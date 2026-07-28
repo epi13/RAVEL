@@ -1,69 +1,108 @@
 # RAVEL — Recursive Adaptive Vector Execution Lattice
 
-RAVEL is a machine-native research architecture that treats AI/ML inference as one combined problem of **routing, retrieval, compression, and bounded computation**.
+RAVEL is a machine-native research architecture that treats AI/ML as one combined problem of routing, retrieval, compression, representation, training state, temporal memory, planning, lifecycle, and bounded computation.
 
-Its foundational claim is that a model, memory store, router, and compute scheduler should not be four separate systems. A stored unit should simultaneously be:
+Its foundational claim is that a model, memory store, router, trainer, world model, planner, and compute scheduler should not be separate systems. A stored expert should simultaneously be a retrieval key, compressed representation, executable predictor, training shard, transition-memory node, planning destination, lineage object, and measured unit of computation.
 
-- a compressed region of behavior;
-- a retrieval target;
-- an executable expert;
-- a routing destination; and
-- a measured unit of computational cost.
+Human readability is relocated into contracts, evaluator authority, evidence, regeneration, and rollback. The generated execution plane is expected to be replaced as a unit rather than routinely hand-maintained.
 
-The long-term system records successful inference traces, compiles repeated traces into compact executable kernels, places those kernels into a generated routing lattice, and retires kernels that become dominated on quality, cost, or coverage. Familiar requests collapse into cheap retrieval-plus-execution. Unfamiliar requests automatically spend more compute.
+## RAVEL 0.1 — exact conditional inference
 
-## Epoch-1 execution capsule
+The first capsule generates 256 quantized experts and retrieves 24 candidates per familiar query. A strict lower-bound certificate permits early return only when every excluded expert is provably unable to win. Otherwise execution becomes the complete oracle.
 
-The first mechanism proof contains 256 generated quantized experts. A query is routed into one of 256 lattice cells. The cell retrieves 24 candidate experts and carries a mathematical lower bound for every excluded expert.
-
-The candidate returns early only when the best routed expert is **strictly closer than any excluded expert could possibly be**. Otherwise it scans the excluded experts and becomes the complete oracle. Ties and uncertainty therefore fall back rather than being promoted to success.
-
-```text
-query
-  -> generated lattice cell
-  -> retrieve 24 compressed experts
-  -> execute candidates
-  -> exact lower-bound certificate
-       PASS: return
-       UNKNOWN: scan excluded experts
-```
-
-## Initial development result
-
-The checked-in capsule produced:
-
-| Workload | Queries | Mismatches | Certified rate | Mean experts | Evaluation reduction |
+| Workload | Queries | Mismatches | Certified rate | Mean experts | Reduction |
 |---|---:|---:|---:|---:|---:|
-| Familiar, near stored experts | 100,000 | 0 | 100.000% | 24.000 | 90.625% |
+| Familiar | 100,000 | 0 | 100.000% | 24.000 | 90.625% |
 | Uniform control | 25,000 | 0 | 2.236% | 250.812 | 2.026% |
 
-The control result is intentional: unfamiliar traffic receives nearly full computation because the shortcut cannot be justified.
+## RAVEL-T 0.2 — recursive training
+
+The current experts build the exact router; routed assignments update the experts; unresolved error ranks overloaded shards; bounded splits compile children; child lineage rebuilds the next router.
+
+| Implementation | Holdout accuracy | Mean experts | Training evaluations |
+|---|---:|---:|---:|
+| RAVEL-T recursive 8→64 | 100.000% | 8.000 | 4,144,248 |
+| Fixed eight-expert | 22.461% | 8.000 | 3,538,944 |
+| Flat 64-expert | 100.000% | 64.000 | 87,031,808 |
+
+## RAVEL-U 0.3 — unified architecture
+
+RAVEL-U closes the component gap. One expert population now owns:
+
+- retrieval and exact conditional compute;
+- compressed state representation and reconstruction;
+- label prediction;
+- action-conditioned next-observation prediction;
+- temporal-memory graph compilation;
+- bounded planning over the learned graph;
+- error-driven expert birth;
+- replay-backed continual adaptation;
+- low-utility child retirement; and
+- checkpoint identity and behavioral rollback verification.
+
+The synthetic world contains 64 states, four actions, eight labels, and eight-dimensional observations. Semantic drift changes both observations and labels for 16 states. The frozen model is evaluated before adaptation, then RAVEL proposes 24 drift experts, retires eight low-utility duplicates, rebuilds the router and transition graph, and re-evaluates drift, retention, planning, and checkpoint behavior.
+
+### Unified development result
+
+| Measure | Result |
+|---|---:|
+| Base holdout accuracy | 96.826% |
+| Static model on semantic drift | 71.899% |
+| Adapted model on semantic drift | 100.000% |
+| Original-task retention after adaptation | 96.704% |
+| Adapted transition accuracy | 99.292% |
+| Adapted planning target success | 505 / 512 |
+| Routed-versus-complete mismatches | 0 |
+| Mean routed experts | 8.000 |
+| Adaptation births / retirements | 24 / 8 |
+| Checkpoint identity and evaluation match | PASS |
+
+The expert is now simultaneously a key, representation, decoder, classifier, world-model fragment, transition node, replay shard, planning node, lineage object, and compute unit. See `ARCHITECTURE_GAPS.md` for what was missing and why raw modality adapters, use policy, protected evaluation, external effects, and promotion authority intentionally remain outside the recursive surface.
 
 ## Run
 
 ```bash
 make test
-make evidence
+make training-check
+make unified-check
 ```
 
-Requirements: a C11 compiler and Make.
+To rewrite repository-visible development evidence:
+
+```bash
+make evidence
+make training-evidence
+make unified-evidence
+```
+
+Requirements: a C11 compiler, the C math library, and Make.
+
+## Files
+
+- `ravel.c`, `CONTRACT.md`, `evidence.json` — exact conditional inference;
+- `ravel_train.c`, `TRAINING_CONTRACT.md`, `training-*.json` — recursive training;
+- `ravel_unified.c` and `ravel_unified/*.inc` — generated unified execution shards;
+- `ARCHITECTURE_GAPS.md` — architectural audit and intentional external boundary;
+- `UNIFIED_CONTRACT.md` — unified readable authority and gates;
+- `unified-preregistration.json` — frozen protocol;
+- `unified-evidence.json` — deterministic observations;
+- `unified-threat-model.json` — threats and residual UNKNOWNs; and
+- `unified-assurance-case.json` — bounded non-promotion record.
 
 ## MNCS boundary
 
-- **Human control plane:** this README, `CONTRACT.md`, exact fallback, benefit thresholds, and exclusions.
-- **Machine execution plane:** generated expert vectors and routing lattice.
-- **Evidence plane:** paired candidate/oracle workloads and exact mismatch counts.
-- **Development-control plane:** fixed generator seed, frozen constants, and preregistered gates.
-- **Operational-control plane:** the complete full-scan oracle remains the rollback implementation.
+- **Human control plane:** intended use, event contract, external authority, limits, gates, and exclusions.
+- **Machine execution plane:** expert keys, decoders, classifiers, next-state programs, router, transition graph, topology, replay assignments, and lineage.
+- **Evidence plane:** exact-oracle agreement, accuracy, reconstruction, prediction, transition, planning, lifecycle, checkpoint, checksums, and limitations.
+- **Development-control plane:** fixed seeds, partitions, birth and retirement budgets, immutable thresholds, and non-promotion fields.
+- **Operational-control plane:** complete-scan fallback, checkpoint restoration, model identity, and replacement of the generated execution shards.
 
-The local experiment records a development `PASS`. Formal MNCS and MNCDS status remain `UNKNOWN` pending protected workloads, independent evaluation, cross-host reproduction, legitimate learned baselines, and lifecycle evidence.
+The repository-visible studies record development `PASS`. Formal MNCS and MNCDS status remain `UNKNOWN`; promotion is unauthorized pending independent protected real-data evaluation, adversarial continual-learning studies, learned modality adapters, cross-host reproduction, accelerator and distributed evidence, and operational release controls.
 
 ## Claim boundary
 
-RAVEL does not establish a solution to intelligence, generalization, training, or production inference. It demonstrates one foundational mechanism: exact conditional compute over a generated compressed expert lattice.
+RAVEL-U is a favorable deterministic mechanism proof. It does not establish general intelligence, foundation-model performance, language or multimodal generation, causal reasoning, real-data generalization, production safety, or formal conformance.
 
 ## Origin
 
-The name, architecture, algorithm, repository setup, and initial implementation were created by **GPT-5.6 Thinking** in response to Alexander Collamore's challenge to design an AI/ML foundation that fully embraces Machine-Native Complexity. Alexander Collamore is the repository steward.
-
-A fuller standalone repository package includes the separated generator, API, tests, threat model, assurance case, and generated artifacts.
+The name, architecture, algorithms, and initial implementations were created by **GPT-5.6 Thinking** in response to Alexander Collamore's challenge to design an AI/ML foundation that fully embraces Machine-Native Complexity. Alexander Collamore is the repository steward.

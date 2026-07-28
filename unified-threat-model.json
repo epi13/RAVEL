@@ -1,0 +1,69 @@
+{
+  "schema_version": "0.3",
+  "threat_model_id": "ravel.unified.synthetic.threats.v1",
+  "assets": [
+    "exact routing equivalence",
+    "expert lineage and topology",
+    "replay retention",
+    "transition memory",
+    "planning graph",
+    "checkpoint identity",
+    "evaluation thresholds",
+    "formal status boundary"
+  ],
+  "threats": [
+    {
+      "id": "U1",
+      "threat": "recursive topology growth silently changes evaluator or promotion rules",
+      "mitigation": "seeds, partitions, topology limits, gates, evaluator, and status fields are frozen outside the mutable model",
+      "evidence": "UNIFIED_CONTRACT.md and unified-preregistration.json"
+    },
+    {
+      "id": "U2",
+      "threat": "approximate routing selects a different expert than the complete oracle",
+      "mitigation": "strict lower-bound certificate and complete fallback",
+      "evidence": "zero exact mismatches on every declared evaluation"
+    },
+    {
+      "id": "U3",
+      "threat": "continual adaptation catastrophically forgets the original task",
+      "mitigation": "deterministic replay and a preregistered retention gate",
+      "evidence": "adapted_retention accuracy in unified-evidence.json"
+    },
+    {
+      "id": "U4",
+      "threat": "unbounded expert birth converts every observation into memory",
+      "mitigation": "hard maximum, fixed adaptation birth budget, utility-ranked retirement, and final topology gate",
+      "evidence": "24 births, 8 retirements, and 80 final experts"
+    },
+    {
+      "id": "U5",
+      "threat": "learned transition memory supports classification but not executable planning",
+      "mitigation": "compile action-conditioned predictions into a graph and execute bounded plans against the held-out synthetic world",
+      "evidence": "planning target success in unified-evidence.json"
+    },
+    {
+      "id": "U6",
+      "threat": "checkpoint restoration substitutes a behaviorally different model",
+      "mitigation": "require both model digest equality and evaluation checksum equality",
+      "evidence": "checkpoint roundtrip gates"
+    },
+    {
+      "id": "U7",
+      "threat": "favorable synthetic structure is promoted as general AI evidence",
+      "mitigation": "formal statuses remain UNKNOWN and promotion is unauthorized",
+      "evidence": "explicit claim boundary and assurance case"
+    }
+  ],
+  "residual_unknowns": [
+    "real-data representation learning",
+    "language and multimodal generation",
+    "stochastic and partially observed environments",
+    "long-horizon credit assignment",
+    "causal generalization",
+    "data poisoning and adversarial continual learning",
+    "distributed and accelerator execution",
+    "protected holdout independence",
+    "production authorization and safety"
+  ]
+}

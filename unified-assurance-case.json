@@ -1,0 +1,52 @@
+{
+  "schema_version": "0.3",
+  "assurance_case_id": "ravel.unified.synthetic.epoch-1.assurance.v1",
+  "claim": "The frozen RAVEL-U capsule passed a deterministic synthetic protocol in which one expert population performed exact retrieval, compression, reconstruction, classification, action-conditioned prediction, temporal-memory compilation, planning, continual adaptation, retirement, and checkpoint restoration.",
+  "development_result": "PASS",
+  "disposition": "REVIEW_REQUIRED",
+  "formal_mncs_status": "UNKNOWN",
+  "formal_mncds_status": "UNKNOWN",
+  "promotion_authorized": false,
+  "implementation": {
+    "entrypoint": "ravel_unified.c",
+    "generated_shards": [
+      "ravel_unified/00_core.inc",
+      "ravel_unified/10_route.inc",
+      "ravel_unified/20_train.inc",
+      "ravel_unified/30_eval.inc"
+    ],
+    "concatenated_execution_sha256": "d6f2d0fd9165487087079a1b3e262c50c78479a9b266089d892d5bc6aeabc7f6",
+    "language": "C11"
+  },
+  "evidence": {
+    "record": "unified-evidence.json",
+    "record_sha256": "6a12505a2d2a229e94391866b5e64064bee50c01389b29d839ee4fb412c06228",
+    "deterministic_reproduction": true,
+    "routed_oracle_agreement": true,
+    "checkpoint_behavioral_agreement": true,
+    "protected_holdout": false
+  },
+  "observed_results": {
+    "base_holdout_accuracy": 0.968261719,
+    "static_drift_accuracy": 0.718994141,
+    "adapted_drift_accuracy": 1.0,
+    "post_adaptation_retention": 0.967041016,
+    "adapted_transition_accuracy": 0.992919922,
+    "adapted_planning_success": 0.986328125,
+    "adapted_mean_experts": 8.0,
+    "adaptation_births": 24,
+    "adaptation_retirements": 8
+  },
+  "promotion_blockers": [
+    "independently protected real-data workloads",
+    "independent evaluator custody",
+    "learned modality adapters",
+    "language or multimodal generation evidence",
+    "stochastic and partially observed world models",
+    "poisoning and adversarial continual-learning evaluation",
+    "long-horizon planning and credit assignment",
+    "cross-host and cross-architecture reproduction",
+    "accelerator and distributed implementation",
+    "release signing, deployment, monitoring, and rollback evidence"
+  ]
+}

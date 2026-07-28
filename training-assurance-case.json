@@ -1,0 +1,42 @@
+{
+  "schema_version": "0.2",
+  "assurance_case_id": "ravel.recursive-training.epoch-1.assurance.v1",
+  "claim": "The bounded RAVEL-T recursive trainer formed and routed a 64-expert classifier under the preregistered deterministic synthetic protocol.",
+  "development_result": "PASS",
+  "disposition": "REVIEW_REQUIRED",
+  "formal_mncs_status": "UNKNOWN",
+  "formal_mncds_status": "UNKNOWN",
+  "promotion_authorized": false,
+  "implementation": {
+    "source": "ravel_train.c",
+    "source_sha256": "90671ef2812c34eff6a8ce71a1cbf9e98d00d5943d0f3f0d275539eab9a42753",
+    "language": "C11"
+  },
+  "evidence": {
+    "record": "training-evidence.json",
+    "record_sha256": "a3ba60ef239c1b61bcd66671ffeda29f30f5a55dfd3f858723f743e9899a0dec",
+    "deterministic_reproduction": true,
+    "routed_oracle_agreement": true,
+    "holdout_protected": false
+  },
+  "observed_benefit": {
+    "recursive_holdout_accuracy": 1.0,
+    "flat64_holdout_accuracy": 1.0,
+    "fixed8_holdout_accuracy": 0.224609375,
+    "recursive_holdout_mean_experts": 8.0,
+    "flat64_holdout_mean_experts": 64.0,
+    "recursive_training_expert_evaluations": 4144248,
+    "flat64_training_expert_evaluations": 87031808,
+    "training_evaluation_reduction_vs_flat64": 0.9523823749588196
+  },
+  "promotion_blockers": [
+    "independently protected real-data workloads",
+    "independent evaluator custody",
+    "non-synthetic learned baselines",
+    "data poisoning and continual-learning evaluation",
+    "expert merge and retirement protocol",
+    "cross-host reproduction",
+    "accelerator and distributed implementation",
+    "release, rollback, regeneration, and monitoring evidence"
+  ]
+}
