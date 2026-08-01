@@ -66,3 +66,15 @@ The smallest justified follow-up after any preserved 0.5 failure is a new
 preregistered development experiment using new development seeds. Final 0.5
 seeds, gates, and mechanism code must not be repaired in response to their
 one-shot result.
+
+## Post-freeze tooling audit
+
+The first final evidence-generation pass preserved the complete raw trial
+observations but found that the external `regime_mutation` fixture selected the
+second trial's regime. Because the first two frozen trials share the same
+regime, that operation made no change and correctly failed the negative-test
+campaign. The fixture was corrected to select the first actually different
+declared regime. No executable mechanism, seed, regime, threshold, raw trial
+observation, or independently derived trial result changed. Regeneration after
+this assurance-tool correction is separately committed and source-manifest
+bound.

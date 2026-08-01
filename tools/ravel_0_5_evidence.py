@@ -164,7 +164,12 @@ def evaluator_mutation_observations(
     observations["seed_mutation"] = _expect_rejection(lambda: evaluate(seed, prereg))
 
     regime = copy.deepcopy(raw)
-    regime["trials"][0]["regime"] = prereg["trials"][1]["regime"]
+    original_regime = regime["trials"][0]["regime"]
+    regime["trials"][0]["regime"] = next(
+        trial["regime"]
+        for trial in prereg["trials"]
+        if trial["regime"] != original_regime
+    )
     observations["regime_mutation"] = _expect_rejection(
         lambda: evaluate(regime, prereg)
     )
@@ -384,6 +389,40 @@ def results_markdown(trial: dict[str, Any]) -> bytes:
             f"{record['trial_result']} | {', '.join(failed) if failed else 'none'} |"
         )
     summary = trial["trial_summary"]
+    lines.extend(
+        [
+            "",
+            "## Paired baseline and ablation summary",
+            "",
+            "All deltas are arithmetic means of per-seed candidate-minus-variant "
+            "differences. A positive accuracy delta favors the candidate; a "
+            "negative work or size delta uses fewer resources. Pareto counts use "
+            "drift, retention, reconstruction, prediction, exact and belief-set "
+            "planning, inference and training evaluations, expert count, and "
+            "checkpoint size.",
+            "",
+            "| Variant | Drift accuracy delta | Retention delta | "
+            "Training-evaluation delta | Inference-evaluation delta | "
+            "Candidate dominates | Variant dominates | Mixed | Equivalent |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+        ]
+    )
+    comparison_names = sorted(trial["trials"][0]["comparisons"])
+    for name in comparison_names:
+        records = [item["comparisons"][name] for item in trial["trials"]]
+        deltas = [record["paired_delta_candidate_minus_variant"] for record in records]
+        relations = [record["pareto_relation"] for record in records]
+        lines.append(
+            f"| {name} | "
+            f"{statistics.fmean(item['drift_accuracy'] for item in deltas):.6f} | "
+            f"{statistics.fmean(item['retention_accuracy'] for item in deltas):.6f} | "
+            f"{statistics.fmean(item['training_evaluations'] for item in deltas):.2f} | "
+            f"{statistics.fmean(item['expert_evaluations'] for item in deltas):.2f} | "
+            f"{relations.count('candidate_dominates')} | "
+            f"{relations.count('variant_dominates')} | "
+            f"{relations.count('mixed')} | "
+            f"{relations.count('equivalent')} |"
+        )
     lines.extend(
         [
             "",

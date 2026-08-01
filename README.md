@@ -91,6 +91,36 @@ gates were removed to obtain a favorable result. See
 `RAVEL_0_4_RESULTS.md` for generated per-trial failures and aggregates, and
 `ravel-0.4-assurance-case.json` for the bounded assurance disposition.
 
+## RAVEL 0.5 — adaptive-mechanism correction
+
+RAVEL 0.5 keeps the 0.4 evidence package immutable and corrects the mechanism
+and assurance split. The C harness now emits raw integer observations and
+integrity facts only. A separate Python evaluator verifies the frozen trial and
+partition matrix, derives every metric and hard gate, and rejects executable
+verdicts, malformed records, contradictions, and mutations.
+
+Mechanism changes include deterministic stratified replay, anchored base
+experts, optional objective-tested births and retirements, eight normalized
+residual channels, support-bearing top-two transitions, unknown unsupported
+actions, retirement safety checks, and alias-aware belief-set planning.
+Comparisons add matched work, expert count, and capacity, while retaining the
+0.4 baselines and ablations.
+
+The one-shot 0.5 final validation used 32 fresh trials: four seeds for each of
+the eight frozen regime families. Execution integrity is `PASS`; 24 trials
+passed and eight failed, so the frozen all-trials development result is
+`FAIL`. All separated, overlap, noise, and observation-drift trials passed.
+Failures remained in label gain (three trials), transition prediction retention
+(one), combined exact planning (one), and ambiguous belief/planning or
+efficiency (three). These failures were not used to change the mechanism,
+seeds, regimes, or gates.
+
+The candidate improved mean drift-holdout accuracy over the matched-compute
+fixed-topology comparison while using fewer mean training evaluations, but the
+complete paired Pareto results are mixed. No superiority claim is made. See
+`RAVEL_0_5_RESULTS.md`, `RAVEL_0_5_POSTMORTEM.md`, and
+`ravel-0.5-assurance-case.json`.
+
 ## Run
 
 ```bash
@@ -98,6 +128,7 @@ make test
 make training-check
 make unified-check
 make 0.4-check
+make 0.5-check
 ```
 
 To rewrite repository-visible development evidence:
@@ -107,6 +138,7 @@ make evidence
 make training-evidence
 make unified-evidence
 make 0.4-evidence
+make 0.5-evidence
 ```
 
 Requirements: a C11 compiler, the C math library, and Make.
@@ -128,7 +160,18 @@ Requirements: a C11 compiler, the C math library, and Make.
 - `ravel-0.4-raw-observations.json`, `ravel-0.4-trial-evidence.json`, and
   `ravel-0.4-negative-evidence.json` — executable raw and derived evidence;
 - `ravel-0.4-source-manifest.json` — ordered implementation identity; and
-- `ravel-0.4-assurance-case.json` — current bounded non-promotion record.
+- `ravel-0.4-assurance-case.json` — historical 0.4 non-promotion record;
+- `ravel_0_5.c`, `RAVEL_0_5_CONTRACT.md`, and
+  `ravel-0.5-preregistration.json` — maintained 0.5 mechanism and frozen
+  authority;
+- `tools/ravel_0_5_evaluator.py` and `tools/ravel_0_5_evidence.py` —
+  independent derivation and deterministic evidence tooling;
+- `ravel-0.5-raw-observations.json`, `ravel-0.5-trial-evidence.json`, and
+  `ravel-0.5-negative-evidence.json` — raw and independently derived 0.5
+  records; and
+- `ravel-0.5-source-and-execution-manifest.json` and
+  `ravel-0.5-assurance-case.json` — bound build/source identity and current
+  bounded non-promotion record.
 
 ## MNCS boundary
 
@@ -138,11 +181,20 @@ Requirements: a C11 compiler, the C math library, and Make.
 - **Development-control plane:** fixed seeds, partitions, birth and retirement budgets, immutable thresholds, and non-promotion fields.
 - **Operational-control plane:** complete-scan fallback, checkpoint restoration, model identity, and replacement of maintained execution source.
 
-The repository-visible studies record development `PASS`. Formal MNCS and MNCDS status remain `UNKNOWN`; promotion is unauthorized pending independent protected real-data evaluation, adversarial continual-learning studies, learned modality adapters, cross-host reproduction, accelerator and distributed evidence, and operational release controls.
+Historical RAVEL 0.1–0.3 studies recorded favorable development observations.
+RAVEL 0.4 records development `FAIL` with zero of eight trials passing. RAVEL
+0.5 records development `FAIL` with 24 of 32 trials passing. Formal MNCS and
+MNCDS status remain `UNKNOWN`; promotion is unauthorized pending independent
+protected real-data evaluation, adversarial continual-learning studies, learned
+modality adapters, cross-host reproduction, accelerator and distributed
+evidence, and operational release controls.
 
 ## Claim boundary
 
-RAVEL-U is a favorable deterministic mechanism proof. It does not establish general intelligence, foundation-model performance, language or multimodal generation, causal reasoning, real-data generalization, production safety, or formal conformance.
+RAVEL is a bounded deterministic research study with both favorable and
+unfavorable results. It does not establish general intelligence,
+foundation-model performance, language or multimodal generation, causal
+reasoning, real-data generalization, production safety, or formal conformance.
 
 ## Origin
 
