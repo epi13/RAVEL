@@ -171,7 +171,9 @@ Requirements: a C11 compiler, the C math library, and Make.
   records; and
 - `ravel-0.5-source-and-execution-manifest.json` and
   `ravel-0.5-assurance-case.json` — bound build/source identity and current
-  bounded non-promotion record.
+  bounded non-promotion record; and
+- `ravel-0.5-runtime-observations.json` — host-specific, non-normative timing
+  observations; canonical comparisons use deterministic operation counts.
 
 ## MNCS boundary
 
