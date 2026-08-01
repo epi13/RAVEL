@@ -81,8 +81,7 @@ def load_json(path: Path) -> Any:
 
 def canonical_bytes(value: Any) -> bytes:
     return (
-        json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
-        + "\n"
+        json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False) + "\n"
     ).encode()
 
 
@@ -96,21 +95,15 @@ def require_object(value: Any, context: str) -> dict[str, Any]:
     return value
 
 
-def require_exact_keys(
-    value: dict[str, Any], keys: set[str], context: str
-) -> None:
+def require_exact_keys(value: dict[str, Any], keys: set[str], context: str) -> None:
     actual = set(value)
     if actual != keys:
         missing = sorted(keys - actual)
         unknown = sorted(actual - keys)
-        raise EvaluationError(
-            f"{context}: key mismatch missing={missing} unknown={unknown}"
-        )
+        raise EvaluationError(f"{context}: key mismatch missing={missing} unknown={unknown}")
 
 
-def require_int(
-    value: Any, context: str, minimum: int = 0, maximum: int | None = None
-) -> int:
+def require_int(value: Any, context: str, minimum: int = 0, maximum: int | None = None) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise EvaluationError(f"{context}: expected integer")
     if value < minimum or (maximum is not None and value > maximum):
@@ -249,9 +242,12 @@ def validate_plan(value: Any, context: str) -> dict[str, Any]:
     ):
         if record[key] > cases:
             raise EvaluationError(f"{context}.{key}: exceeds cases")
-    if record["path_found"] + record["graph_disconnection_failures"] + record[
-        "no_supported_edge_failures"
-    ] != cases:
+    if (
+        record["path_found"]
+        + record["graph_disconnection_failures"]
+        + record["no_supported_edge_failures"]
+        != cases
+    ):
         raise EvaluationError(f"{context}: planning disposition contradiction")
     _validate_hex(record["checksum"], f"{context}.checksum", 16)
     return record
@@ -266,27 +262,19 @@ def derive_eval(record: dict[str, Any]) -> dict[str, float | int]:
     result: dict[str, float | int] = {
         "accuracy": record["correct"] / samples,
         "reconstruction_rmse": math.sqrt(
-            (record["reconstruction_sse_q20"] / Q20_SCALE)
-            / (samples * DIMENSIONS)
+            (record["reconstruction_sse_q20"] / Q20_SCALE) / (samples * DIMENSIONS)
         ),
         "prediction_rmse": math.sqrt(
-            (record["prediction_sse_q20"] / Q20_SCALE)
-            / (prediction_samples * DIMENSIONS)
+            (record["prediction_sse_q20"] / Q20_SCALE) / (prediction_samples * DIMENSIONS)
         )
         if prediction_samples
         else math.inf,
-        "transition_accuracy": record["transition_correct"] / supported
-        if supported
-        else 0.0,
+        "transition_accuracy": record["transition_correct"] / supported if supported else 0.0,
         "transition_support_rate": supported / samples,
         "routing_mismatches": record["routed_complete_mismatches"],
         "expert_evaluations": record["expert_evaluations"],
     }
-    if not all(
-        math.isfinite(value)
-        for value in result.values()
-        if isinstance(value, float)
-    ):
+    if not all(math.isfinite(value) for value in result.values() if isinstance(value, float)):
         raise EvaluationError("derived evaluation contains non-finite metric")
     return result
 
@@ -466,9 +454,7 @@ def validate_preregistration(value: Any) -> dict[str, Any]:
         raise EvaluationError("final validation must be declared one-shot")
     require_string(freeze["development_corpus"], "preregistration.freeze.development")
 
-    derivation = require_object(
-        prereg["seed_derivation"], "preregistration.seed_derivation"
-    )
+    derivation = require_object(prereg["seed_derivation"], "preregistration.seed_derivation")
     require_exact_keys(
         derivation,
         {
@@ -495,9 +481,7 @@ def validate_preregistration(value: Any) -> dict[str, Any]:
         1,
     )
 
-    datasets = require_object(
-        prereg["datasets_per_trial"], "preregistration.datasets_per_trial"
-    )
+    datasets = require_object(prereg["datasets_per_trial"], "preregistration.datasets_per_trial")
     require_exact_keys(datasets, DATASET_KEYS, "preregistration.datasets_per_trial")
     for name, count in datasets.items():
         require_int(count, f"preregistration.datasets_per_trial.{name}", 1)
@@ -507,9 +491,7 @@ def validate_preregistration(value: Any) -> dict[str, Any]:
     for index, prohibition in enumerate(prohibitions):
         require_string(prohibition, f"dataset_prohibitions[{index}]")
 
-    constants = require_object(
-        prereg["mechanism_constants"], "preregistration.mechanism_constants"
-    )
+    constants = require_object(prereg["mechanism_constants"], "preregistration.mechanism_constants")
     require_exact_keys(
         constants,
         {
@@ -556,9 +538,7 @@ def validate_preregistration(value: Any) -> dict[str, Any]:
         regime_index = regimes.get(regime, 0)
         derived_seed = _derive_validation_seed(root_seed, regime, regime_index)
         if seed_value != derived_seed:
-            raise EvaluationError(
-                f"trials[{index}].seed disagrees with frozen derivation"
-            )
+            raise EvaluationError(f"trials[{index}].seed disagrees with frozen derivation")
         if trial_id in identities or seed in seeds:
             raise EvaluationError("duplicate trial id or seed")
         identities.add(trial_id)
@@ -570,11 +550,7 @@ def validate_preregistration(value: Any) -> dict[str, Any]:
     if any(count != expected_per_regime for count in regimes.values()):
         raise EvaluationError("unexpected validation seed count per regime")
     variants = prereg["comparison_variants"]
-    if (
-        not isinstance(variants, list)
-        or not variants
-        or len(variants) != len(set(variants))
-    ):
+    if not isinstance(variants, list) or not variants or len(variants) != len(set(variants)):
         raise EvaluationError("comparison_variants must be a unique non-empty list")
     for index, variant in enumerate(variants):
         require_string(variant, f"comparison_variants[{index}]")
@@ -582,9 +558,7 @@ def validate_preregistration(value: Any) -> dict[str, Any]:
         _validate_gate_list(prereg[collection_name], collection_name)
     for regime, gates in prereg["regime_gates"].items():
         _validate_gate_list(gates, f"regime_gates.{regime}")
-    global_rule = require_object(
-        prereg["global_pass_rule"], "preregistration.global_pass_rule"
-    )
+    global_rule = require_object(prereg["global_pass_rule"], "preregistration.global_pass_rule")
     require_exact_keys(
         global_rule,
         {
@@ -681,9 +655,7 @@ def _validate_gate_list(value: Any, context: str) -> None:
             raise EvaluationError(f"{context}[{index}]: non-finite threshold")
 
 
-def validate_trial(
-    trial: Any, expected: dict[str, Any], prereg: dict[str, Any]
-) -> dict[str, Any]:
+def validate_trial(trial: Any, expected: dict[str, Any], prereg: dict[str, Any]) -> dict[str, Any]:
     context = f"trial[{expected['trial_id']}]"
     record = require_object(trial, context)
     require_exact_keys(
@@ -721,8 +693,7 @@ def validate_trial(
     if len(set(parsed_dataset_seeds.values())) != len(parsed_dataset_seeds):
         raise EvaluationError(f"{context}: dataset seed collision")
     expected_dataset_seeds = {
-        name: _mix64(trial_seed ^ xor_value)
-        for name, xor_value in DATASET_SEED_XORS.items()
+        name: _mix64(trial_seed ^ xor_value) for name, xor_value in DATASET_SEED_XORS.items()
     }
     if parsed_dataset_seeds != expected_dataset_seeds:
         raise EvaluationError(f"{context}: dataset seed derivation mismatch")
@@ -845,12 +816,9 @@ def validate_trial(
     candidate_comparison = comparisons["ravel_0_5_candidate"]
     if (
         candidate_comparison["expert_count"] != candidate["expert_count"]
-        or candidate_comparison["checkpoint_size_bytes"]
-        != candidate["checkpoint_size_bytes"]
-        or candidate_comparison["drift_holdout"]
-        != candidate["adapted_model_drift_holdout"]
-        or candidate_comparison["retention_holdout"]
-        != candidate["base_holdout_retention"]
+        or candidate_comparison["checkpoint_size_bytes"] != candidate["checkpoint_size_bytes"]
+        or candidate_comparison["drift_holdout"] != candidate["adapted_model_drift_holdout"]
+        or candidate_comparison["retention_holdout"] != candidate["base_holdout_retention"]
         or candidate_comparison["planning"] != candidate["planning"]
     ):
         raise EvaluationError(f"{context}: candidate comparison contradicts raw candidate")
@@ -876,8 +844,7 @@ def derive_trial_metrics(record: dict[str, Any]) -> dict[str, Any]:
     replay = candidate["replay"]
     topology = candidate["topology"]
     routing_mismatches = sum(
-        int(view["routing_mismatches"])
-        for view in (base, adaptation, static, adapted, retention)
+        int(view["routing_mismatches"]) for view in (base, adaptation, static, adapted, retention)
     )
     metrics: dict[str, Any] = {
         "adaptation_completed": candidate["adaptation_completed"],
@@ -897,13 +864,11 @@ def derive_trial_metrics(record: dict[str, Any]) -> dict[str, Any]:
         "adapted_reconstruction_rmse": adapted["reconstruction_rmse"],
         "retention_reconstruction_rmse": retention["reconstruction_rmse"],
         "retention_reconstruction_degradation_ratio": (
-            float(retention["reconstruction_rmse"])
-            - float(base["reconstruction_rmse"])
+            float(retention["reconstruction_rmse"]) - float(base["reconstruction_rmse"])
         )
         / max(float(base["reconstruction_rmse"]), 1e-12),
         "reconstruction_improvement_ratio": (
-            float(static["reconstruction_rmse"])
-            - float(adapted["reconstruction_rmse"])
+            float(static["reconstruction_rmse"]) - float(adapted["reconstruction_rmse"])
         )
         / max(float(static["reconstruction_rmse"]), 1e-12),
         "base_prediction_rmse": base["prediction_rmse"],
@@ -920,9 +885,7 @@ def derive_trial_metrics(record: dict[str, Any]) -> dict[str, Any]:
         "adapted_transition_accuracy": adapted["transition_accuracy"],
         "transition_accuracy_delta": float(adapted["transition_accuracy"])
         - float(static["transition_accuracy"]),
-        "retention_transition_accuracy_delta": float(
-            retention["transition_accuracy"]
-        )
+        "retention_transition_accuracy_delta": float(retention["transition_accuracy"])
         - float(base["transition_accuracy"]),
         "transition_support_rate": adapted["transition_support_rate"],
         "path_found_rate": planning["path_found_rate"],
@@ -948,9 +911,7 @@ def derive_trial_metrics(record: dict[str, Any]) -> dict[str, Any]:
         "checkpoint_behavior": integrity["checkpoint_behavior_match"],
         "checkpoint_mutations": all(integrity["checkpoint_mutations"].values()),
         "lineage_invariants": all(integrity["lineage_invariants"].values()),
-        "unsupported_graph_edge_violations": integrity[
-            "unsupported_graph_edge_violations"
-        ],
+        "unsupported_graph_edge_violations": integrity["unsupported_graph_edge_violations"],
     }
     comparison_metrics: dict[str, dict[str, float | int]] = {}
     for name, variant in record["comparisons"].items():
@@ -989,9 +950,7 @@ def derive_trial_metrics(record: dict[str, Any]) -> dict[str, Any]:
             - float(matched_compute["drift_accuracy"]),
             "matched_compute_retention_delta": float(retention["accuracy"])
             - float(matched_compute["retention_accuracy"]),
-            "matched_compute_training_evaluation_ratio": float(
-                metrics["training_evaluations"]
-            )
+            "matched_compute_training_evaluation_ratio": float(metrics["training_evaluations"])
             / max(float(matched_compute["training_evaluations"]), 1.0),
             "no_birth_drift_accuracy_delta": float(adapted["accuracy"])
             - float(no_birth["drift_accuracy"]),
@@ -1001,19 +960,13 @@ def derive_trial_metrics(record: dict[str, Any]) -> dict[str, Any]:
             - float(periodic_replay["drift_accuracy"]),
             "balanced_vs_periodic_retention_delta": float(retention["accuracy"])
             - float(periodic_replay["retention_accuracy"]),
-            "inference_evaluation_ratio_vs_flat64": float(
-                metrics["inference_expert_evaluations"]
-            )
+            "inference_evaluation_ratio_vs_flat64": float(metrics["inference_expert_evaluations"])
             / max(float(flat_complete["expert_evaluations"]), 1.0),
             "topology_objective_gain_q20": topology["objective_after_q20"]
             - topology["objective_before_q20"],
         }
     )
-    if not all(
-        math.isfinite(value)
-        for value in metrics.values()
-        if isinstance(value, float)
-    ):
+    if not all(math.isfinite(value) for value in metrics.values() if isinstance(value, float)):
         raise EvaluationError("trial derived non-finite metric")
     return metrics
 
@@ -1053,9 +1006,7 @@ def _aggregate(values: list[float | int]) -> dict[str, float]:
     }
 
 
-def _pareto_relation(
-    candidate: dict[str, float | int], variant: dict[str, float | int]
-) -> str:
+def _pareto_relation(candidate: dict[str, float | int], variant: dict[str, float | int]) -> str:
     maximize = {
         "drift_accuracy",
         "retention_accuracy",
@@ -1114,16 +1065,13 @@ def evaluate(raw: Any, preregistration: Any) -> dict[str, Any]:
     evaluated_trials: list[dict[str, Any]] = []
     metric_series: dict[str, list[float | int]] = {}
     passing = 0
-    passing_by_regime: dict[str, int] = {
-        regime: 0 for regime in prereg["regime_gates"]
-    }
+    passing_by_regime: dict[str, int] = {regime: 0 for regime in prereg["regime_gates"]}
     for index, expected in enumerate(prereg["trials"]):
         record = validate_trial(trials[index], expected, prereg)
         metrics = derive_trial_metrics(record)
         gates = [
             _apply_gate(gate, metrics)
-            for gate in prereg["common_gates"]
-            + prereg["regime_gates"][record["regime"]]
+            for gate in prereg["common_gates"] + prereg["regime_gates"][record["regime"]]
         ]
         trial_pass = all(gate["pass"] for gate in gates)
         passing += int(trial_pass)
@@ -1167,9 +1115,7 @@ def evaluate(raw: Any, preregistration: Any) -> dict[str, Any]:
                     metric: candidate_quality[metric] - value
                     for metric, value in variant_metrics.items()
                 },
-                "pareto_relation": _pareto_relation(
-                    candidate_quality, variant_metrics
-                ),
+                "pareto_relation": _pareto_relation(candidate_quality, variant_metrics),
             }
         evaluated_trials.append(
             {
@@ -1184,9 +1130,7 @@ def evaluate(raw: Any, preregistration: Any) -> dict[str, Any]:
         )
     failing = len(evaluated_trials) - passing
     required = prereg["global_pass_rule"]["minimum_passing_trials"]
-    required_per_regime = prereg["global_pass_rule"][
-        "minimum_passing_trials_per_regime"
-    ]
+    required_per_regime = prereg["global_pass_rule"]["minimum_passing_trials_per_regime"]
     global_pass = passing >= required and all(
         count >= required_per_regime for count in passing_by_regime.values()
     )
@@ -1204,9 +1148,7 @@ def evaluate(raw: Any, preregistration: Any) -> dict[str, Any]:
             "minimum_passing_trials_per_regime": required_per_regime,
         },
         "trials": evaluated_trials,
-        "aggregates": {
-            name: _aggregate(values) for name, values in metric_series.items()
-        },
+        "aggregates": {name: _aggregate(values) for name, values in metric_series.items()},
         "development_result": development_result,
         "evidence_reproduction": "PASS",
         "formal_mncs_status": "UNKNOWN",

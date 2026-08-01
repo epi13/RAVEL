@@ -63,8 +63,7 @@ def _run(binary: Path, arguments: list[str]) -> bytes:
     )
     if completed.stderr:
         raise EvidenceError(
-            "RAVEL executable wrote unexpected stderr: "
-            + completed.stderr.decode(errors="replace")
+            "RAVEL executable wrote unexpected stderr: " + completed.stderr.decode(errors="replace")
         )
     return completed.stdout
 
@@ -145,9 +144,7 @@ def evaluator_mutation_observations(
 
     threshold = copy.deepcopy(prereg)
     threshold["common_gates"][0]["value"] = not threshold["common_gates"][0]["value"]
-    observations["threshold_mutation"] = _expect_rejection(
-        lambda: evaluate(raw, threshold)
-    )
+    observations["threshold_mutation"] = _expect_rejection(lambda: evaluate(raw, threshold))
 
     trial_result = copy.deepcopy(raw)
     trial_result["trials"][0]["trial_result"] = "PASS"
@@ -168,19 +165,13 @@ def evaluator_mutation_observations(
     regime = copy.deepcopy(raw)
     original_regime = regime["trials"][0]["regime"]
     regime["trials"][0]["regime"] = next(
-        trial["regime"]
-        for trial in prereg["trials"]
-        if trial["regime"] != original_regime
+        trial["regime"] for trial in prereg["trials"] if trial["regime"] != original_regime
     )
-    observations["regime_mutation"] = _expect_rejection(
-        lambda: evaluate(regime, prereg)
-    )
+    observations["regime_mutation"] = _expect_rejection(lambda: evaluate(regime, prereg))
 
     aggregate = copy.deepcopy(raw)
     aggregate["development_result"] = "PASS"
-    observations["aggregate_mutation"] = _expect_rejection(
-        lambda: evaluate(aggregate, prereg)
-    )
+    observations["aggregate_mutation"] = _expect_rejection(lambda: evaluate(aggregate, prereg))
     return observations
 
 
@@ -261,15 +252,11 @@ def manifest_mutation_observations(
     def omit(_root: Path, spec_path: Path) -> None:
         spec = load_json(spec_path)
         spec["ordered_files"] = [
-            entry
-            for entry in spec["ordered_files"]
-            if entry["role"] != "contract"
+            entry for entry in spec["ordered_files"] if entry["role"] != "contract"
         ]
         spec_path.write_bytes(canonical_bytes(spec))
 
-    observations["omitted_file"] = _expect_rejection(
-        lambda: copied_recalculation(omit)
-    )
+    observations["omitted_file"] = _expect_rejection(lambda: copied_recalculation(omit))
 
     def mutate_build(_root: Path, spec_path: Path) -> None:
         spec = load_json(spec_path)
@@ -277,9 +264,7 @@ def manifest_mutation_observations(
         spec_path.write_bytes(canonical_bytes(spec))
 
     observations["build_configuration_mutation"] = _expect_rejection(
-        lambda: verify_manifest_record(
-            copied_recalculation(mutate_build), manifest
-        )
+        lambda: verify_manifest_record(copied_recalculation(mutate_build), manifest)
     )
 
     observations["artifact_mutation"] = _expect_rejection(
@@ -387,9 +372,7 @@ def build_assurance(
     return {
         "schema": "ravel-assurance-case/0.5",
         "assurance_case_id": "ravel.adaptive-mechanism-correction.epoch-1",
-        "execution_integrity": (
-            "PASS" if negative["all_negative_tests_pass"] else "FAIL"
-        ),
+        "execution_integrity": ("PASS" if negative["all_negative_tests_pass"] else "FAIL"),
         "development_result": trial["development_result"],
         "disposition": "NON_PROMOTION_RESEARCH_EVIDENCE",
         "formal_mncs_status": "UNKNOWN",
@@ -398,9 +381,7 @@ def build_assurance(
         "implementation": {
             "entrypoint": manifest["entrypoint"],
             "source_manifest": MANIFEST.name,
-            "source_manifest_sha256": hashlib.sha256(
-                canonical_bytes(manifest)
-            ).hexdigest(),
+            "source_manifest_sha256": hashlib.sha256(canonical_bytes(manifest)).hexdigest(),
             "source_digest": manifest["source_digest"],
             "build_configuration": manifest["build_configuration"],
             "source_provenance": manifest["source_provenance"],
@@ -518,9 +499,7 @@ def expected_package(binary: Path) -> dict[Path, bytes]:
         },
         manifest,
     )
-    manifest_observations = manifest_mutation_observations(
-        manifest, preliminary_assurance
-    )
+    manifest_observations = manifest_mutation_observations(manifest, preliminary_assurance)
     negative = derive_negative(
         self_tests,
         prereg,
@@ -584,8 +563,7 @@ def development_gates() -> None:
     trial = load_json(TRIAL)
     if trial.get("development_result") != "PASS":
         raise EvidenceError(
-            "independent evaluator development result is "
-            f"{trial.get('development_result')}"
+            f"independent evaluator development result is {trial.get('development_result')}"
         )
 
 

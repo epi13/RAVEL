@@ -128,9 +128,7 @@ def discover_execution_shards(
     return discovered
 
 
-def build_manifest(
-    spec_path: Path, repository_root: Path = REPOSITORY_ROOT
-) -> dict[str, Any]:
+def build_manifest(spec_path: Path, repository_root: Path = REPOSITORY_ROOT) -> dict[str, Any]:
     spec = load_json(spec_path)
     validate_spec(spec)
     declared_shards = set(spec["generated_execution_shards"]) | set(
