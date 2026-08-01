@@ -3,7 +3,7 @@ SAN_CC ?= clang
 CFLAGS ?= -std=c11 -O3 -Wall -Wextra -Werror -pedantic
 LDLIBS ?= -lm
 
-.PHONY: test evidence training-test training-evidence training-check unified-test unified-evidence unified-check 0.4-evidence 0.4-check 0.4-manifest-negative-test 0.4-checkpoint-test 0.4-lineage-test 0.4-negative-test 0.4-compiler-matrix 0.4-sanitizers 0.4-runtime all clean
+.PHONY: test evidence training-test training-evidence training-check unified-test unified-evidence unified-check 0.4-evidence 0.4-check 0.4-manifest-negative-test 0.4-checkpoint-test 0.4-lineage-test 0.4-negative-test 0.4-compiler-matrix 0.4-sanitizers 0.4-runtime 0.5-test 0.5-evidence 0.5-check 0.5-development-gates 0.5-negative-test 0.5-manifest-negative-test 0.5-compiler-matrix 0.5-sanitizers 0.5-runtime 0.5-clean all clean
 
 test: ravel
 	./ravel >/dev/null
@@ -135,7 +135,67 @@ unified-check: ravel_unified_bin
 0.4-runtime: ravel_0_4_bin
 	python3 tools/ravel_0_4_evidence.py runtime --binary ./ravel_0_4_bin --runs 3
 
-all: test training-check unified-check 0.4-check
+0.5-test: ravel_0_5_bin
+	@tmp=$$(mktemp); \
+	trap 'rm -f "$$tmp"' EXIT; \
+	./ravel_0_5_bin --self-test > "$$tmp"; \
+	python3 -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r["schema"] == "ravel-self-test-observations/0.5"; assert all(v["observed"] for v in r["fixtures"].values())' "$$tmp"
+
+0.5-evidence: ravel_0_5_bin
+	python3 tools/ravel_0_5_evidence.py generate --binary ./ravel_0_5_bin
+
+0.5-check: ravel_0_5_bin
+	python3 tools/ravel_0_5_evidence.py verify --binary ./ravel_0_5_bin --diagnostics-dir diagnostics-0.5
+	python3 tools/ravel_0_5_source_digest.py verify \
+		--spec ravel-0.5-source-manifest-spec.json \
+		--manifest ravel-0.5-source-and-execution-manifest.json \
+		--assurance ravel-0.5-assurance-case.json
+
+0.5-development-gates:
+	python3 tools/ravel_0_5_evidence.py development-gates
+
+0.5-negative-test: ravel_0_5_bin
+	$(MAKE) 0.5-test
+	python3 tools/ravel_0_5_evidence.py mutation-tests
+	python3 -c 'import json; r=json.load(open("ravel-0.5-negative-evidence.json")); assert r["all_negative_tests_pass"]; assert len(r["tests"]) == len(set(r["tests"]))'
+
+0.5-manifest-negative-test:
+	python3 tools/ravel_0_5_evidence.py manifest-negative-tests
+
+0.5-compiler-matrix:
+	@set -eu; \
+	for compiler in gcc clang; do \
+		if command -v "$$compiler" >/dev/null 2>&1; then \
+			for optimization in 0 3; do \
+				binary=$$(mktemp); \
+				trap 'rm -f "$$binary"' EXIT; \
+				"$$compiler" -std=c11 "-O$$optimization" -Wall -Wextra -Werror -pedantic ravel_0_5.c -lm -o "$$binary"; \
+				python3 tools/ravel_0_5_evidence.py verify --binary "$$binary" --diagnostics-dir diagnostics-0.5; \
+				rm -f "$$binary"; \
+				trap - EXIT; \
+			done; \
+		fi; \
+	done
+
+0.5-sanitizers:
+	@set -eu; \
+	command -v "$(SAN_CC)" >/dev/null 2>&1 || { echo "sanitizer compiler unavailable: $(SAN_CC)" >&2; exit 1; }; \
+	binary=$$(mktemp); \
+	trap 'rm -f "$$binary"' EXIT; \
+	$(SAN_CC) -std=c11 -O1 -g -Wall -Wextra -Werror -pedantic \
+		-fsanitize=address,undefined -fno-omit-frame-pointer \
+		ravel_0_5.c -lm -o "$$binary"; \
+	ASAN_OPTIONS=detect_leaks=1 UBSAN_OPTIONS=halt_on_error=1 \
+		python3 tools/ravel_0_5_evidence.py verify --binary "$$binary" --diagnostics-dir diagnostics-0.5
+
+0.5-runtime: ravel_0_5_bin
+	python3 tools/ravel_0_5_evidence.py runtime --binary ./ravel_0_5_bin --runs 3
+
+0.5-clean:
+	rm -f ravel_0_5_bin
+	rm -rf diagnostics-0.5
+
+all: test training-check unified-check 0.4-check 0.5-check
 
 ravel: ravel.c
 	$(CC) $(CFLAGS) $< -o $@
@@ -149,7 +209,10 @@ ravel_unified_bin: ravel_unified.c ravel_unified/00_core.inc ravel_unified/10_ro
 ravel_0_4_bin: ravel_0_4.c
 	$(CC) $(CFLAGS) ravel_0_4.c $(LDLIBS) -o $@
 
+ravel_0_5_bin: ravel_0_5.c
+	$(CC) $(CFLAGS) ravel_0_5.c $(LDLIBS) -o $@
+
 clean:
-	rm -f ravel ravel_train ravel_unified_bin ravel_0_4_bin
+	rm -f ravel ravel_train ravel_unified_bin ravel_0_4_bin ravel_0_5_bin
 	rm -f evidence-actual.json unified-actual.json ravel-unified-checkpoint.bin ravel-0.4-checkpoint.bin
 	rm -rf diagnostics
