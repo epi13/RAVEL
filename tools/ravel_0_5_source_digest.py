@@ -52,11 +52,13 @@ def file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def framed_source_digest(entries: list[dict[str, Any]]) -> str:
+def framed_source_digest(
+    entries: list[dict[str, Any]], repository_root: Path = REPOSITORY_ROOT
+) -> str:
     digest = hashlib.sha256()
     for entry in entries:
         relative = entry["path"].encode("utf-8")
-        content = (REPOSITORY_ROOT / entry["path"]).read_bytes()
+        content = (repository_root / entry["path"]).read_bytes()
         digest.update(struct.pack(">I", len(relative)))
         digest.update(relative)
         digest.update(struct.pack(">Q", len(content)))
@@ -110,7 +112,9 @@ def validate_spec(spec: dict[str, Any]) -> None:
         raise ManifestError("canonical_flags must be a non-empty array")
 
 
-def discover_execution_shards(spec: dict[str, Any]) -> set[str]:
+def discover_execution_shards(
+    spec: dict[str, Any], repository_root: Path = REPOSITORY_ROOT
+) -> set[str]:
     discovered: set[str] = set()
     globs = spec.get("execution_source_discovery_globs", [])
     if not isinstance(globs, list):
@@ -118,19 +122,21 @@ def discover_execution_shards(spec: dict[str, Any]) -> set[str]:
     for pattern in globs:
         if not isinstance(pattern, str):
             raise ManifestError("execution shard glob must be a string")
-        for path in REPOSITORY_ROOT.glob(pattern):
+        for path in repository_root.glob(pattern):
             if path.is_file():
-                discovered.add(path.relative_to(REPOSITORY_ROOT).as_posix())
+                discovered.add(path.relative_to(repository_root).as_posix())
     return discovered
 
 
-def build_manifest(spec_path: Path) -> dict[str, Any]:
+def build_manifest(
+    spec_path: Path, repository_root: Path = REPOSITORY_ROOT
+) -> dict[str, Any]:
     spec = load_json(spec_path)
     validate_spec(spec)
     declared_shards = set(spec["generated_execution_shards"]) | set(
         spec["maintained_execution_sources"]
     )
-    discovered_shards = discover_execution_shards(spec)
+    discovered_shards = discover_execution_shards(spec, repository_root)
     unexpected = sorted(discovered_shards - declared_shards)
     omitted = sorted(declared_shards - discovered_shards)
     if unexpected:
@@ -141,7 +147,7 @@ def build_manifest(spec_path: Path) -> dict[str, Any]:
     entries: list[dict[str, Any]] = []
     for item in spec["ordered_files"]:
         relative = item["path"]
-        absolute = REPOSITORY_ROOT / relative
+        absolute = repository_root / relative
         if not absolute.is_file():
             raise ManifestError(f"listed source file is missing: {relative}")
         content = absolute.read_bytes()
@@ -167,7 +173,7 @@ def build_manifest(spec_path: Path) -> dict[str, Any]:
         "digest_algorithm": spec["digest_algorithm"],
         "digest_procedure": spec["digest_procedure"],
         "ordered_files": entries,
-        "source_digest": framed_source_digest(entries),
+        "source_digest": framed_source_digest(entries, repository_root),
         "unexpected_execution_shards": [],
     }
 
@@ -187,15 +193,12 @@ def verify_manifest(
     }
     if assurance_path is not None:
         assurance = load_json(assurance_path)
-        implementation = assurance.get("implementation")
-        if not isinstance(implementation, dict):
-            raise ManifestError("assurance record lacks implementation object")
-        if implementation.get("source_digest") != expected["source_digest"]:
-            raise ManifestError("assurance record contains a stale source digest")
-        if implementation.get("source_manifest_sha256") != result["manifest_sha256"]:
-            raise ManifestError("assurance record contains a stale manifest digest")
-        if implementation.get("source_manifest") != manifest_path.name:
-            raise ManifestError("assurance record names the wrong source manifest")
+        verify_assurance_record(
+            assurance,
+            expected,
+            manifest_path.name,
+            result["manifest_sha256"],
+        )
         result["assurance_match"] = True
     return result
 
@@ -206,6 +209,24 @@ def verify_manifest_record(expected: dict[str, Any], actual: dict[str, Any]) -> 
         raise ManifestError(
             "source manifest is stale, reordered, incomplete, or contains unexpected data"
         )
+
+
+def verify_assurance_record(
+    assurance: dict[str, Any],
+    manifest: dict[str, Any],
+    manifest_name: str,
+    manifest_sha256: str,
+) -> None:
+    """Reject an assurance record that does not bind the exact manifest."""
+    implementation = assurance.get("implementation")
+    if not isinstance(implementation, dict):
+        raise ManifestError("assurance record lacks implementation object")
+    if implementation.get("source_digest") != manifest["source_digest"]:
+        raise ManifestError("assurance record contains a stale source digest")
+    if implementation.get("source_manifest_sha256") != manifest_sha256:
+        raise ManifestError("assurance record contains a stale manifest digest")
+    if implementation.get("source_manifest") != manifest_name:
+        raise ManifestError("assurance record names the wrong source manifest")
 
 
 def parse_args() -> argparse.Namespace:

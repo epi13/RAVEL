@@ -12,6 +12,7 @@ import platform
 import statistics
 import subprocess
 import sys
+import tempfile
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -31,6 +32,7 @@ from ravel_0_5_evaluator import (  # noqa: E402
 from ravel_0_5_source_digest import (  # noqa: E402
     ManifestError,
     build_manifest,
+    verify_assurance_record,
     verify_manifest_record,
 )
 
@@ -198,43 +200,98 @@ def manifest_mutation_observations(
 ) -> dict[str, bool]:
     observations: dict[str, bool] = {}
 
-    stale = copy.deepcopy(manifest)
-    stale["source_digest"] = "0" * 64
+    def copied_recalculation(
+        mutate: Callable[[Path, Path], None],
+    ) -> dict[str, Any]:
+        spec = load_json(MANIFEST_SPEC)
+        with tempfile.TemporaryDirectory(prefix="ravel-0.5-manifest-") as directory:
+            root = Path(directory)
+            for entry in spec["ordered_files"]:
+                source = Path(__file__).resolve().parents[3] / entry["path"]
+                destination = root / entry["path"]
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(source.read_bytes())
+            spec_path = root / "case-studies/ravel" / MANIFEST_SPEC.name
+            mutate(root, spec_path)
+            return build_manifest(spec_path, root)
+
+    def append_to(relative: str, payload: bytes) -> Callable[[Path, Path], None]:
+        def mutate(root: Path, _spec_path: Path) -> None:
+            path = root / relative
+            path.write_bytes(path.read_bytes() + payload)
+
+        return mutate
+
     observations["stale_manifest"] = _expect_rejection(
-        lambda: verify_manifest_record(manifest, stale)
+        lambda: verify_manifest_record(
+            copied_recalculation(
+                append_to(
+                    "case-studies/ravel/RAVEL_0_5_CONTRACT.md",
+                    b"\nstale manifest fixture\n",
+                )
+            ),
+            manifest,
+        )
     )
 
-    substituted = copy.deepcopy(manifest)
-    substituted["ordered_files"][0]["sha256"] = "f" * 64
     observations["substituted_source"] = _expect_rejection(
-        lambda: verify_manifest_record(manifest, substituted)
+        lambda: verify_manifest_record(
+            copied_recalculation(
+                append_to(
+                    "case-studies/ravel/ravel_0_5.c",
+                    b"\n/* substituted source fixture */\n",
+                )
+            ),
+            manifest,
+        )
     )
 
-    reordered = copy.deepcopy(manifest)
-    reordered["ordered_files"][0], reordered["ordered_files"][1] = (
-        reordered["ordered_files"][1],
-        reordered["ordered_files"][0],
-    )
+    def reorder(_root: Path, spec_path: Path) -> None:
+        spec = load_json(spec_path)
+        spec["ordered_files"][0], spec["ordered_files"][1] = (
+            spec["ordered_files"][1],
+            spec["ordered_files"][0],
+        )
+        spec_path.write_bytes(canonical_bytes(spec))
+
     observations["reordered_file"] = _expect_rejection(
-        lambda: verify_manifest_record(manifest, reordered)
+        lambda: verify_manifest_record(copied_recalculation(reorder), manifest)
     )
 
-    omitted = copy.deepcopy(manifest)
-    omitted["ordered_files"].pop()
+    def omit(_root: Path, spec_path: Path) -> None:
+        spec = load_json(spec_path)
+        spec["ordered_files"] = [
+            entry
+            for entry in spec["ordered_files"]
+            if entry["role"] != "contract"
+        ]
+        spec_path.write_bytes(canonical_bytes(spec))
+
     observations["omitted_file"] = _expect_rejection(
-        lambda: verify_manifest_record(manifest, omitted)
+        lambda: copied_recalculation(omit)
     )
 
-    build = copy.deepcopy(manifest)
-    build["build_configuration"]["canonical_flags"][0] = "-std=c99"
+    def mutate_build(_root: Path, spec_path: Path) -> None:
+        spec = load_json(spec_path)
+        spec["build_configuration"]["canonical_flags"][0] = "-std=c99"
+        spec_path.write_bytes(canonical_bytes(spec))
+
     observations["build_configuration_mutation"] = _expect_rejection(
-        lambda: verify_manifest_record(manifest, build)
+        lambda: verify_manifest_record(
+            copied_recalculation(mutate_build), manifest
+        )
     )
 
-    artifact = copy.deepcopy(manifest)
-    artifact["ordered_files"][0]["bytes"] += 1
     observations["artifact_mutation"] = _expect_rejection(
-        lambda: verify_manifest_record(manifest, artifact)
+        lambda: verify_manifest_record(
+            copied_recalculation(
+                append_to(
+                    "case-studies/ravel/tools/ravel_0_5_evaluator.py",
+                    b"\n# artifact mutation fixture\n",
+                )
+            ),
+            manifest,
+        )
     )
 
     if assurance is None:
@@ -242,9 +299,13 @@ def manifest_mutation_observations(
     else:
         stale_assurance = copy.deepcopy(assurance)
         stale_assurance["implementation"]["source_digest"] = "0" * 64
-        observations["stale_assurance"] = (
-            stale_assurance["implementation"]["source_digest"]
-            != manifest["source_digest"]
+        observations["stale_assurance"] = _expect_rejection(
+            lambda: verify_assurance_record(
+                stale_assurance,
+                manifest,
+                MANIFEST.name,
+                hashlib.sha256(canonical_bytes(manifest)).hexdigest(),
+            )
         )
     return observations
 
