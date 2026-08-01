@@ -56,8 +56,14 @@ static int split_one(Model *m, uint16_t parent, uint16_t child, const Event *dat
     }
     if (pa == pb) return 0;
     uint64_t root = m->e[parent].lineage;
-    seed_expert(&m->e[parent], &data[pa], mix64(root ^ ((uint64_t)round << 32) ^ UINT64_C(0xa5)), (uint16_t)(m->e[parent].generation + 1u));
-    seed_expert(&m->e[child], &data[pb], mix64(root ^ ((uint64_t)round << 32) ^ UINT64_C(0x5a)), (uint16_t)(m->e[parent].generation + 1u));
+    uint16_t original_generation = m->e[parent].generation;
+    uint16_t child_generation = (uint16_t)(original_generation + 1u);
+    seed_expert(&m->e[parent], &data[pa],
+                mix64(root ^ ((uint64_t)round << 32) ^ UINT64_C(0xa5)),
+                child_generation);
+    seed_expert(&m->e[child], &data[pb],
+                mix64(root ^ ((uint64_t)round << 32) ^ UINT64_C(0x5a)),
+                child_generation);
     return 1;
 }
 

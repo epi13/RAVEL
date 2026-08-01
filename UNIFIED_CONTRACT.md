@@ -1,5 +1,11 @@
 # RAVEL-U 0.3 unified architecture contract
 
+> Historical protocol note: RAVEL 0.3 evaluated adapted performance on its
+> adaptation array, used a raw-struct checkpoint with incomplete identity, and
+> measured planning goal-expert equivalence rather than exact state equality.
+> RAVEL 0.4 preserves this contract as history and replaces those assurance
+> mechanisms in `RAVEL_0_4_CONTRACT.md`.
+
 ## Intended use
 
 RAVEL-U is a bounded research architecture for testing whether one recursively managed expert population can provide exact retrieval, compressed representation, reconstruction, classification, action-conditioned prediction, temporal memory, planning, continual adaptation, lifecycle compression, and checkpoint rollback under one deterministic protocol.
@@ -14,7 +20,7 @@ Every active expert contains one retrieval key, one reconstruction vector, four 
 
 ## Routing authority
 
-The generated lattice evaluates eight candidates. It may return early only when the selected distance is strictly lower than the mathematical lower bound for every excluded expert. Equality, malformed input, or insufficient separation requires the complete scan. Routed and complete scans must select the same expert.
+The maintained lattice evaluates eight candidates. It may return early only when the selected distance is strictly lower than the mathematical lower bound for every excluded expert. Equality, malformed input, or insufficient separation requires the complete scan. Routed and complete scans must select the same expert.
 
 ## Recursive development authority
 

@@ -1,0 +1,199 @@
+{
+  "schema": "ravel-assurance-case/0.4",
+  "assurance_case_id": "ravel.evidence-hardening.epoch-1.assurance.v1",
+  "claim": "The bounded RAVEL 0.4 harness produced deterministic development evidence with separated drift holdouts, canonical checkpoint verification, mutations, multiple regimes, baselines, ablations, and preserved failures.",
+  "development_result": "FAIL",
+  "disposition": "NON_PROMOTION_RESEARCH_FAILURES_PRESERVED",
+  "formal_mncs_status": "UNKNOWN",
+  "formal_mncds_status": "UNKNOWN",
+  "promotion_authorized": false,
+  "implementation": {
+    "entrypoint": "ravel_0_4.c",
+    "source_manifest": "ravel-0.4-source-manifest.json",
+    "source_manifest_sha256": "c3b590a93313c929ef667f7c41100eb51a130c5015b2b2b7789bb6bf2033d768",
+    "source_digest": "1a8b8f0fcbabf0ec2000c8bfd89a754a0c203cf0c2f1747c6e32fb862123937e",
+    "digest_algorithm": "sha256",
+    "digest_procedure": "For each file in declared order, hash uint32_be(path_utf8_length), path_utf8, uint64_be(file_length), and exact file bytes.",
+    "source_provenance": "human_maintained_c11_no_generator",
+    "generated_execution_shards": [],
+    "language": "C11"
+  },
+  "evidence": {
+    "records": [
+      {
+        "path": "ravel-0.4-raw-observations.json",
+        "bytes": 80943,
+        "sha256": "c7c71ad964b2cc06584a21185930eca5cb361112e4a9e1d9f6bc541b1d47f4e2"
+      },
+      {
+        "path": "ravel-0.4-trial-evidence.json",
+        "bytes": 134551,
+        "sha256": "a5ffbfdbf2f46274413edf0644df2afa36df27da629c777bcf59b1f6e79066aa"
+      },
+      {
+        "path": "ravel-0.4-negative-evidence.json",
+        "bytes": 7104,
+        "sha256": "12026b61cb81e86ccffccd1b69cc8853140eea2a3bf3f3be3f7e14e7dbd5b2b1"
+      }
+    ],
+    "deterministic_reproduction": true,
+    "drift_holdout_used_for_adaptation": false,
+    "checkpoint_complete_identity": true,
+    "checkpoint_complete_behavioral_agreement": true,
+    "checkpoint_mutation_campaign": true,
+    "protected_holdout": false,
+    "independent_custody": false
+  },
+  "trial_summary": {
+    "declared": 8,
+    "passing": 0,
+    "failing": 8,
+    "pass_rule": "all_8_trials_pass"
+  },
+  "failed_gates_by_trial": {
+    "trial-01-separated": [
+      "adapted_gain_over_static"
+    ],
+    "trial-02-overlap": [
+      "adapted_gain_over_static"
+    ],
+    "trial-03-noise": [
+      "adapted_gain_over_static"
+    ],
+    "trial-04-label": [
+      "base_holdout_retention",
+      "adapted_reconstruction_improvement"
+    ],
+    "trial-05-observation": [
+      "adapted_gain_over_static"
+    ],
+    "trial-06-transition": [
+      "adapted_gain_over_static",
+      "retention_prediction"
+    ],
+    "trial-07-combined": [
+      "base_holdout_retention"
+    ],
+    "trial-08-ambiguous": [
+      "exact_world_state_target_rate"
+    ]
+  },
+  "observed_aggregates": {
+    "base_holdout_accuracy": {
+      "minimum": 0.9375,
+      "median": 0.98828125,
+      "maximum": 1.0,
+      "arithmetic_mean": 0.98095703125,
+      "population_standard_deviation": 0.020710263730906734
+    },
+    "adaptation_training_accuracy": {
+      "minimum": 0.962890625,
+      "median": 1.0,
+      "maximum": 1.0,
+      "arithmetic_mean": 0.988037109375,
+      "population_standard_deviation": 0.015729554363129505
+    },
+    "static_model_drift_holdout_accuracy": {
+      "minimum": 0.61328125,
+      "median": 0.955078125,
+      "maximum": 0.9921875,
+      "arithmetic_mean": 0.84228515625,
+      "population_standard_deviation": 0.16786581034443188
+    },
+    "adapted_model_drift_holdout_accuracy": {
+      "minimum": 0.93359375,
+      "median": 1.0,
+      "maximum": 1.0,
+      "arithmetic_mean": 0.9853515625,
+      "population_standard_deviation": 0.022333196535213422
+    },
+    "base_holdout_retention": {
+      "minimum": 0.671875,
+      "median": 1.0,
+      "maximum": 1.0,
+      "arithmetic_mean": 0.904296875,
+      "population_standard_deviation": 0.1358650803862397
+    },
+    "base_reconstruction_rmse": {
+      "minimum": 3.249159843,
+      "median": 4.779562945,
+      "maximum": 9.256042033,
+      "arithmetic_mean": 5.290470095125,
+      "population_standard_deviation": 1.7926340609447835
+    },
+    "adapted_drift_reconstruction_rmse": {
+      "minimum": 3.268650797,
+      "median": 4.7148156100000005,
+      "maximum": 11.722196472,
+      "arithmetic_mean": 5.595161787,
+      "population_standard_deviation": 2.7010520289568483
+    },
+    "base_prediction_rmse": {
+      "minimum": 5.274702577,
+      "median": 9.0684269465,
+      "maximum": 15.803773847,
+      "arithmetic_mean": 9.351916128375,
+      "population_standard_deviation": 3.3369641369339753
+    },
+    "adapted_drift_prediction_rmse": {
+      "minimum": 5.210900214,
+      "median": 7.5611356915000005,
+      "maximum": 15.132556407,
+      "arithmetic_mean": 9.0894363225,
+      "population_standard_deviation": 3.7918848016987137
+    },
+    "planning_exact_state_rate": {
+      "minimum": 0.296875,
+      "median": 0.9453125,
+      "maximum": 1.0,
+      "arithmetic_mean": 0.8671875,
+      "population_standard_deviation": 0.2222103539582483
+    },
+    "planning_path_found_rate": {
+      "minimum": 0.96875,
+      "median": 1.0,
+      "maximum": 1.0,
+      "arithmetic_mean": 0.99609375,
+      "population_standard_deviation": 0.010334966058846057
+    },
+    "expert_count": {
+      "minimum": 68.0,
+      "median": 68.0,
+      "maximum": 68.0,
+      "arithmetic_mean": 68.0,
+      "population_standard_deviation": 0.0
+    },
+    "training_evaluations": {
+      "minimum": 184288.0,
+      "median": 198176.5,
+      "maximum": 248728.0,
+      "arithmetic_mean": 201902.5,
+      "population_standard_deviation": 19212.06033979698
+    },
+    "checkpoint_size_bytes": {
+      "minimum": 39438.0,
+      "median": 39438.0,
+      "maximum": 39438.0,
+      "arithmetic_mean": 39438.0,
+      "population_standard_deviation": 0.0
+    }
+  },
+  "baseline_and_ablation_interpretation": "Results are mixed across the frozen regimes; no superiority claim is made.",
+  "historical_audit": {
+    "ravel_u_0_3_adapted_score": "The historical 100% adapted drift score reused adaptation data and was not an untouched drift-holdout result.",
+    "ravel_u_0_3_checkpoint": "The historical raw-struct checkpoint and weak digest are not accepted as RAVEL 0.4 assurance.",
+    "ravel_u_0_3_source_digest": "The historical unified assurance digest was incorrect; RAVEL 0.4 replaces implementation identity with the ordered manifest.",
+    "ravel_u_0_3_shard_provenance": "No generator was present in source or reviewed pull-request history; split sources are maintained, not claimed as generated."
+  },
+  "limitations": [
+    "development evidence is not independent protected evidence",
+    "synthetic success or failure is not real-data generalization",
+    "deterministic reproduction is not cross-organizational reproduction",
+    "exact routing equivalence is not overall model correctness",
+    "checkpoint reproducibility is not production rollback authorization",
+    "runtime observations are non-normative",
+    "formal MNCS status remains UNKNOWN",
+    "formal MNCDS status remains UNKNOWN",
+    "promotion remains unauthorized"
+  ]
+}

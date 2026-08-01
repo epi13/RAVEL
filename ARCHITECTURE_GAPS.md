@@ -15,7 +15,7 @@ RAVEL-U 0.3 closes that bounded architectural gap. One expert now simultaneously
 - a lineage-bearing lifecycle object; and
 - a measured unit of computational cost.
 
-The same expert population builds the exact routing lattice, receives training assignments, identifies unresolved error, creates children, compiles its transition graph, supplies plans, adapts to semantic drift, and retires low-utility duplicate children. Successful checkpoint restoration must reproduce both model identity and evaluation behavior.
+The same expert population builds the exact routing lattice, receives training assignments, identifies unresolved error, creates children, compiles its transition graph, supplies plans, adapts to semantic drift, and retires low-utility duplicate children. RAVEL 0.3 intended checkpoint restoration to reproduce both identity and behavior, but its digest and checksum were incomplete. RAVEL 0.4 supplies complete-field canonical identity, restored measurement comparison, and corruption tests.
 
 ## Intentionally external
 

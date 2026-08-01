@@ -1,0 +1,140 @@
+{
+  "schema": "ravel-preregistration/0.4",
+  "study_id": "ravel.evidence-hardening.epoch-1.v1",
+  "candidate_id": "ravel-u.evidence-hardened.c11.v0.4",
+  "frozen_before_final_evidence": true,
+  "trial_pass_rule": "all_hard_gates_per_trial",
+  "global_pass_rule": "all_8_trials_pass",
+  "datasets_per_trial": {
+    "base_training": 1024,
+    "base_holdout": 256,
+    "drift_adaptation_training": 512,
+    "drift_holdout": 256,
+    "original_task_retention_holdout": 256,
+    "planning_cases": 64
+  },
+  "dataset_prohibitions": {
+    "drift_holdout_may_be_used_for": [
+      "post-freeze evaluation"
+    ],
+    "drift_holdout_may_not_be_used_for": [
+      "expert birth selection",
+      "refinement",
+      "retirement",
+      "threshold selection",
+      "topology selection",
+      "replay selection",
+      "model selection"
+    ]
+  },
+  "topology": {
+    "dimensions": 8,
+    "classes": 8,
+    "actions": 4,
+    "world_states": 64,
+    "initial_experts": 8,
+    "base_experts": 64,
+    "adaptation_births": 8,
+    "adaptation_retirements": 4,
+    "adapted_experts": 68,
+    "maximum_experts": 80,
+    "route_width": 8,
+    "routing_cells": 256
+  },
+  "trials": [
+    {
+      "trial_id": "trial-01-separated",
+      "seed": "0x0401000000000001",
+      "regime": "separated_state"
+    },
+    {
+      "trial_id": "trial-02-overlap",
+      "seed": "0x0402000000000002",
+      "regime": "partially_overlapping_observations"
+    },
+    {
+      "trial_id": "trial-03-noise",
+      "seed": "0x0403000000000003",
+      "regime": "increased_observation_noise"
+    },
+    {
+      "trial_id": "trial-04-label",
+      "seed": "0x0404000000000004",
+      "regime": "label_drift"
+    },
+    {
+      "trial_id": "trial-05-observation",
+      "seed": "0x0405000000000005",
+      "regime": "observation_drift"
+    },
+    {
+      "trial_id": "trial-06-transition",
+      "seed": "0x0406000000000006",
+      "regime": "transition_drift"
+    },
+    {
+      "trial_id": "trial-07-combined",
+      "seed": "0x0407000000000007",
+      "regime": "combined_observation_and_label_drift"
+    },
+    {
+      "trial_id": "trial-08-ambiguous",
+      "seed": "0x0408000000000008",
+      "regime": "partially_observed_ambiguous"
+    }
+  ],
+  "hard_gates": {
+    "base_holdout_accuracy_min": 0.75,
+    "adaptation_training_accuracy_min": 0.70,
+    "adapted_drift_holdout_accuracy_min": 0.70,
+    "adapted_gain_over_static_drift_holdout_min": 0.05,
+    "base_holdout_retention_min": 0.70,
+    "routed_complete_oracle_mismatches_max": 0,
+    "base_reconstruction_rmse_max": 18.0,
+    "adapted_drift_reconstruction_rmse_max": 18.0,
+    "adapted_drift_reconstruction_improvement_min": 0.25,
+    "retention_reconstruction_degradation_max": 4.0,
+    "base_prediction_rmse_max": 24.0,
+    "adapted_drift_prediction_rmse_max": 24.0,
+    "adapted_drift_prediction_improvement_min": 0.25,
+    "retention_prediction_degradation_max": 5.0,
+    "exact_world_state_target_rate_min": 0.60,
+    "path_found_rate_min": 0.70,
+    "checkpoint_identity_match": true,
+    "checkpoint_behavior_match": true,
+    "checkpoint_mutation_campaign_pass": true,
+    "lineage_and_topology_invariants_pass": true
+  },
+  "baselines": [
+    "fixed_8_expert",
+    "flat_64_expert_complete_scan",
+    "fixed_topology_64_expert_routed",
+    "nearest_centroid_16_no_recursive_births",
+    "no_adaptation_static"
+  ],
+  "ablations": [
+    "ravel_without_replay",
+    "ravel_without_retirement",
+    "ravel_complete_scan_without_certification",
+    "ravel_fixed_topology_without_recursive_births",
+    "ravel_random_births"
+  ],
+  "comparison_metrics": [
+    "accuracy",
+    "drift_holdout_accuracy",
+    "retention_accuracy",
+    "reconstruction_rmse",
+    "next_observation_prediction_rmse",
+    "planning_exact_state_rate",
+    "expert_evaluations",
+    "expert_count",
+    "training_evaluations",
+    "checkpoint_size_bytes",
+    "runtime_observation_non_normative"
+  ],
+  "formal_status_regardless_of_development_result": {
+    "mncs": "UNKNOWN",
+    "mncds": "UNKNOWN",
+    "promotion_authorized": false
+  }
+}

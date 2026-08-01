@@ -4,7 +4,7 @@ RAVEL is a machine-native research architecture that treats AI/ML as one combine
 
 Its foundational claim is that a model, memory store, router, trainer, world model, planner, and compute scheduler should not be separate systems. A stored expert should simultaneously be a retrieval key, compressed representation, executable predictor, training shard, transition-memory node, planning destination, lineage object, and measured unit of computation.
 
-Human readability is relocated into contracts, evaluator authority, evidence, regeneration, and rollback. The generated execution plane is expected to be replaced as a unit rather than routinely hand-maintained.
+Human readability is relocated into contracts, evaluator authority, evidence, provenance, and rollback. The 0.3 split C translation unit is maintained source: no reproducible higher-level generator was included in the repository or reviewed pull-request history.
 
 ## RAVEL 0.1 — exact conditional inference
 
@@ -59,12 +59,45 @@ The synthetic world contains 64 states, four actions, eight labels, and eight-di
 
 The expert is now simultaneously a key, representation, decoder, classifier, world-model fragment, transition node, replay shard, planning node, lineage object, and compute unit. See `ARCHITECTURE_GAPS.md` for what was missing and why raw modality adapters, use policy, protected evaluation, external effects, and promotion authority intentionally remain outside the recursive surface.
 
+The historical `100.000%` adapted drift value above was measured on the same
+`adapt_set` used for adaptation. It is an adaptation-training observation, not
+an untouched drift-holdout result. Likewise, the historical planning
+`exact_goals` field measured goal-expert equivalence rather than exact
+world-state equality. RAVEL 0.4 preserves these facts instead of relabeling the
+0.3 evidence.
+
+## RAVEL 0.4 — evidence hardening
+
+RAVEL 0.4 repairs assurance rather than expanding the architecture. It adds:
+
+- disjoint base training, base holdout, drift adaptation training, untouched
+  drift holdout, original-task retention holdout, and planning inputs;
+- eight frozen seeds covering separated, overlapping, noisy, label-drift,
+  observation-drift, transition-drift, combined, and ambiguous regimes;
+- canonical big-endian Q20 checkpoints with a versioned header and SHA-256
+  payload identity instead of raw C memory images;
+- complete restored classification, reconstruction, prediction, transition,
+  routing, planning, topology, lineage, and reported-metric comparison;
+- deliberate field, payload, truncation, append, schema, and substitution
+  checkpoint mutations;
+- exact-state planning measurements distinct from goal-expert equivalence;
+- reconstruction and next-observation prediction gates;
+- five bounded baselines, five ablations, negative/adversarial tests, aggregate
+  variance, and preserved failures; and
+- an ordered, script-generated source manifest and assurance digest.
+
+The frozen 0.4 experiment records development `FAIL`; no seeds, regimes, or
+gates were removed to obtain a favorable result. See
+`RAVEL_0_4_RESULTS.md` for generated per-trial failures and aggregates, and
+`ravel-0.4-assurance-case.json` for the bounded assurance disposition.
+
 ## Run
 
 ```bash
 make test
 make training-check
 make unified-check
+make 0.4-check
 ```
 
 To rewrite repository-visible development evidence:
@@ -73,6 +106,7 @@ To rewrite repository-visible development evidence:
 make evidence
 make training-evidence
 make unified-evidence
+make 0.4-evidence
 ```
 
 Requirements: a C11 compiler, the C math library, and Make.
@@ -81,13 +115,20 @@ Requirements: a C11 compiler, the C math library, and Make.
 
 - `ravel.c`, `CONTRACT.md`, `evidence.json` — exact conditional inference;
 - `ravel_train.c`, `TRAINING_CONTRACT.md`, `training-*.json` — recursive training;
-- `ravel_unified.c` and `ravel_unified/*.inc` — generated unified execution shards;
+- `ravel_unified.c` and `ravel_unified/*.inc` — maintained 0.3 split C source;
 - `ARCHITECTURE_GAPS.md` — architectural audit and intentional external boundary;
 - `UNIFIED_CONTRACT.md` — unified readable authority and gates;
 - `unified-preregistration.json` — frozen protocol;
 - `unified-evidence.json` — deterministic observations;
 - `unified-threat-model.json` — threats and residual UNKNOWNs; and
-- `unified-assurance-case.json` — bounded non-promotion record.
+- `unified-assurance-case.json` — historical bounded non-promotion record;
+- `ravel_0_4.c` and `RAVEL_0_4_CONTRACT.md` — hardened maintained execution and
+  readable authority;
+- `ravel-0.4-preregistration.json` — frozen seeds, regimes, partitions, and gates;
+- `ravel-0.4-raw-observations.json`, `ravel-0.4-trial-evidence.json`, and
+  `ravel-0.4-negative-evidence.json` — executable raw and derived evidence;
+- `ravel-0.4-source-manifest.json` — ordered implementation identity; and
+- `ravel-0.4-assurance-case.json` — current bounded non-promotion record.
 
 ## MNCS boundary
 
@@ -95,7 +136,7 @@ Requirements: a C11 compiler, the C math library, and Make.
 - **Machine execution plane:** expert keys, decoders, classifiers, next-state programs, router, transition graph, topology, replay assignments, and lineage.
 - **Evidence plane:** exact-oracle agreement, accuracy, reconstruction, prediction, transition, planning, lifecycle, checkpoint, checksums, and limitations.
 - **Development-control plane:** fixed seeds, partitions, birth and retirement budgets, immutable thresholds, and non-promotion fields.
-- **Operational-control plane:** complete-scan fallback, checkpoint restoration, model identity, and replacement of the generated execution shards.
+- **Operational-control plane:** complete-scan fallback, checkpoint restoration, model identity, and replacement of maintained execution source.
 
 The repository-visible studies record development `PASS`. Formal MNCS and MNCDS status remain `UNKNOWN`; promotion is unauthorized pending independent protected real-data evaluation, adversarial continual-learning studies, learned modality adapters, cross-host reproduction, accelerator and distributed evidence, and operational release controls.
 
