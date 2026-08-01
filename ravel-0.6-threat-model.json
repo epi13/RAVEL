@@ -1,0 +1,79 @@
+{
+  "schema": "ravel-threat-model/0.6-preregistration",
+  "threat_model_id": "ravel.retention-constrained-adaptation.threats.epoch-1",
+  "status": "PREREGISTERED_NOT_EVALUATED",
+  "assets": [
+    "immutable RAVEL 0.5 baseline identities and dispositions",
+    "separate development, selection, retention, transition-retention, planning, and future final partitions",
+    "future post-freeze final seed material",
+    "raw observation and evaluator authority separation",
+    "retention and transition-support update constraints",
+    "candidate, checkpoint, source, environment, and manifest identities"
+  ],
+  "threats": [
+    {
+      "id": "same-epoch-final-feedback",
+      "control": "future final evaluation is one-shot after candidate freeze and cannot repair the same candidate epoch",
+      "residual": "no external custodian or independent evaluator has yet accepted authority",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "ravel-0.5-final-reuse",
+      "control": "all 0.5 final seeds are prohibited and 0.5 observations are labeled cross-epoch design inputs only",
+      "residual": "developers know the published 0.5 findings",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "partition-leakage",
+      "control": "partition IDs and seed domains are unique; selection and final data are forbidden from replay, update, threshold, and evaluator repair",
+      "residual": "development and selection partitions remain under repository custody",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "retention-objective-gaming",
+      "control": "retention accuracy, prediction, replay coverage, and transition-support floors are hard gates rather than optimization-only scores",
+      "residual": "bounded synthetic floors may omit open-world failure modes",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "transition-support-erasure",
+      "control": "updates and retirements must preserve uniquely supported transitions and pass explicit transition-retention gates",
+      "residual": "top-k bounded support is not a full stochastic world model",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "self-verdict",
+      "control": "the future implementation may emit only raw observations; a separately maintained evaluator derives gates and aggregate dispositions",
+      "residual": "repository-local code separation is not operational independence",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "identity-substitution",
+      "control": "ordered manifests bind candidate, evaluator, preregistration, compiler profiles, checkpoints, and evidence with SHA-256 identities",
+      "residual": "no external signature, witness, or protected custody currently exists",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "threshold-repair",
+      "control": "material threshold, hypothesis, evaluator, or partition changes start a new epoch or preregistration revision",
+      "residual": "governance review has not approved the epoch",
+      "status": "UNKNOWN"
+    }
+  ],
+  "status_precedence": "FAIL > UNKNOWN > PASS",
+  "residual_unknowns": [
+    "candidate behavior",
+    "development evaluation",
+    "final evaluation",
+    "protected custody",
+    "independent evaluation",
+    "external security/privacy review",
+    "cross-host reproduction",
+    "formal MNCS status",
+    "formal MNCDS status",
+    "governance approval"
+  ],
+  "formal_mncs_status": "UNKNOWN",
+  "formal_mncds_status": "UNKNOWN",
+  "promotion_authorized": false
+}

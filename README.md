@@ -121,6 +121,29 @@ complete paired Pareto results are mixed. No superiority claim is made. See
 `RAVEL_0_5_RESULTS.md`, `RAVEL_0_5_POSTMORTEM.md`, and
 `ravel-0.5-assurance-case.json`.
 
+## RAVEL 0.6 — preregistered future development
+
+RAVEL 0.6 is a clean new epoch preregistered before implementation. It binds
+the immutable 0.5 candidate and evidence as a failed development baseline and
+uses the published label-gain, prediction-retention, combined-planning,
+ambiguous-planning/efficiency, mixed-Pareto, and assurance findings only as
+permitted cross-epoch design input.
+
+The narrow hypothesis concerns retention-constrained adaptation for label and
+combined observation/label drift. The planned policy combines stratified
+replay protection, objective-tested updates, and transition-support
+preservation. Development, selection, retention, transition-retention,
+planning, and future final partitions have distinct identities. Development
+and selection seeds are distinct from every 0.5 final seed. Future final seed
+material is intentionally absent and may be obtained only after candidate
+freeze, preferably from an external custodian.
+
+No 0.6 mechanism has been implemented, selected, frozen, or evaluated.
+Development and final results, protected custody, independent evaluation, and
+formal MNCS/MNCDS status are all `UNKNOWN`; promotion is unauthorized. See
+`RAVEL_0_6_SCOPE.md`, `RAVEL_0_6_PREREGISTRATION.md`, and
+`ravel-0.6-preregistration.json`.
+
 ## Run
 
 ```bash
@@ -129,6 +152,7 @@ make training-check
 make unified-check
 make 0.4-check
 make 0.5-check
+make ravel-0.6-preregistration-check
 ```
 
 To rewrite repository-visible development evidence:
@@ -173,7 +197,11 @@ Requirements: a C11 compiler, the C math library, and Make.
   `ravel-0.5-assurance-case.json` — bound build/source identity and current
   bounded non-promotion record; and
 - `ravel-0.5-runtime-observations.json` — host-specific, non-normative timing
-  observations; canonical comparisons use deterministic operation counts.
+  observations; canonical comparisons use deterministic operation counts; and
+- `RAVEL_0_6_SCOPE.md`, `RAVEL_0_6_PREREGISTRATION.md`,
+  `ravel-0.6-preregistration.json`, `ravel-0.6-threat-model.json`,
+  `ravel-0.6-development-record.json`, and `ravel-0.6-limitations.md` — a new
+  preregistered epoch with no implementation or evaluation claim.
 
 ## MNCS boundary
 
@@ -186,10 +214,11 @@ Requirements: a C11 compiler, the C math library, and Make.
 Historical RAVEL 0.1–0.3 studies recorded favorable development observations.
 RAVEL 0.4 records development `FAIL` with zero of eight trials passing. RAVEL
 0.5 records development `FAIL` with 24 of 32 trials passing. Formal MNCS and
-MNCDS status remain `UNKNOWN`; promotion is unauthorized pending independent
-protected real-data evaluation, adversarial continual-learning studies, learned
-modality adapters, cross-host reproduction, accelerator and distributed
-evidence, and operational release controls.
+MNCDS status remain `UNKNOWN`. RAVEL 0.6 is preregistered future work whose
+implementation and evaluation remain `UNKNOWN`. Promotion is unauthorized
+pending independent protected real-data evaluation, adversarial
+continual-learning studies, learned modality adapters, cross-host reproduction,
+accelerator and distributed evidence, and operational release controls.
 
 ## Claim boundary
 
