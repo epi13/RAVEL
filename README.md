@@ -1,232 +1,145 @@
 # RAVEL — Recursive Adaptive Vector Execution Lattice
 
-RAVEL is a machine-native research architecture that treats AI/ML as one combined problem of routing, retrieval, compression, representation, training state, temporal memory, planning, lifecycle, and bounded computation.
+RAVEL is a machine-native research architecture that treats routing, retrieval,
+representation, training state, temporal memory, planning, lifecycle, and bounded
+computation as one connected mechanism.
 
-Its foundational claim is that a model, memory store, router, trainer, world model, planner, and compute scheduler should not be separate systems. A stored expert should simultaneously be a retrieval key, compressed representation, executable predictor, training shard, transition-memory node, planning destination, lineage object, and measured unit of computation.
+This directory contains several historical and active research epochs. The files
+are intentionally evidence-heavy, and some frozen artifacts must retain their
+existing paths and identities. The navigation layer below separates the project
+by purpose without rewriting or relocating those historical records.
 
-Human readability is relocated into contracts, evaluator authority, evidence, provenance, and rollback. The 0.3 split C translation unit is maintained source: no reproducible higher-level generator was included in the repository or reviewed pull-request history.
+> **Current status:** RAVEL 0.4 and 0.5 retain development `FAIL` results. RAVEL
+> 0.6 is preregistered and has a reproducible candidate-001 derivation, but it has
+> not been selected, finally evaluated, independently attested, or authorized for
+> promotion. Formal MNCS and MNCDS status remain `UNKNOWN`.
 
-## RAVEL 0.1 — exact conditional inference
+## Start here
 
-The first capsule generates 256 quantized experts and retrieves 24 candidates per familiar query. A strict lower-bound certificate permits early return only when every excluded expert is provably unable to win. Otherwise execution becomes the complete oracle.
+| Goal | Entry point |
+|---|---|
+| Understand the project at a glance | [Version history](docs/VERSION_HISTORY.md) |
+| Find source, contracts, evidence, and plans | [Project map](docs/PROJECT_MAP.md) |
+| Understand what each evidence file proves | [Evidence guide](docs/EVIDENCE_GUIDE.md) |
+| Browse the RAVEL documentation set | [Documentation hub](docs/README.md) |
+| Understand evaluator and generation scripts | [Tooling guide](tools/README.md) |
+| Review the architectural idea and exclusions | [Architecture gaps](ARCHITECTURE_GAPS.md) |
+| Continue bounded 0.6 development | [RAVEL 0.6 next steps](RAVEL_0_6_NEXT_STEPS.md) |
 
-| Workload | Queries | Mismatches | Certified rate | Mean experts | Reduction |
-|---|---:|---:|---:|---:|---:|
-| Familiar | 100,000 | 0 | 100.000% | 24.000 | 90.625% |
-| Uniform control | 25,000 | 0 | 2.236% | 250.812 | 2.026% |
+## Project shape
 
-## RAVEL-T 0.2 — recursive training
-
-The current experts build the exact router; routed assignments update the experts; unresolved error ranks overloaded shards; bounded splits compile children; child lineage rebuilds the next router.
-
-| Implementation | Holdout accuracy | Mean experts | Training evaluations |
-|---|---:|---:|---:|
-| RAVEL-T recursive 8→64 | 100.000% | 8.000 | 4,144,248 |
-| Fixed eight-expert | 22.461% | 8.000 | 3,538,944 |
-| Flat 64-expert | 100.000% | 64.000 | 87,031,808 |
-
-## RAVEL-U 0.3 — unified architecture
-
-RAVEL-U closes the component gap. One expert population now owns:
-
-- retrieval and exact conditional compute;
-- compressed state representation and reconstruction;
-- label prediction;
-- action-conditioned next-observation prediction;
-- temporal-memory graph compilation;
-- bounded planning over the learned graph;
-- error-driven expert birth;
-- replay-backed continual adaptation;
-- low-utility child retirement; and
-- checkpoint identity and behavioral rollback verification.
-
-The synthetic world contains 64 states, four actions, eight labels, and eight-dimensional observations. Semantic drift changes both observations and labels for 16 states. The frozen model is evaluated before adaptation, then RAVEL proposes 24 drift experts, retires eight low-utility duplicates, rebuilds the router and transition graph, and re-evaluates drift, retention, planning, and checkpoint behavior.
-
-### Unified development result
-
-| Measure | Result |
-|---|---:|
-| Base holdout accuracy | 96.826% |
-| Static model on semantic drift | 71.899% |
-| Adapted model on semantic drift | 100.000% |
-| Original-task retention after adaptation | 96.704% |
-| Adapted transition accuracy | 99.292% |
-| Adapted planning target success | 505 / 512 |
-| Routed-versus-complete mismatches | 0 |
-| Mean routed experts | 8.000 |
-| Adaptation births / retirements | 24 / 8 |
-| Checkpoint identity and evaluation match | PASS |
-
-The expert is now simultaneously a key, representation, decoder, classifier, world-model fragment, transition node, replay shard, planning node, lineage object, and compute unit. See `ARCHITECTURE_GAPS.md` for what was missing and why raw modality adapters, use policy, protected evaluation, external effects, and promotion authority intentionally remain outside the recursive surface.
-
-The historical `100.000%` adapted drift value above was measured on the same
-`adapt_set` used for adaptation. It is an adaptation-training observation, not
-an untouched drift-holdout result. Likewise, the historical planning
-`exact_goals` field measured goal-expert equivalence rather than exact
-world-state equality. RAVEL 0.4 preserves these facts instead of relabeling the
-0.3 evidence.
-
-## RAVEL 0.4 — evidence hardening
-
-RAVEL 0.4 repairs assurance rather than expanding the architecture. It adds:
-
-- disjoint base training, base holdout, drift adaptation training, untouched
-  drift holdout, original-task retention holdout, and planning inputs;
-- eight frozen seeds covering separated, overlapping, noisy, label-drift,
-  observation-drift, transition-drift, combined, and ambiguous regimes;
-- canonical big-endian Q20 checkpoints with a versioned header and SHA-256
-  payload identity instead of raw C memory images;
-- complete restored classification, reconstruction, prediction, transition,
-  routing, planning, topology, lineage, and reported-metric comparison;
-- deliberate field, payload, truncation, append, schema, and substitution
-  checkpoint mutations;
-- exact-state planning measurements distinct from goal-expert equivalence;
-- reconstruction and next-observation prediction gates;
-- five bounded baselines, five ablations, negative/adversarial tests, aggregate
-  variance, and preserved failures; and
-- an ordered, script-generated source manifest and assurance digest.
-
-The frozen 0.4 experiment records development `FAIL`; no seeds, regimes, or
-gates were removed to obtain a favorable result. See
-`RAVEL_0_4_RESULTS.md` for generated per-trial failures and aggregates, and
-`ravel-0.4-assurance-case.json` for the bounded assurance disposition.
-
-## RAVEL 0.5 — adaptive-mechanism correction
-
-RAVEL 0.5 keeps the 0.4 evidence package immutable and corrects the mechanism
-and assurance split. The C harness now emits raw integer observations and
-integrity facts only. A separate Python evaluator verifies the frozen trial and
-partition matrix, derives every metric and hard gate, and rejects executable
-verdicts, malformed records, contradictions, and mutations.
-
-Mechanism changes include deterministic stratified replay, anchored base
-experts, optional objective-tested births and retirements, eight normalized
-residual channels, support-bearing top-two transitions, unknown unsupported
-actions, retirement safety checks, and alias-aware belief-set planning.
-Comparisons add matched work, expert count, and capacity, while retaining the
-0.4 baselines and ablations.
-
-The one-shot 0.5 final validation used 32 fresh trials: four seeds for each of
-the eight frozen regime families. Execution integrity is `PASS`; 24 trials
-passed and eight failed, so the frozen all-trials development result is
-`FAIL`. All separated, overlap, noise, and observation-drift trials passed.
-Failures remained in label gain (three trials), transition prediction retention
-(one), combined exact planning (one), and ambiguous belief/planning or
-efficiency (three). These failures were not used to change the mechanism,
-seeds, regimes, or gates.
-
-The candidate improved mean drift-holdout accuracy over the matched-compute
-fixed-topology comparison while using fewer mean training evaluations, but the
-complete paired Pareto results are mixed. No superiority claim is made. See
-`RAVEL_0_5_RESULTS.md`, `RAVEL_0_5_POSTMORTEM.md`, and
-`ravel-0.5-assurance-case.json`.
-
-## RAVEL 0.6 — preregistered future development
-
-RAVEL 0.6 is a clean new epoch preregistered before implementation. It binds
-the immutable 0.5 candidate and evidence as a failed development baseline and
-uses the published label-gain, prediction-retention, combined-planning,
-ambiguous-planning/efficiency, mixed-Pareto, and assurance findings only as
-permitted cross-epoch design input.
-
-The narrow hypothesis concerns retention-constrained adaptation for label and
-combined observation/label drift. The planned policy combines stratified
-replay protection, objective-tested updates, and transition-support
-preservation. Development, selection, retention, transition-retention,
-planning, and future final partitions have distinct identities. Development
-and selection seeds are distinct from every 0.5 final seed. Future final seed
-material is intentionally absent and may be obtained only after candidate
-freeze, preferably from an external custodian.
-
-No 0.6 mechanism has been implemented, selected, frozen, or evaluated.
-Development and final results, protected custody, independent evaluation, and
-formal MNCS/MNCDS status are all `UNKNOWN`; promotion is unauthorized. See
-`RAVEL_0_6_SCOPE.md`, `RAVEL_0_6_PREREGISTRATION.md`, and
-`ravel-0.6-preregistration.json`.
-
-## Run
-
-```bash
-make test
-make training-check
-make unified-check
-make 0.4-check
-make 0.5-check
-make ravel-0.6-preregistration-check
+```text
+case-studies/ravel/
+├── README.md                 # landing page
+├── docs/                     # human navigation and explanatory guides
+├── tools/                    # evaluators, evidence builders, and digest tools
+├── ravel_unified/            # maintained 0.3 split implementation units
+├── ravel*.c                  # versioned mechanism implementations
+├── *_CONTRACT.md             # readable behavioral authority
+├── RAVEL_*                   # results, postmortems, scopes, and plans
+├── ravel-*.json              # protocols, observations, manifests, and assurance
+└── Makefile                  # local build, verification, and evidence targets
 ```
 
-To rewrite repository-visible development evidence:
+The top-level RAVEL directory remains partly flat on purpose. Versioned source,
+preregistrations, observations, manifests, and assurance records are linked by
+exact filenames and digests. Moving them merely for appearance could invalidate
+historical identity or make prior evidence harder to reproduce. New explanatory
+documentation belongs under `docs/`; executable support tooling belongs under
+`tools/`.
+
+## Epoch status
+
+| Epoch | Primary purpose | Preserved status |
+|---|---|---|
+| RAVEL 0.1 | Exact conditional inference | Favorable bounded development observation |
+| RAVEL-T 0.2 | Recursive training and expert birth | Favorable bounded development observation |
+| RAVEL-U 0.3 | Unified expert architecture | Favorable historical observations with documented evaluation caveats |
+| RAVEL 0.4 | Evidence and checkpoint hardening | Development `FAIL` — 0 of 8 frozen trials passed all gates |
+| RAVEL 0.5 | Mechanism correction and evaluator separation | Development `FAIL` — 24 of 32 trials passed; all-trials gate failed |
+| RAVEL 0.6 | Retention-constrained adaptation epoch | Preregistered; candidate-001 derivation prepared; selection and final evaluation `UNKNOWN` |
+
+Detailed results, limitations, and links are collected in
+[docs/VERSION_HISTORY.md](docs/VERSION_HISTORY.md).
+
+## Common verification commands
+
+From the repository root:
 
 ```bash
-make evidence
-make training-evidence
-make unified-evidence
-make 0.4-evidence
-make 0.5-evidence
+make ravel-test
+make ravel-training-check
+make ravel-unified-check
+make ravel-0.4-check
+make ravel-0.5-check
 ```
 
-Requirements: a C11 compiler, the C math library, and Make.
+From this directory:
 
-## Files
+```bash
+make all
+make 0.4-compiler-matrix
+make 0.4-sanitizers
+make 0.5-negative-test
+make 0.5-manifest-negative-test
+make 0.5-compiler-matrix
+make 0.5-sanitizers
+```
 
-- `ravel.c`, `CONTRACT.md`, `evidence.json` — exact conditional inference;
-- `ravel_train.c`, `TRAINING_CONTRACT.md`, `training-*.json` — recursive training;
-- `ravel_unified.c` and `ravel_unified/*.inc` — maintained 0.3 split C source;
-- `ARCHITECTURE_GAPS.md` — architectural audit and intentional external boundary;
-- `UNIFIED_CONTRACT.md` — unified readable authority and gates;
-- `unified-preregistration.json` — frozen protocol;
-- `unified-evidence.json` — deterministic observations;
-- `unified-threat-model.json` — threats and residual UNKNOWNs; and
-- `unified-assurance-case.json` — historical bounded non-promotion record;
-- `ravel_0_4.c` and `RAVEL_0_4_CONTRACT.md` — hardened maintained execution and
-  readable authority;
-- `ravel-0.4-preregistration.json` — frozen seeds, regimes, partitions, and gates;
-- `ravel-0.4-raw-observations.json`, `ravel-0.4-trial-evidence.json`, and
-  `ravel-0.4-negative-evidence.json` — executable raw and derived evidence;
-- `ravel-0.4-source-manifest.json` — ordered implementation identity; and
-- `ravel-0.4-assurance-case.json` — historical 0.4 non-promotion record;
-- `ravel_0_5.c`, `RAVEL_0_5_CONTRACT.md`, and
-  `ravel-0.5-preregistration.json` — maintained 0.5 mechanism and frozen
-  authority;
-- `tools/ravel_0_5_evaluator.py` and `tools/ravel_0_5_evidence.py` —
-  independent derivation and deterministic evidence tooling;
-- `ravel-0.5-raw-observations.json`, `ravel-0.5-trial-evidence.json`, and
-  `ravel-0.5-negative-evidence.json` — raw and independently derived 0.5
-  records; and
-- `ravel-0.5-source-and-execution-manifest.json` and
-  `ravel-0.5-assurance-case.json` — bound build/source identity and current
-  bounded non-promotion record; and
-- `ravel-0.5-runtime-observations.json` — host-specific, non-normative timing
-  observations; canonical comparisons use deterministic operation counts; and
-- `RAVEL_0_6_SCOPE.md`, `RAVEL_0_6_PREREGISTRATION.md`,
-  `ravel-0.6-preregistration.json`, `ravel-0.6-threat-model.json`,
-  `ravel-0.6-development-record.json`, and `ravel-0.6-limitations.md` — a new
-  preregistered epoch with no implementation or evaluation claim.
+Commands ending in `-check`, `-test`, `-compiler-matrix`, or `-sanitizers` are
+verification-oriented. Commands ending in `-evidence` or `-runtime` can rewrite
+repository-visible development records; review [tools/README.md](tools/README.md)
+before using them.
+
+Requirements vary by epoch but generally include a C11 compiler, Python 3, the C
+math library, and Make.
+
+## Reading order for each epoch
+
+For version 0.4 or later, use this order:
+
+1. scope or preregistration;
+2. readable contract;
+3. maintained or generated mechanism source;
+4. raw observations;
+5. evaluator-derived trial and negative evidence;
+6. source/execution manifest;
+7. assurance case;
+8. generated results and postmortem;
+9. next-epoch development plan.
+
+This order keeps protocol, implementation, observations, interpretation, and
+claim authority separate.
 
 ## MNCS boundary
 
-- **Human control plane:** intended use, event contract, external authority, limits, gates, and exclusions.
-- **Machine execution plane:** expert keys, decoders, classifiers, next-state programs, router, transition graph, topology, replay assignments, and lineage.
-- **Evidence plane:** exact-oracle agreement, accuracy, reconstruction, prediction, transition, planning, lifecycle, checkpoint, checksums, and limitations.
-- **Development-control plane:** fixed seeds, partitions, birth and retirement budgets, immutable thresholds, and non-promotion fields.
-- **Operational-control plane:** complete-scan fallback, checkpoint restoration, model identity, and replacement of maintained execution source.
-
-Historical RAVEL 0.1–0.3 studies recorded favorable development observations.
-RAVEL 0.4 records development `FAIL` with zero of eight trials passing. RAVEL
-0.5 records development `FAIL` with 24 of 32 trials passing. Formal MNCS and
-MNCDS status remain `UNKNOWN`. RAVEL 0.6 is preregistered future work whose
-implementation and evaluation remain `UNKNOWN`. Promotion is unauthorized
-pending independent protected real-data evaluation, adversarial
-continual-learning studies, learned modality adapters, cross-host reproduction,
-accelerator and distributed evidence, and operational release controls.
+- **Human control plane:** intended use, event contract, external authority,
+  limits, gates, and exclusions.
+- **Machine execution plane:** expert keys, decoders, classifiers, next-state
+  programs, router, transition graph, topology, replay assignments, and lineage.
+- **Evidence plane:** oracle agreement, accuracy, reconstruction, prediction,
+  transition, planning, lifecycle, checkpoint, checksums, and limitations.
+- **Development-control plane:** fixed seeds, partitions, candidate limits,
+  immutable thresholds, and non-promotion fields.
+- **Operational-control plane:** complete-scan fallback, checkpoint restoration,
+  model identity, source replacement, and rollback behavior.
 
 ## Claim boundary
 
 RAVEL is a bounded deterministic research study with both favorable and
-unfavorable results. It does not establish general intelligence,
-foundation-model performance, language or multimodal generation, causal
-reasoning, real-data generalization, production safety, or formal conformance.
+unfavorable results. It does not establish general intelligence, foundation-model
+performance, language or multimodal generation, causal reasoning, real-data
+generalization, production safety, independent evaluation, protected custody, or
+formal conformance.
+
+Historical RAVEL 0.1–0.3 studies recorded favorable development observations.
+RAVEL 0.4 and 0.5 preserve failed frozen development outcomes. RAVEL 0.6 remains
+a development epoch. Promotion is unauthorized pending appropriate external,
+protected, and independently evaluated evidence.
 
 ## Origin
 
-The name, architecture, algorithms, and initial implementations were created by **GPT-5.6 Thinking** in response to Alexander Collamore's challenge to design an AI/ML foundation that fully embraces Machine-Native Complexity. Alexander Collamore is the repository steward.
+The name, architecture, algorithms, and initial implementations were created by
+**GPT-5.6 Thinking** in response to Alexander Collamore's challenge to design an
+AI/ML foundation that fully embraces Machine-Native Complexity. Alexander
+Collamore is the repository steward.
