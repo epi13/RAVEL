@@ -1,0 +1,18 @@
+{
+  "schema":"ravel-training-evidence/0.2",
+  "dataset":{"train":32768,"holdout":8192,"dimensions":8,"latent_regions":64,"classes":8},
+  "training":{
+    "recursive":{"final_experts":64,"splits":56,"samples_processed":393216,"expert_evaluations":4144248,"certified_routes":387898,"lineage_digest":"a03419ee3b58f5d7"},
+    "fixed8":{"expert_evaluations":3538944},
+    "flat64":{"expert_evaluations":87031808}
+  },
+  "holdout":{
+    "recursive":{"experts":64,"samples":8192,"accuracy":1.000000000,"exact_mismatches":0,"certified_rate":1.000000000,"mean_experts":8.000000,"checksum":"16c87a0b9a7f9617"},
+    "fixed8":{"experts":8,"samples":8192,"accuracy":0.224609375,"exact_mismatches":0,"certified_rate":0.000000000,"mean_experts":8.000000,"checksum":"fbd74fc154768bb7"},
+    "flat64":{"experts":64,"samples":8192,"accuracy":1.000000000,"exact_mismatches":0,"certified_rate":0.000000000,"mean_experts":64.000000,"checksum":"17f617329512a204"}
+  },
+  "development_result":"PASS",
+  "formal_mncs_status":"UNKNOWN",
+  "formal_mncds_status":"UNKNOWN",
+  "promotion_authorized":false
+}

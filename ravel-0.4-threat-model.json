@@ -1,0 +1,74 @@
+{
+  "schema": "ravel-threat-model/0.4",
+  "threat_model_id": "ravel.evidence-hardening.threats.v1",
+  "assets": [
+    "adaptation and drift-holdout separation",
+    "canonical checkpoint identity",
+    "behavioral restoration measurements",
+    "expert lineage and topology",
+    "exact routing fallback",
+    "planning claim precision",
+    "ordered implementation provenance",
+    "deterministic raw and derived evidence",
+    "formal UNKNOWN and non-promotion boundary"
+  ],
+  "threats": [
+    {
+      "id": "R04-T1",
+      "threat": "drift evaluation data influences adaptation or topology",
+      "mitigation": "separate seed-addressed arrays and call boundaries; drift holdout is passed only to post-adaptation evaluation",
+      "residual_status": "repository visibility prevents protected independence"
+    },
+    {
+      "id": "R04-T2",
+      "threat": "checkpoint substitution or corruption preserves a weak identity",
+      "mitigation": "canonical full-field payload, SHA-256 payload identity, strict parser, full restored measurement comparison, and deliberate mutations",
+      "residual_status": "no signing, authorization, protected custody, or operational rollback"
+    },
+    {
+      "id": "R04-T3",
+      "threat": "split metadata misstates sibling or descendant generation",
+      "mitigation": "capture original generation before reseeding and test sibling, descendant, uniqueness, reuse, and deterministic topology invariants",
+      "residual_status": "lineage identity is deterministic development metadata, not an external attestation"
+    },
+    {
+      "id": "R04-T4",
+      "threat": "expert-equivalence is reported as exact planning success",
+      "mitigation": "separate exact world state, goal expert, path, regret, disconnection, transition error, and aliasing measurements",
+      "residual_status": "bounded synthetic planning is not real-world planning evidence"
+    },
+    {
+      "id": "R04-T5",
+      "threat": "assurance digest is stale, incomplete, reordered, or omits source",
+      "mitigation": "machine-generated ordered manifest with per-file hashes, framed aggregate digest, shard discovery, and independent verification",
+      "residual_status": "repository-local verification is not protected or independent custody"
+    },
+    {
+      "id": "R04-T6",
+      "threat": "favorable seed or regime selection hides failures",
+      "mitigation": "eight frozen seeds and regimes, all-trials pass rule, per-trial failures, variance, and no seed removal",
+      "residual_status": "the bounded matrix is not representative of arbitrary environments"
+    },
+    {
+      "id": "R04-T7",
+      "threat": "poisoning, replay removal, malformed data, or capacity boundaries fail silently",
+      "mitigation": "negative tests with declared reject, fallback, fail-gate, UNKNOWN, or non-promotion dispositions",
+      "residual_status": "the attacks are bounded fixtures, not a complete adversarial evaluation"
+    }
+  ],
+  "residual_unknowns": [
+    "independently protected evaluation",
+    "real-data and real-world generalization",
+    "cross-organizational reproduction",
+    "language or multimodal capability",
+    "causal or long-horizon reasoning",
+    "production safety and authorization",
+    "release signing and monitored rollback",
+    "distributed and accelerator behavior",
+    "formal MNCS conformance",
+    "formal MNCDS conformance"
+  ],
+  "formal_mncs_status": "UNKNOWN",
+  "formal_mncds_status": "UNKNOWN",
+  "promotion_authorized": false
+}

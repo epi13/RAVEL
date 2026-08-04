@@ -1,0 +1,27 @@
+{
+  "schema": "ravel-development-corpus/0.5",
+  "purpose": "mechanism development only; excluded from final validation",
+  "root_seed": "0x524156454c354445",
+  "derivation": {
+    "algorithm": "sha256-first-u64-big-endian",
+    "framing": "root_seed_u64_be || utf8('development\\0') || utf8(regime) || zero_byte || index_u32_be"
+  },
+  "trials": [
+    {"trial_id": "dev-separated-01", "regime": "separated_state", "seed": "0xe6cd60cd9235fc25"},
+    {"trial_id": "dev-separated-02", "regime": "separated_state", "seed": "0xe45a783ec991f987"},
+    {"trial_id": "dev-overlap-01", "regime": "partially_overlapping_observations", "seed": "0x6a6232f008add61a"},
+    {"trial_id": "dev-overlap-02", "regime": "partially_overlapping_observations", "seed": "0xbcd915310d00bc76"},
+    {"trial_id": "dev-noise-01", "regime": "increased_observation_noise", "seed": "0x5bc6312ee9b3c9ab"},
+    {"trial_id": "dev-noise-02", "regime": "increased_observation_noise", "seed": "0x164a5ffaa55ce99c"},
+    {"trial_id": "dev-label-01", "regime": "label_drift", "seed": "0xe6b89e4c7c85d015"},
+    {"trial_id": "dev-label-02", "regime": "label_drift", "seed": "0x1af5673e90272cd1"},
+    {"trial_id": "dev-observation-01", "regime": "observation_drift", "seed": "0x7ce75c5e20d50dd0"},
+    {"trial_id": "dev-observation-02", "regime": "observation_drift", "seed": "0xc3d9b9bf34080ee2"},
+    {"trial_id": "dev-transition-01", "regime": "transition_drift", "seed": "0xc57219f81f2abf8a"},
+    {"trial_id": "dev-transition-02", "regime": "transition_drift", "seed": "0xb76c0379538680b6"},
+    {"trial_id": "dev-combined-01", "regime": "combined_observation_and_label_drift", "seed": "0x1646189968570d32"},
+    {"trial_id": "dev-combined-02", "regime": "combined_observation_and_label_drift", "seed": "0x0c66bfc8c2d03ede"},
+    {"trial_id": "dev-ambiguous-01", "regime": "partially_observed_ambiguous", "seed": "0xc6f19aa0149e9fbf"},
+    {"trial_id": "dev-ambiguous-02", "regime": "partially_observed_ambiguous", "seed": "0x02d98bd1f0d9fce5"}
+  ]
+}

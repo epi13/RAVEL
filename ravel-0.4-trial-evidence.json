@@ -1,0 +1,3605 @@
+{
+  "schema": "ravel-trial-evidence/0.4",
+  "study_id": "ravel.evidence-hardening.epoch-1.v1",
+  "preregistration": "ravel-0.4-preregistration.json",
+  "trial_pass_rule": "all_hard_gates_per_trial",
+  "global_pass_rule": "all_8_trials_pass",
+  "trials": [
+    {
+      "trial_id": "trial-01-separated",
+      "regime": "separated_state",
+      "seed": "0x0401000000000001",
+      "dataset_seeds": {
+        "base_training": "0xfb9173fec332d474",
+        "base_holdout": "0xa2cb7273b415f00f",
+        "drift_adaptation_training": "0xd128a6be12aedae6",
+        "drift_holdout": "0xc8c3a44f89c5d6a7",
+        "original_task_retention_holdout": "0x7fac89bfda811927",
+        "planning_cases": "0x4dbc3dd2a99ef496"
+      },
+      "candidate": {
+        "expert_count": 68,
+        "base_births": 56,
+        "adaptation_births": 8,
+        "adaptation_retirements": 4,
+        "training_evaluations": 184288,
+        "checkpoint_size_bytes": 39438,
+        "model_identity": "f749f4346b5f1a6fa55950a97192666e6649edead2d32477cbc20313b0c62c0c",
+        "behavior_identity": "d7bb0c9b9c43226b516a5c6e200831b8dc7f97650c4370532feca71cd41f68e8",
+        "base_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.9375,
+          "reconstruction_rmse": 6.771654787,
+          "next_observation_prediction_rmse": 10.387196711,
+          "transition_accuracy": 0.9140625,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "621008a0accf4117",
+          "reconstruction_checksum": "bbc6d95bb03c71b3",
+          "prediction_checksum": "d0ebe4d1e7f20613",
+          "transition_checksum": "982b9a44cdccbcb7"
+        },
+        "adaptation_training": {
+          "samples": 512,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 3.009849648,
+          "next_observation_prediction_rmse": 2.5683344,
+          "transition_accuracy": 0.986328125,
+          "routing_certification_count": 512,
+          "complete_oracle_agreement": 512,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 4096,
+          "classification_checksum": "34bb91b25793446d",
+          "reconstruction_checksum": "2065f12be33264fb",
+          "prediction_checksum": "58c88a10857785a5",
+          "transition_checksum": "5a1d5dec583cd7c6"
+        },
+        "static_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.953125,
+          "reconstruction_rmse": 6.080038321,
+          "next_observation_prediction_rmse": 9.069805773,
+          "transition_accuracy": 0.93359375,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "bc4851585cd4847c",
+          "reconstruction_checksum": "a2e1dad23a64c827",
+          "prediction_checksum": "2088e68834483eaa",
+          "transition_checksum": "0881513aa1b2b983"
+        },
+        "adapted_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 3.268650797,
+          "next_observation_prediction_rmse": 5.534045939,
+          "transition_accuracy": 0.9765625,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "e8130132975e90e0",
+          "reconstruction_checksum": "4726339a3b30ffbd",
+          "prediction_checksum": "5b9408ccf32d2ba0",
+          "transition_checksum": "e47d08295bd4268e"
+        },
+        "base_holdout_retention": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 3.224120775,
+          "next_observation_prediction_rmse": 3.792183638,
+          "transition_accuracy": 0.99609375,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "2467726ebb18c9ea",
+          "reconstruction_checksum": "b465510aae54fd34",
+          "prediction_checksum": "58aadbc1d6eac16c",
+          "transition_checksum": "fcfed22da80eb85d"
+        },
+        "planning": {
+          "cases": 64,
+          "path_found": 62,
+          "exact_world_state_target_reached": 59,
+          "goal_expert_reached": 59,
+          "executed_path_length": 261,
+          "optimal_path_length": 262,
+          "path_length_regret": 2,
+          "graph_disconnection_failures": 2,
+          "transition_model_error_failures": 3,
+          "state_aliasing_failures": 0,
+          "expansions": 1927,
+          "checksum": "cc0f6efda781d157"
+        }
+      },
+      "checkpoint_verification": {
+        "roundtrip": true,
+        "identity_match": true,
+        "adaptation_training_evaluation_match": true,
+        "drift_holdout_evaluation_match": true,
+        "retention_evaluation_match": true,
+        "planning_match": true,
+        "complete_behavior_match": true,
+        "mutations": {
+          "retrieval_key_component": true,
+          "reconstruction_component": true,
+          "next_observation_component": true,
+          "label": true,
+          "label_count": true,
+          "lineage": true,
+          "transition_graph_edge": true,
+          "payload_byte": true,
+          "checkpoint_truncation": true,
+          "appended_unexpected_byte": true,
+          "incorrect_schema_version": true,
+          "checkpoint_substitution": true
+        }
+      },
+      "lineage_invariants": {
+        "sibling_generation_equality": true,
+        "parent_child_generation_increment": true,
+        "lineage_uniqueness": true,
+        "repeated_descendant_splitting": true,
+        "no_accidental_lineage_reuse": true,
+        "deterministic_topology_reproduction": true
+      },
+      "comparisons": {
+        "ravel_0_4_candidate": {
+          "expert_count": 68,
+          "training_evaluations": 184288,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.268650797,
+          "prediction_rmse": 5.534045939,
+          "planning_exact_state_rate": 0.921875,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_8_expert": {
+          "expert_count": 8,
+          "training_evaluations": 61440,
+          "drift_holdout_accuracy": 0.19921875,
+          "retention_accuracy": 0.25,
+          "reconstruction_rmse": 28.565835338,
+          "prediction_rmse": 29.869555279,
+          "planning_exact_state_rate": 0.03125,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 10578,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "flat_64_expert_complete_scan": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.239324581,
+          "prediction_rmse": 7.670675312,
+          "planning_exact_state_rate": 0.953125,
+          "expert_evaluations": 16384,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_topology_64_expert_routed": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.239324581,
+          "prediction_rmse": 7.670675312,
+          "planning_exact_state_rate": 0.953125,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "nearest_centroid_16_no_recursive_births": {
+          "expert_count": 16,
+          "training_evaluations": 188416,
+          "drift_holdout_accuracy": 0.2109375,
+          "retention_accuracy": 0.265625,
+          "reconstruction_rmse": 22.911277755,
+          "prediction_rmse": 24.245409824,
+          "planning_exact_state_rate": 0.15625,
+          "expert_evaluations": 4096,
+          "checkpoint_size_bytes": 14426,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "no_adaptation_static": {
+          "expert_count": 64,
+          "training_evaluations": 131040,
+          "drift_holdout_accuracy": 0.953125,
+          "retention_accuracy": 0.96875,
+          "reconstruction_rmse": 6.080038321,
+          "prediction_rmse": 9.069805773,
+          "planning_exact_state_rate": 0.75,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_replay": {
+          "expert_count": 68,
+          "training_evaluations": 167904,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.35731616,
+          "prediction_rmse": 6.825674031,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_retirement": {
+          "expert_count": 72,
+          "training_evaluations": 159712,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.268070888,
+          "prediction_rmse": 8.88638668,
+          "planning_exact_state_rate": 0.90625,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 41362,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_complete_scan_without_certification": {
+          "expert_count": 68,
+          "training_evaluations": 380896,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.268650797,
+          "prediction_rmse": 5.534045939,
+          "planning_exact_state_rate": 0.921875,
+          "expert_evaluations": 17408,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_fixed_topology_without_recursive_births": {
+          "expert_count": 64,
+          "training_evaluations": 2351104,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.276899436,
+          "prediction_rmse": 3.725665254,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_random_births": {
+          "expert_count": 68,
+          "training_evaluations": 185164,
+          "drift_holdout_accuracy": 0.96875,
+          "retention_accuracy": 0.97265625,
+          "reconstruction_rmse": 5.095431803,
+          "prediction_rmse": 5.244062968,
+          "planning_exact_state_rate": 0.859375,
+          "expert_evaluations": 2108,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        }
+      },
+      "hard_gates": {
+        "expected_topology": true,
+        "base_holdout_accuracy": true,
+        "adaptation_training_accuracy": true,
+        "adapted_drift_holdout_accuracy": true,
+        "adapted_gain_over_static": false,
+        "base_holdout_retention": true,
+        "exact_routing": true,
+        "base_reconstruction_rmse": true,
+        "adapted_reconstruction_rmse": true,
+        "adapted_reconstruction_improvement": true,
+        "retention_reconstruction": true,
+        "base_prediction_rmse": true,
+        "adapted_prediction_rmse": true,
+        "adapted_prediction_improvement": true,
+        "retention_prediction": true,
+        "exact_world_state_target_rate": true,
+        "path_found_rate": true,
+        "checkpoint_identity": true,
+        "checkpoint_behavior": true,
+        "checkpoint_mutations": true,
+        "lineage_and_topology": true
+      },
+      "trial_result": "FAIL"
+    },
+    {
+      "trial_id": "trial-02-overlap",
+      "regime": "partially_overlapping_observations",
+      "seed": "0x0402000000000002",
+      "dataset_seeds": {
+        "base_training": "0x359791d15caa8021",
+        "base_holdout": "0x347629147b455cc1",
+        "drift_adaptation_training": "0xc5b9901d9746e31d",
+        "drift_holdout": "0x9662c6f345517a30",
+        "original_task_retention_holdout": "0x8c6d375a4e72b2ee",
+        "planning_cases": "0xa469eb102cb94fff"
+      },
+      "candidate": {
+        "expert_count": 68,
+        "base_births": 56,
+        "adaptation_births": 8,
+        "adaptation_retirements": 4,
+        "training_evaluations": 248728,
+        "checkpoint_size_bytes": 39438,
+        "model_identity": "77c5530ae17887619c8b9c67bf728d0c61274c7da26f8c20a73f547bc6225193",
+        "behavior_identity": "7b979ea1ffa888236dd1d5fd29766affdd216ef0b764f806b977deab3719f736",
+        "base_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.984375,
+          "reconstruction_rmse": 4.682442178,
+          "next_observation_prediction_rmse": 7.749657182,
+          "transition_accuracy": 0.953125,
+          "routing_certification_count": 250,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2384,
+          "classification_checksum": "036a80c04271efd2",
+          "reconstruction_checksum": "5f21253cc71596e1",
+          "prediction_checksum": "1a1f7876f3cc397d",
+          "transition_checksum": "53181bb942dbcf59"
+        },
+        "adaptation_training": {
+          "samples": 512,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 4.136402676,
+          "next_observation_prediction_rmse": 3.456683979,
+          "transition_accuracy": 0.98828125,
+          "routing_certification_count": 512,
+          "complete_oracle_agreement": 512,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 4096,
+          "classification_checksum": "966484f3d827cb07",
+          "reconstruction_checksum": "2b6c05741e6cf15a",
+          "prediction_checksum": "64ca7b8c28a4c1df",
+          "transition_checksum": "5352b3c50b8ebd37"
+        },
+        "static_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.96875,
+          "reconstruction_rmse": 4.741379161,
+          "next_observation_prediction_rmse": 6.308541448,
+          "transition_accuracy": 0.9765625,
+          "routing_certification_count": 246,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2608,
+          "classification_checksum": "b8abbf549864e6c4",
+          "reconstruction_checksum": "64d2a4a6a0da11ad",
+          "prediction_checksum": "1bde53784df95a76",
+          "transition_checksum": "f49f5057e7a746c0"
+        },
+        "adapted_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 4.4597597,
+          "next_observation_prediction_rmse": 5.210900214,
+          "transition_accuracy": 0.984375,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "5240a759ab88cac2",
+          "reconstruction_checksum": "d9ad5b705868359f",
+          "prediction_checksum": "7534d917b59170f4",
+          "transition_checksum": "f62159f7a4deeebe"
+        },
+        "base_holdout_retention": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 4.506023348,
+          "next_observation_prediction_rmse": 6.320249235,
+          "transition_accuracy": 0.9609375,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "9b4af0db28883f0a",
+          "reconstruction_checksum": "985b8fa03c17c5e2",
+          "prediction_checksum": "bcb25ada809a99dc",
+          "transition_checksum": "cd61076b01f84266"
+        },
+        "planning": {
+          "cases": 64,
+          "path_found": 64,
+          "exact_world_state_target_reached": 64,
+          "goal_expert_reached": 64,
+          "executed_path_length": 304,
+          "optimal_path_length": 304,
+          "path_length_regret": 0,
+          "graph_disconnection_failures": 0,
+          "transition_model_error_failures": 0,
+          "state_aliasing_failures": 0,
+          "expansions": 2175,
+          "checksum": "351ce529139874a7"
+        }
+      },
+      "checkpoint_verification": {
+        "roundtrip": true,
+        "identity_match": true,
+        "adaptation_training_evaluation_match": true,
+        "drift_holdout_evaluation_match": true,
+        "retention_evaluation_match": true,
+        "planning_match": true,
+        "complete_behavior_match": true,
+        "mutations": {
+          "retrieval_key_component": true,
+          "reconstruction_component": true,
+          "next_observation_component": true,
+          "label": true,
+          "label_count": true,
+          "lineage": true,
+          "transition_graph_edge": true,
+          "payload_byte": true,
+          "checkpoint_truncation": true,
+          "appended_unexpected_byte": true,
+          "incorrect_schema_version": true,
+          "checkpoint_substitution": true
+        }
+      },
+      "lineage_invariants": {
+        "sibling_generation_equality": true,
+        "parent_child_generation_increment": true,
+        "lineage_uniqueness": true,
+        "repeated_descendant_splitting": true,
+        "no_accidental_lineage_reuse": true,
+        "deterministic_topology_reproduction": true
+      },
+      "comparisons": {
+        "ravel_0_4_candidate": {
+          "expert_count": 68,
+          "training_evaluations": 248728,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 4.4597597,
+          "prediction_rmse": 5.210900214,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_8_expert": {
+          "expert_count": 8,
+          "training_evaluations": 61440,
+          "drift_holdout_accuracy": 0.22265625,
+          "retention_accuracy": 0.1953125,
+          "reconstruction_rmse": 16.462897466,
+          "prediction_rmse": 17.871856266,
+          "planning_exact_state_rate": 0.046875,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 10578,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "flat_64_expert_complete_scan": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 4.448226133,
+          "prediction_rmse": 6.28316291,
+          "planning_exact_state_rate": 0.96875,
+          "expert_evaluations": 16384,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_topology_64_expert_routed": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 4.448226133,
+          "prediction_rmse": 6.28316291,
+          "planning_exact_state_rate": 0.96875,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "nearest_centroid_16_no_recursive_births": {
+          "expert_count": 16,
+          "training_evaluations": 188416,
+          "drift_holdout_accuracy": 0.21484375,
+          "retention_accuracy": 0.25,
+          "reconstruction_rmse": 11.97511352,
+          "prediction_rmse": 11.988090221,
+          "planning_exact_state_rate": 0.328125,
+          "expert_evaluations": 4096,
+          "checkpoint_size_bytes": 14426,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "no_adaptation_static": {
+          "expert_count": 64,
+          "training_evaluations": 192824,
+          "drift_holdout_accuracy": 0.96875,
+          "retention_accuracy": 0.96484375,
+          "reconstruction_rmse": 4.741379161,
+          "prediction_rmse": 6.308541448,
+          "planning_exact_state_rate": 0.8125,
+          "expert_evaluations": 2608,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_replay": {
+          "expert_count": 68,
+          "training_evaluations": 231960,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 4.5404994,
+          "prediction_rmse": 6.171878127,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_retirement": {
+          "expert_count": 72,
+          "training_evaluations": 224152,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 4.46332194,
+          "prediction_rmse": 5.628626399,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 41362,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_complete_scan_without_certification": {
+          "expert_count": 68,
+          "training_evaluations": 443800,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 4.4597597,
+          "prediction_rmse": 5.210900214,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 17408,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_fixed_topology_without_recursive_births": {
+          "expert_count": 64,
+          "training_evaluations": 2351104,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 4.479194377,
+          "prediction_rmse": 5.20249819,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_random_births": {
+          "expert_count": 68,
+          "training_evaluations": 259742,
+          "drift_holdout_accuracy": 0.96875,
+          "retention_accuracy": 0.96484375,
+          "reconstruction_rmse": 4.760327614,
+          "prediction_rmse": 5.96448625,
+          "planning_exact_state_rate": 0.796875,
+          "expert_evaluations": 2528,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        }
+      },
+      "hard_gates": {
+        "expected_topology": true,
+        "base_holdout_accuracy": true,
+        "adaptation_training_accuracy": true,
+        "adapted_drift_holdout_accuracy": true,
+        "adapted_gain_over_static": false,
+        "base_holdout_retention": true,
+        "exact_routing": true,
+        "base_reconstruction_rmse": true,
+        "adapted_reconstruction_rmse": true,
+        "adapted_reconstruction_improvement": true,
+        "retention_reconstruction": true,
+        "base_prediction_rmse": true,
+        "adapted_prediction_rmse": true,
+        "adapted_prediction_improvement": true,
+        "retention_prediction": true,
+        "exact_world_state_target_rate": true,
+        "path_found_rate": true,
+        "checkpoint_identity": true,
+        "checkpoint_behavior": true,
+        "checkpoint_mutations": true,
+        "lineage_and_topology": true
+      },
+      "trial_result": "FAIL"
+    },
+    {
+      "trial_id": "trial-03-noise",
+      "regime": "increased_observation_noise",
+      "seed": "0x0403000000000003",
+      "dataset_seeds": {
+        "base_training": "0x31c899554a6b02bf",
+        "base_holdout": "0x30ab06786aecff1f",
+        "drift_adaptation_training": "0x5337eaaa31957ea0",
+        "drift_holdout": "0x849ccea305c2e858",
+        "original_task_retention_holdout": "0x1bcba0c16fd0b750",
+        "planning_cases": "0x2c6c4e52d917f858"
+      },
+      "candidate": {
+        "expert_count": 68,
+        "base_births": 56,
+        "adaptation_births": 8,
+        "adaptation_retirements": 4,
+        "training_evaluations": 191966,
+        "checkpoint_size_bytes": 39438,
+        "model_identity": "094fa2315b914a3e8fe4b05403958769d77a80e84f9df17be05ceffbbf1b0e83",
+        "behavior_identity": "f39fad0c4a8340e4d0359aec9b2ac05d792afb7019028b6329058921c3c7be96",
+        "base_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.95703125,
+          "reconstruction_rmse": 9.256042033,
+          "next_observation_prediction_rmse": 12.015166216,
+          "transition_accuracy": 0.9296875,
+          "routing_certification_count": 254,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2160,
+          "classification_checksum": "78ade4e3ed35bffa",
+          "reconstruction_checksum": "56a03e4fa9fd47e3",
+          "prediction_checksum": "0d2d7902d1277e1d",
+          "transition_checksum": "b1856bd2df36b1f5"
+        },
+        "adaptation_training": {
+          "samples": 512,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 10.681188351,
+          "next_observation_prediction_rmse": 8.970615587,
+          "transition_accuracy": 0.9765625,
+          "routing_certification_count": 511,
+          "complete_oracle_agreement": 512,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 4156,
+          "classification_checksum": "b3055f634bac50af",
+          "reconstruction_checksum": "b8c42536c2170e68",
+          "prediction_checksum": "478678748e759b6f",
+          "transition_checksum": "e2adee66e4283a9c"
+        },
+        "static_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.95703125,
+          "reconstruction_rmse": 12.208403881,
+          "next_observation_prediction_rmse": 17.195498684,
+          "transition_accuracy": 0.890625,
+          "routing_certification_count": 250,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2384,
+          "classification_checksum": "c78ed10841903f15",
+          "reconstruction_checksum": "e017e54783b64e82",
+          "prediction_checksum": "eb07bd78ca758a86",
+          "transition_checksum": "a2f761de4e55be59"
+        },
+        "adapted_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 11.722196472,
+          "next_observation_prediction_rmse": 13.802821074,
+          "transition_accuracy": 0.97265625,
+          "routing_certification_count": 252,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2288,
+          "classification_checksum": "1ed08bd42b12b5a9",
+          "reconstruction_checksum": "56bb01a6e0dd2d19",
+          "prediction_checksum": "2bc238dbe09141f1",
+          "transition_checksum": "1407053d804140a4"
+        },
+        "base_holdout_retention": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 8.396915222,
+          "next_observation_prediction_rmse": 10.613961832,
+          "transition_accuracy": 0.9765625,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "cc9c9e18f84df52a",
+          "reconstruction_checksum": "7957a429e66aa981",
+          "prediction_checksum": "6d04a2d1c39cb8db",
+          "transition_checksum": "2cf05ac107da7dee"
+        },
+        "planning": {
+          "cases": 64,
+          "path_found": 64,
+          "exact_world_state_target_reached": 61,
+          "goal_expert_reached": 61,
+          "executed_path_length": 310,
+          "optimal_path_length": 311,
+          "path_length_regret": 0,
+          "graph_disconnection_failures": 0,
+          "transition_model_error_failures": 3,
+          "state_aliasing_failures": 0,
+          "expansions": 2292,
+          "checksum": "3cc709ccf4c5fc5d"
+        }
+      },
+      "checkpoint_verification": {
+        "roundtrip": true,
+        "identity_match": true,
+        "adaptation_training_evaluation_match": true,
+        "drift_holdout_evaluation_match": true,
+        "retention_evaluation_match": true,
+        "planning_match": true,
+        "complete_behavior_match": true,
+        "mutations": {
+          "retrieval_key_component": true,
+          "reconstruction_component": true,
+          "next_observation_component": true,
+          "label": true,
+          "label_count": true,
+          "lineage": true,
+          "transition_graph_edge": true,
+          "payload_byte": true,
+          "checkpoint_truncation": true,
+          "appended_unexpected_byte": true,
+          "incorrect_schema_version": true,
+          "checkpoint_substitution": true
+        }
+      },
+      "lineage_invariants": {
+        "sibling_generation_equality": true,
+        "parent_child_generation_increment": true,
+        "lineage_uniqueness": true,
+        "repeated_descendant_splitting": true,
+        "no_accidental_lineage_reuse": true,
+        "deterministic_topology_reproduction": true
+      },
+      "comparisons": {
+        "ravel_0_4_candidate": {
+          "expert_count": 68,
+          "training_evaluations": 191966,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 11.722196472,
+          "prediction_rmse": 13.802821074,
+          "planning_exact_state_rate": 0.953125,
+          "expert_evaluations": 2288,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_8_expert": {
+          "expert_count": 8,
+          "training_evaluations": 61440,
+          "drift_holdout_accuracy": 0.1484375,
+          "retention_accuracy": 0.15625,
+          "reconstruction_rmse": 30.667927368,
+          "prediction_rmse": 33.419556245,
+          "planning_exact_state_rate": 0.03125,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 10578,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "flat_64_expert_complete_scan": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 11.498955243,
+          "prediction_rmse": 16.982378697,
+          "planning_exact_state_rate": 0.8125,
+          "expert_evaluations": 16384,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_topology_64_expert_routed": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 11.498955243,
+          "prediction_rmse": 16.982378697,
+          "planning_exact_state_rate": 0.8125,
+          "expert_evaluations": 2104,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "nearest_centroid_16_no_recursive_births": {
+          "expert_count": 16,
+          "training_evaluations": 188416,
+          "drift_holdout_accuracy": 0.28515625,
+          "retention_accuracy": 0.2578125,
+          "reconstruction_rmse": 25.316094113,
+          "prediction_rmse": 28.500359276,
+          "planning_exact_state_rate": 0.09375,
+          "expert_evaluations": 4096,
+          "checkpoint_size_bytes": 14426,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "no_adaptation_static": {
+          "expert_count": 64,
+          "training_evaluations": 137528,
+          "drift_holdout_accuracy": 0.95703125,
+          "retention_accuracy": 0.95703125,
+          "reconstruction_rmse": 12.208403881,
+          "prediction_rmse": 17.195498684,
+          "planning_exact_state_rate": 0.578125,
+          "expert_evaluations": 2384,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_replay": {
+          "expert_count": 68,
+          "training_evaluations": 175770,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 12.117639144,
+          "prediction_rmse": 14.675433687,
+          "planning_exact_state_rate": 0.9375,
+          "expert_evaluations": 2648,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_retirement": {
+          "expert_count": 72,
+          "training_evaluations": 167144,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 11.715737213,
+          "prediction_rmse": 15.118959391,
+          "planning_exact_state_rate": 0.921875,
+          "expert_evaluations": 2496,
+          "checkpoint_size_bytes": 41362,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_complete_scan_without_certification": {
+          "expert_count": 68,
+          "training_evaluations": 387742,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 11.722196472,
+          "prediction_rmse": 13.802821074,
+          "planning_exact_state_rate": 0.953125,
+          "expert_evaluations": 17408,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_fixed_topology_without_recursive_births": {
+          "expert_count": 64,
+          "training_evaluations": 2351160,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 11.73443203,
+          "prediction_rmse": 13.131661923,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2272,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_random_births": {
+          "expert_count": 68,
+          "training_evaluations": 193719,
+          "drift_holdout_accuracy": 0.9609375,
+          "retention_accuracy": 0.9609375,
+          "reconstruction_rmse": 12.370829046,
+          "prediction_rmse": 14.167108782,
+          "planning_exact_state_rate": 0.609375,
+          "expert_evaluations": 2708,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        }
+      },
+      "hard_gates": {
+        "expected_topology": true,
+        "base_holdout_accuracy": true,
+        "adaptation_training_accuracy": true,
+        "adapted_drift_holdout_accuracy": true,
+        "adapted_gain_over_static": false,
+        "base_holdout_retention": true,
+        "exact_routing": true,
+        "base_reconstruction_rmse": true,
+        "adapted_reconstruction_rmse": true,
+        "adapted_reconstruction_improvement": true,
+        "retention_reconstruction": true,
+        "base_prediction_rmse": true,
+        "adapted_prediction_rmse": true,
+        "adapted_prediction_improvement": true,
+        "retention_prediction": true,
+        "exact_world_state_target_rate": true,
+        "path_found_rate": true,
+        "checkpoint_identity": true,
+        "checkpoint_behavior": true,
+        "checkpoint_mutations": true,
+        "lineage_and_topology": true
+      },
+      "trial_result": "FAIL"
+    },
+    {
+      "trial_id": "trial-04-label",
+      "regime": "label_drift",
+      "seed": "0x0404000000000004",
+      "dataset_seeds": {
+        "base_training": "0xb119124bb25f62fd",
+        "base_holdout": "0xba974d75811c25b5",
+        "drift_adaptation_training": "0x08bb1d2ce7152f90",
+        "drift_holdout": "0x29b60e6074e6e6fe",
+        "original_task_retention_holdout": "0xa8a9a927d9b882fb",
+        "planning_cases": "0x3aa6b2bd4735ab34"
+      },
+      "candidate": {
+        "expert_count": 68,
+        "base_births": 56,
+        "adaptation_births": 8,
+        "adaptation_retirements": 4,
+        "training_evaluations": 184400,
+        "checkpoint_size_bytes": 39438,
+        "model_identity": "7ac729eed49beb4abd7e89b3a47999db4f0ae5ae911356fbcfb387cf55d0c716",
+        "behavior_identity": "6448b04fcc6c2382081a5f9f427d110fbd4b346640095e5a3a117152061bcf12",
+        "base_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 3.249159843,
+          "next_observation_prediction_rmse": 5.274702577,
+          "transition_accuracy": 0.9921875,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "ecc0702db2f2e0ee",
+          "reconstruction_checksum": "cc3772cbc44d2381",
+          "prediction_checksum": "410e74edf5b9d356",
+          "transition_checksum": "576182581fca82fc"
+        },
+        "adaptation_training": {
+          "samples": 512,
+          "rejected": 0,
+          "accuracy": 0.974609375,
+          "reconstruction_rmse": 2.999208801,
+          "next_observation_prediction_rmse": 2.576304245,
+          "transition_accuracy": 0.984375,
+          "routing_certification_count": 512,
+          "complete_oracle_agreement": 512,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 4096,
+          "classification_checksum": "c76de4f4760f0a46",
+          "reconstruction_checksum": "1cafef0b0ccf035a",
+          "prediction_checksum": "ae58e537418e726c",
+          "transition_checksum": "296706d6eb355028"
+        },
+        "static_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.6328125,
+          "reconstruction_rmse": 3.245941506,
+          "next_observation_prediction_rmse": 6.694133269,
+          "transition_accuracy": 0.98828125,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "d5abe6419bc92a60",
+          "reconstruction_checksum": "d78de092c59b9d1b",
+          "prediction_checksum": "da6fc180aa7abd76",
+          "transition_checksum": "eebd44338c6b40d8"
+        },
+        "adapted_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.97265625,
+          "reconstruction_rmse": 3.284709157,
+          "next_observation_prediction_rmse": 5.929517197,
+          "transition_accuracy": 0.98828125,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "314f63b85b64e88f",
+          "reconstruction_checksum": "c8e18735756cb09a",
+          "prediction_checksum": "53b19e6217f535dc",
+          "transition_checksum": "7e9474adc2958e20"
+        },
+        "base_holdout_retention": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.671875,
+          "reconstruction_rmse": 3.32254887,
+          "next_observation_prediction_rmse": 6.133100096,
+          "transition_accuracy": 0.98046875,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "ff2e7d89ac8af3be",
+          "reconstruction_checksum": "363d7216b8b76e93",
+          "prediction_checksum": "79af8c0e99f46229",
+          "transition_checksum": "7bf04bff940296f1"
+        },
+        "planning": {
+          "cases": 64,
+          "path_found": 64,
+          "exact_world_state_target_reached": 64,
+          "goal_expert_reached": 64,
+          "executed_path_length": 296,
+          "optimal_path_length": 296,
+          "path_length_regret": 0,
+          "graph_disconnection_failures": 0,
+          "transition_model_error_failures": 0,
+          "state_aliasing_failures": 0,
+          "expansions": 2153,
+          "checksum": "bebe1a3ebe36d486"
+        }
+      },
+      "checkpoint_verification": {
+        "roundtrip": true,
+        "identity_match": true,
+        "adaptation_training_evaluation_match": true,
+        "drift_holdout_evaluation_match": true,
+        "retention_evaluation_match": true,
+        "planning_match": true,
+        "complete_behavior_match": true,
+        "mutations": {
+          "retrieval_key_component": true,
+          "reconstruction_component": true,
+          "next_observation_component": true,
+          "label": true,
+          "label_count": true,
+          "lineage": true,
+          "transition_graph_edge": true,
+          "payload_byte": true,
+          "checkpoint_truncation": true,
+          "appended_unexpected_byte": true,
+          "incorrect_schema_version": true,
+          "checkpoint_substitution": true
+        }
+      },
+      "lineage_invariants": {
+        "sibling_generation_equality": true,
+        "parent_child_generation_increment": true,
+        "lineage_uniqueness": true,
+        "repeated_descendant_splitting": true,
+        "no_accidental_lineage_reuse": true,
+        "deterministic_topology_reproduction": true
+      },
+      "comparisons": {
+        "ravel_0_4_candidate": {
+          "expert_count": 68,
+          "training_evaluations": 184400,
+          "drift_holdout_accuracy": 0.97265625,
+          "retention_accuracy": 0.671875,
+          "reconstruction_rmse": 3.284709157,
+          "prediction_rmse": 5.929517197,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_8_expert": {
+          "expert_count": 8,
+          "training_evaluations": 61440,
+          "drift_holdout_accuracy": 0.1796875,
+          "retention_accuracy": 0.21484375,
+          "reconstruction_rmse": 28.177461374,
+          "prediction_rmse": 29.442125356,
+          "planning_exact_state_rate": 0.03125,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 10578,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "flat_64_expert_complete_scan": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 0.6328125,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.245941506,
+          "prediction_rmse": 5.964526836,
+          "planning_exact_state_rate": 0.984375,
+          "expert_evaluations": 16384,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_topology_64_expert_routed": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 0.6328125,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.245941506,
+          "prediction_rmse": 5.964526836,
+          "planning_exact_state_rate": 0.984375,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "nearest_centroid_16_no_recursive_births": {
+          "expert_count": 16,
+          "training_evaluations": 188416,
+          "drift_holdout_accuracy": 0.20703125,
+          "retention_accuracy": 0.26953125,
+          "reconstruction_rmse": 23.766545085,
+          "prediction_rmse": 24.836108388,
+          "planning_exact_state_rate": 0.140625,
+          "expert_evaluations": 4096,
+          "checkpoint_size_bytes": 14426,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "no_adaptation_static": {
+          "expert_count": 64,
+          "training_evaluations": 131152,
+          "drift_holdout_accuracy": 0.6328125,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.245941506,
+          "prediction_rmse": 6.694133269,
+          "planning_exact_state_rate": 0.984375,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_replay": {
+          "expert_count": 68,
+          "training_evaluations": 168016,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 0.6328125,
+          "reconstruction_rmse": 3.353389407,
+          "prediction_rmse": 6.588012389,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_retirement": {
+          "expert_count": 72,
+          "training_evaluations": 159824,
+          "drift_holdout_accuracy": 0.97265625,
+          "retention_accuracy": 0.671875,
+          "reconstruction_rmse": 3.287590917,
+          "prediction_rmse": 6.496733865,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 41362,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_complete_scan_without_certification": {
+          "expert_count": 68,
+          "training_evaluations": 381008,
+          "drift_holdout_accuracy": 0.97265625,
+          "retention_accuracy": 0.671875,
+          "reconstruction_rmse": 3.284709157,
+          "prediction_rmse": 5.929517197,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 17408,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_fixed_topology_without_recursive_births": {
+          "expert_count": 64,
+          "training_evaluations": 2351104,
+          "drift_holdout_accuracy": 0.98046875,
+          "retention_accuracy": 0.6640625,
+          "reconstruction_rmse": 3.284108194,
+          "prediction_rmse": 5.306900561,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_random_births": {
+          "expert_count": 68,
+          "training_evaluations": 184400,
+          "drift_holdout_accuracy": 0.98046875,
+          "retention_accuracy": 0.6640625,
+          "reconstruction_rmse": 3.278805288,
+          "prediction_rmse": 7.104260996,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        }
+      },
+      "hard_gates": {
+        "expected_topology": true,
+        "base_holdout_accuracy": true,
+        "adaptation_training_accuracy": true,
+        "adapted_drift_holdout_accuracy": true,
+        "adapted_gain_over_static": true,
+        "base_holdout_retention": false,
+        "exact_routing": true,
+        "base_reconstruction_rmse": true,
+        "adapted_reconstruction_rmse": true,
+        "adapted_reconstruction_improvement": false,
+        "retention_reconstruction": true,
+        "base_prediction_rmse": true,
+        "adapted_prediction_rmse": true,
+        "adapted_prediction_improvement": true,
+        "retention_prediction": true,
+        "exact_world_state_target_rate": true,
+        "path_found_rate": true,
+        "checkpoint_identity": true,
+        "checkpoint_behavior": true,
+        "checkpoint_mutations": true,
+        "lineage_and_topology": true
+      },
+      "trial_result": "FAIL"
+    },
+    {
+      "trial_id": "trial-05-observation",
+      "regime": "observation_drift",
+      "seed": "0x0405000000000005",
+      "dataset_seeds": {
+        "base_training": "0x056696df8d3b6c3f",
+        "base_holdout": "0x82991be6b3c3b49b",
+        "drift_adaptation_training": "0xc88ff7795c17c309",
+        "drift_holdout": "0x6fae784d472487dd",
+        "original_task_retention_holdout": "0xbbca41d1303f0277",
+        "planning_cases": "0x0cd111aa847bd3dd"
+      },
+      "candidate": {
+        "expert_count": 68,
+        "base_births": 56,
+        "adaptation_births": 8,
+        "adaptation_retirements": 4,
+        "training_evaluations": 198795,
+        "checkpoint_size_bytes": 39438,
+        "model_identity": "162084e398b93cbcf8bf7b298b91fe58b8da90d32f18e34d5800e0353a02f33e",
+        "behavior_identity": "66fb2612b268f816ecfb9a1a1d96f6d5b0d063b8f0f793308a3e03b523e0aef5",
+        "base_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.98828125,
+          "reconstruction_rmse": 4.08848307,
+          "next_observation_prediction_rmse": 5.745390367,
+          "transition_accuracy": 0.984375,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "6590037caf973659",
+          "reconstruction_checksum": "44f1c43e7f352d40",
+          "prediction_checksum": "0808ea0a11572b7e",
+          "transition_checksum": "05d0df53a1426590"
+        },
+        "adaptation_training": {
+          "samples": 512,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 4.365044794,
+          "next_observation_prediction_rmse": 3.726372863,
+          "transition_accuracy": 0.99609375,
+          "routing_certification_count": 512,
+          "complete_oracle_agreement": 512,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 4096,
+          "classification_checksum": "0b8986fe5dc2780d",
+          "reconstruction_checksum": "741f88b7af72fb87",
+          "prediction_checksum": "49c4691e3cd7837e",
+          "transition_checksum": "5670ff85721a5aaf"
+        },
+        "static_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.98828125,
+          "reconstruction_rmse": 7.214147712,
+          "next_observation_prediction_rmse": 8.980319577,
+          "transition_accuracy": 0.97265625,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "5e7a3d1c8098fd4f",
+          "reconstruction_checksum": "86885f60232e4e7f",
+          "prediction_checksum": "ccd62f1626f9e38e",
+          "transition_checksum": "3798f0b6a265b96c"
+        },
+        "adapted_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 4.96987152,
+          "next_observation_prediction_rmse": 5.908756185,
+          "transition_accuracy": 1.0,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "06889ba43eaa9f13",
+          "reconstruction_checksum": "56c4fda307558a43",
+          "prediction_checksum": "b7c2bf1328deb043",
+          "transition_checksum": "5ed594c48a1c64b3"
+        },
+        "base_holdout_retention": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 4.742146477,
+          "next_observation_prediction_rmse": 10.344778044,
+          "transition_accuracy": 0.9609375,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "4257baa390b0702b",
+          "reconstruction_checksum": "bbb7556c367e13ae",
+          "prediction_checksum": "c0b400533f3d7afb",
+          "transition_checksum": "c823aed4d1a21197"
+        },
+        "planning": {
+          "cases": 64,
+          "path_found": 64,
+          "exact_world_state_target_reached": 64,
+          "goal_expert_reached": 64,
+          "executed_path_length": 277,
+          "optimal_path_length": 275,
+          "path_length_regret": 2,
+          "graph_disconnection_failures": 0,
+          "transition_model_error_failures": 0,
+          "state_aliasing_failures": 0,
+          "expansions": 1956,
+          "checksum": "88023746529cc64c"
+        }
+      },
+      "checkpoint_verification": {
+        "roundtrip": true,
+        "identity_match": true,
+        "adaptation_training_evaluation_match": true,
+        "drift_holdout_evaluation_match": true,
+        "retention_evaluation_match": true,
+        "planning_match": true,
+        "complete_behavior_match": true,
+        "mutations": {
+          "retrieval_key_component": true,
+          "reconstruction_component": true,
+          "next_observation_component": true,
+          "label": true,
+          "label_count": true,
+          "lineage": true,
+          "transition_graph_edge": true,
+          "payload_byte": true,
+          "checkpoint_truncation": true,
+          "appended_unexpected_byte": true,
+          "incorrect_schema_version": true,
+          "checkpoint_substitution": true
+        }
+      },
+      "lineage_invariants": {
+        "sibling_generation_equality": true,
+        "parent_child_generation_increment": true,
+        "lineage_uniqueness": true,
+        "repeated_descendant_splitting": true,
+        "no_accidental_lineage_reuse": true,
+        "deterministic_topology_reproduction": true
+      },
+      "comparisons": {
+        "ravel_0_4_candidate": {
+          "expert_count": 68,
+          "training_evaluations": 198795,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 4.96987152,
+          "prediction_rmse": 5.908756185,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_8_expert": {
+          "expert_count": 8,
+          "training_evaluations": 61440,
+          "drift_holdout_accuracy": 0.1953125,
+          "retention_accuracy": 0.2265625,
+          "reconstruction_rmse": 28.588489902,
+          "prediction_rmse": 30.140919158,
+          "planning_exact_state_rate": 0.078125,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 10578,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "flat_64_expert_complete_scan": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 6.710329592,
+          "prediction_rmse": 9.665663175,
+          "planning_exact_state_rate": 0.984375,
+          "expert_evaluations": 16384,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_topology_64_expert_routed": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 6.710329592,
+          "prediction_rmse": 9.665663175,
+          "planning_exact_state_rate": 0.984375,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "nearest_centroid_16_no_recursive_births": {
+          "expert_count": 16,
+          "training_evaluations": 188416,
+          "drift_holdout_accuracy": 0.23046875,
+          "retention_accuracy": 0.2890625,
+          "reconstruction_rmse": 23.5668836,
+          "prediction_rmse": 25.375825862,
+          "planning_exact_state_rate": 0.171875,
+          "expert_evaluations": 4096,
+          "checkpoint_size_bytes": 14426,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "no_adaptation_static": {
+          "expert_count": 64,
+          "training_evaluations": 133736,
+          "drift_holdout_accuracy": 0.98828125,
+          "retention_accuracy": 0.9765625,
+          "reconstruction_rmse": 7.214147712,
+          "prediction_rmse": 8.980319577,
+          "planning_exact_state_rate": 0.859375,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_replay": {
+          "expert_count": 68,
+          "training_evaluations": 180125,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 4.641846269,
+          "prediction_rmse": 5.858492042,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_retirement": {
+          "expert_count": 72,
+          "training_evaluations": 170344,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 4.964079357,
+          "prediction_rmse": 6.628937969,
+          "planning_exact_state_rate": 0.96875,
+          "expert_evaluations": 3328,
+          "checkpoint_size_bytes": 41362,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_complete_scan_without_certification": {
+          "expert_count": 68,
+          "training_evaluations": 387467,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 4.96987152,
+          "prediction_rmse": 5.908756185,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 17408,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_fixed_topology_without_recursive_births": {
+          "expert_count": 64,
+          "training_evaluations": 2351104,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 4.968732508,
+          "prediction_rmse": 5.908756185,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_random_births": {
+          "expert_count": 68,
+          "training_evaluations": 186984,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 4.872652007,
+          "prediction_rmse": 5.853272074,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        }
+      },
+      "hard_gates": {
+        "expected_topology": true,
+        "base_holdout_accuracy": true,
+        "adaptation_training_accuracy": true,
+        "adapted_drift_holdout_accuracy": true,
+        "adapted_gain_over_static": false,
+        "base_holdout_retention": true,
+        "exact_routing": true,
+        "base_reconstruction_rmse": true,
+        "adapted_reconstruction_rmse": true,
+        "adapted_reconstruction_improvement": true,
+        "retention_reconstruction": true,
+        "base_prediction_rmse": true,
+        "adapted_prediction_rmse": true,
+        "adapted_prediction_improvement": true,
+        "retention_prediction": true,
+        "exact_world_state_target_rate": true,
+        "path_found_rate": true,
+        "checkpoint_identity": true,
+        "checkpoint_behavior": true,
+        "checkpoint_mutations": true,
+        "lineage_and_topology": true
+      },
+      "trial_result": "FAIL"
+    },
+    {
+      "trial_id": "trial-06-transition",
+      "regime": "transition_drift",
+      "seed": "0x0406000000000006",
+      "dataset_seeds": {
+        "base_training": "0x926766a8f89b01fe",
+        "base_holdout": "0x4c841aa67ba9ccda",
+        "drift_adaptation_training": "0x29236cc144e74100",
+        "drift_holdout": "0x9468c22e35791397",
+        "original_task_retention_holdout": "0xdf904ec059d94431",
+        "planning_cases": "0x85212879e0609776"
+      },
+      "candidate": {
+        "expert_count": 68,
+        "base_births": 56,
+        "adaptation_births": 8,
+        "adaptation_retirements": 4,
+        "training_evaluations": 204431,
+        "checkpoint_size_bytes": 39438,
+        "model_identity": "c9f3398d39810cbe2b0f70fffa52582204a29f0dd7c154d6fc38dd324c7f4572",
+        "behavior_identity": "218dcc8ecd66212dcb5a42746d5277935a8182edeab19b2d20c621f631ddd313",
+        "base_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.9921875,
+          "reconstruction_rmse": 4.014867992,
+          "next_observation_prediction_rmse": 10.752743838,
+          "transition_accuracy": 0.94140625,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "6e0106d9b5b350fa",
+          "reconstruction_checksum": "52629014d1060d6a",
+          "prediction_checksum": "917239c9f83390d4",
+          "transition_checksum": "4232633d53e59eec"
+        },
+        "adaptation_training": {
+          "samples": 512,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 3.00556352,
+          "next_observation_prediction_rmse": 6.928904267,
+          "transition_accuracy": 0.962890625,
+          "routing_certification_count": 512,
+          "complete_oracle_agreement": 512,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 4096,
+          "classification_checksum": "82b5e25d7ff724c7",
+          "reconstruction_checksum": "cc7762b3a56a7ab3",
+          "prediction_checksum": "22e9566a98d22fd6",
+          "transition_checksum": "feed63e7e75120b1"
+        },
+        "static_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.9921875,
+          "reconstruction_rmse": 3.887227949,
+          "next_observation_prediction_rmse": 23.74263423,
+          "transition_accuracy": 0.76171875,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "27c8df540711e103",
+          "reconstruction_checksum": "03e7f1b90d5a0a2b",
+          "prediction_checksum": "6e1608d9bfceb46b",
+          "transition_checksum": "8a170a01d05f6d7d"
+        },
+        "adapted_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 3.325471662,
+          "next_observation_prediction_rmse": 12.004139378,
+          "transition_accuracy": 0.90234375,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "0a27b19971dc5cba",
+          "reconstruction_checksum": "d9e92709409fdc40",
+          "prediction_checksum": "2d33bc8b33b5cfea",
+          "transition_checksum": "1dfc28f7f966c6ea"
+        },
+        "base_holdout_retention": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 3.353064513,
+          "next_observation_prediction_rmse": 18.338539315,
+          "transition_accuracy": 0.82421875,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "d031bf9b75dfd3d4",
+          "reconstruction_checksum": "4e30ac3dee1b39f7",
+          "prediction_checksum": "6868a7c76c4a9c8b",
+          "transition_checksum": "606edfed2c65db50"
+        },
+        "planning": {
+          "cases": 64,
+          "path_found": 64,
+          "exact_world_state_target_reached": 53,
+          "goal_expert_reached": 53,
+          "executed_path_length": 238,
+          "optimal_path_length": 234,
+          "path_length_regret": 8,
+          "graph_disconnection_failures": 0,
+          "transition_model_error_failures": 11,
+          "state_aliasing_failures": 0,
+          "expansions": 2180,
+          "checksum": "f4634137350b92ba"
+        }
+      },
+      "checkpoint_verification": {
+        "roundtrip": true,
+        "identity_match": true,
+        "adaptation_training_evaluation_match": true,
+        "drift_holdout_evaluation_match": true,
+        "retention_evaluation_match": true,
+        "planning_match": true,
+        "complete_behavior_match": true,
+        "mutations": {
+          "retrieval_key_component": true,
+          "reconstruction_component": true,
+          "next_observation_component": true,
+          "label": true,
+          "label_count": true,
+          "lineage": true,
+          "transition_graph_edge": true,
+          "payload_byte": true,
+          "checkpoint_truncation": true,
+          "appended_unexpected_byte": true,
+          "incorrect_schema_version": true,
+          "checkpoint_substitution": true
+        }
+      },
+      "lineage_invariants": {
+        "sibling_generation_equality": true,
+        "parent_child_generation_increment": true,
+        "lineage_uniqueness": true,
+        "repeated_descendant_splitting": true,
+        "no_accidental_lineage_reuse": true,
+        "deterministic_topology_reproduction": true
+      },
+      "comparisons": {
+        "ravel_0_4_candidate": {
+          "expert_count": 68,
+          "training_evaluations": 204431,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.325471662,
+          "prediction_rmse": 12.004139378,
+          "planning_exact_state_rate": 0.828125,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_8_expert": {
+          "expert_count": 8,
+          "training_evaluations": 61440,
+          "drift_holdout_accuracy": 0.234375,
+          "retention_accuracy": 0.2421875,
+          "reconstruction_rmse": 28.776491142,
+          "prediction_rmse": 33.661330668,
+          "planning_exact_state_rate": 0.015625,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 10578,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "flat_64_expert_complete_scan": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.289496039,
+          "prediction_rmse": 23.603471108,
+          "planning_exact_state_rate": 0.578125,
+          "expert_evaluations": 16384,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_topology_64_expert_routed": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.289496039,
+          "prediction_rmse": 23.603471108,
+          "planning_exact_state_rate": 0.578125,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "nearest_centroid_16_no_recursive_births": {
+          "expert_count": 16,
+          "training_evaluations": 188416,
+          "drift_holdout_accuracy": 0.25390625,
+          "retention_accuracy": 0.23828125,
+          "reconstruction_rmse": 21.823954139,
+          "prediction_rmse": 29.618836762,
+          "planning_exact_state_rate": 0.078125,
+          "expert_evaluations": 4096,
+          "checkpoint_size_bytes": 14426,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "no_adaptation_static": {
+          "expert_count": 64,
+          "training_evaluations": 128704,
+          "drift_holdout_accuracy": 0.9921875,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.887227949,
+          "prediction_rmse": 23.74263423,
+          "planning_exact_state_rate": 0.4375,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_replay": {
+          "expert_count": 68,
+          "training_evaluations": 180427,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.43195935,
+          "prediction_rmse": 9.730895929,
+          "planning_exact_state_rate": 0.859375,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_retirement": {
+          "expert_count": 72,
+          "training_evaluations": 172480,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.325329926,
+          "prediction_rmse": 12.949892046,
+          "planning_exact_state_rate": 0.8125,
+          "expert_evaluations": 2496,
+          "checkpoint_size_bytes": 41362,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_complete_scan_without_certification": {
+          "expert_count": 68,
+          "training_evaluations": 385935,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.325471662,
+          "prediction_rmse": 12.004139378,
+          "planning_exact_state_rate": 0.828125,
+          "expert_evaluations": 17408,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_fixed_topology_without_recursive_births": {
+          "expert_count": 64,
+          "training_evaluations": 2351104,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.325683177,
+          "prediction_rmse": 12.001830992,
+          "planning_exact_state_rate": 0.828125,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_random_births": {
+          "expert_count": 68,
+          "training_evaluations": 181952,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 3.323853271,
+          "prediction_rmse": 11.958909439,
+          "planning_exact_state_rate": 0.8125,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        }
+      },
+      "hard_gates": {
+        "expected_topology": true,
+        "base_holdout_accuracy": true,
+        "adaptation_training_accuracy": true,
+        "adapted_drift_holdout_accuracy": true,
+        "adapted_gain_over_static": false,
+        "base_holdout_retention": true,
+        "exact_routing": true,
+        "base_reconstruction_rmse": true,
+        "adapted_reconstruction_rmse": true,
+        "adapted_reconstruction_improvement": true,
+        "retention_reconstruction": true,
+        "base_prediction_rmse": true,
+        "adapted_prediction_rmse": true,
+        "adapted_prediction_improvement": true,
+        "retention_prediction": false,
+        "exact_world_state_target_rate": true,
+        "path_found_rate": true,
+        "checkpoint_identity": true,
+        "checkpoint_behavior": true,
+        "checkpoint_mutations": true,
+        "lineage_and_topology": true
+      },
+      "trial_result": "FAIL"
+    },
+    {
+      "trial_id": "trial-07-combined",
+      "regime": "combined_observation_and_label_drift",
+      "seed": "0x0407000000000007",
+      "dataset_seeds": {
+        "base_training": "0xd37509ad6f4444a6",
+        "base_holdout": "0xc24118d60c43c1ea",
+        "drift_adaptation_training": "0x6ea6490add7501fc",
+        "drift_holdout": "0xa988d131a089eeee",
+        "original_task_retention_holdout": "0xc9bbd7c5753ce32e",
+        "planning_cases": "0xb148fd98c53e55d4"
+      },
+      "candidate": {
+        "expert_count": 68,
+        "base_births": 56,
+        "adaptation_births": 8,
+        "adaptation_retirements": 4,
+        "training_evaluations": 197558,
+        "checkpoint_size_bytes": 39438,
+        "model_identity": "2ead11143532e496b9d9b5cbd2c4c5363effd8f0ae94b98c44d0e8fb9e0cbb0f",
+        "behavior_identity": "982a5bea0c5cc4cd65225ad89f69e948ae3aaf7f3b96775f272bfbb860c818e8",
+        "base_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.98828125,
+          "reconstruction_rmse": 4.876683712,
+          "next_observation_prediction_rmse": 7.086698289,
+          "transition_accuracy": 0.97265625,
+          "routing_certification_count": 255,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2104,
+          "classification_checksum": "6cd7b6d1bd581f71",
+          "reconstruction_checksum": "3c79a743b378256a",
+          "prediction_checksum": "c9a65350c2f6a864",
+          "transition_checksum": "132d9ff47e9a3c34"
+        },
+        "adaptation_training": {
+          "samples": 512,
+          "rejected": 0,
+          "accuracy": 0.966796875,
+          "reconstruction_rmse": 6.512482533,
+          "next_observation_prediction_rmse": 5.470895116,
+          "transition_accuracy": 0.984375,
+          "routing_certification_count": 512,
+          "complete_oracle_agreement": 512,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 4096,
+          "classification_checksum": "b44d4766a148c5a2",
+          "reconstruction_checksum": "ab2a825fe7ce2c66",
+          "prediction_checksum": "807dda64ed1d3e6e",
+          "transition_checksum": "170dff003fb8aef9"
+        },
+        "static_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.6328125,
+          "reconstruction_rmse": 8.351477839,
+          "next_observation_prediction_rmse": 9.707866943,
+          "transition_accuracy": 0.96875,
+          "routing_certification_count": 249,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2440,
+          "classification_checksum": "8dd63826d89403eb",
+          "reconstruction_checksum": "8a4e616f0d0b57a1",
+          "prediction_checksum": "128ddd95639d580b",
+          "transition_checksum": "aadb36192c3461c4"
+        },
+        "adapted_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.9765625,
+          "reconstruction_rmse": 6.954333254,
+          "next_observation_prediction_rmse": 9.192754186,
+          "transition_accuracy": 0.97265625,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "9826d9dd8b84f4ac",
+          "reconstruction_checksum": "2d462a2e5e5645d6",
+          "prediction_checksum": "997151b693eebed4",
+          "transition_checksum": "733cc1aaeea73a46"
+        },
+        "base_holdout_retention": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.6875,
+          "reconstruction_rmse": 5.46058183,
+          "next_observation_prediction_rmse": 8.177056842,
+          "transition_accuracy": 0.953125,
+          "routing_certification_count": 256,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2048,
+          "classification_checksum": "9138ca83c6220659",
+          "reconstruction_checksum": "c17294b4edebb6c5",
+          "prediction_checksum": "485970e080858b11",
+          "transition_checksum": "e439dceab4f9949b"
+        },
+        "planning": {
+          "cases": 64,
+          "path_found": 64,
+          "exact_world_state_target_reached": 60,
+          "goal_expert_reached": 60,
+          "executed_path_length": 291,
+          "optimal_path_length": 290,
+          "path_length_regret": 1,
+          "graph_disconnection_failures": 0,
+          "transition_model_error_failures": 4,
+          "state_aliasing_failures": 0,
+          "expansions": 2157,
+          "checksum": "3b7b0b37ec24a514"
+        }
+      },
+      "checkpoint_verification": {
+        "roundtrip": true,
+        "identity_match": true,
+        "adaptation_training_evaluation_match": true,
+        "drift_holdout_evaluation_match": true,
+        "retention_evaluation_match": true,
+        "planning_match": true,
+        "complete_behavior_match": true,
+        "mutations": {
+          "retrieval_key_component": true,
+          "reconstruction_component": true,
+          "next_observation_component": true,
+          "label": true,
+          "label_count": true,
+          "lineage": true,
+          "transition_graph_edge": true,
+          "payload_byte": true,
+          "checkpoint_truncation": true,
+          "appended_unexpected_byte": true,
+          "incorrect_schema_version": true,
+          "checkpoint_substitution": true
+        }
+      },
+      "lineage_invariants": {
+        "sibling_generation_equality": true,
+        "parent_child_generation_increment": true,
+        "lineage_uniqueness": true,
+        "repeated_descendant_splitting": true,
+        "no_accidental_lineage_reuse": true,
+        "deterministic_topology_reproduction": true
+      },
+      "comparisons": {
+        "ravel_0_4_candidate": {
+          "expert_count": 68,
+          "training_evaluations": 197558,
+          "drift_holdout_accuracy": 0.9765625,
+          "retention_accuracy": 0.6875,
+          "reconstruction_rmse": 6.954333254,
+          "prediction_rmse": 9.192754186,
+          "planning_exact_state_rate": 0.9375,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_8_expert": {
+          "expert_count": 8,
+          "training_evaluations": 61440,
+          "drift_holdout_accuracy": 0.15625,
+          "retention_accuracy": 0.16015625,
+          "reconstruction_rmse": 24.517232256,
+          "prediction_rmse": 26.045696477,
+          "planning_exact_state_rate": 0.046875,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 10578,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "flat_64_expert_complete_scan": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 0.6484375,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 8.060471065,
+          "prediction_rmse": 9.979726896,
+          "planning_exact_state_rate": 0.984375,
+          "expert_evaluations": 16384,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_topology_64_expert_routed": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 0.6484375,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 8.060471065,
+          "prediction_rmse": 9.979726896,
+          "planning_exact_state_rate": 0.984375,
+          "expert_evaluations": 2272,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "nearest_centroid_16_no_recursive_births": {
+          "expert_count": 16,
+          "training_evaluations": 188416,
+          "drift_holdout_accuracy": 0.203125,
+          "retention_accuracy": 0.203125,
+          "reconstruction_rmse": 20.580456353,
+          "prediction_rmse": 21.985895044,
+          "planning_exact_state_rate": 0.15625,
+          "expert_evaluations": 4096,
+          "checkpoint_size_bytes": 14426,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "no_adaptation_static": {
+          "expert_count": 64,
+          "training_evaluations": 141600,
+          "drift_holdout_accuracy": 0.6328125,
+          "retention_accuracy": 0.97265625,
+          "reconstruction_rmse": 8.351477839,
+          "prediction_rmse": 9.707866943,
+          "planning_exact_state_rate": 0.859375,
+          "expert_evaluations": 2440,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_replay": {
+          "expert_count": 68,
+          "training_evaluations": 181112,
+          "drift_holdout_accuracy": 1.0,
+          "retention_accuracy": 0.640625,
+          "reconstruction_rmse": 6.954449813,
+          "prediction_rmse": 9.180787899,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_retirement": {
+          "expert_count": 72,
+          "training_evaluations": 172920,
+          "drift_holdout_accuracy": 0.96875,
+          "retention_accuracy": 0.7421875,
+          "reconstruction_rmse": 6.949565093,
+          "prediction_rmse": 9.438350171,
+          "planning_exact_state_rate": 0.875,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 41362,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_complete_scan_without_certification": {
+          "expert_count": 68,
+          "training_evaluations": 393142,
+          "drift_holdout_accuracy": 0.9765625,
+          "retention_accuracy": 0.6875,
+          "reconstruction_rmse": 6.954333254,
+          "prediction_rmse": 9.192754186,
+          "planning_exact_state_rate": 0.9375,
+          "expert_evaluations": 17408,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_fixed_topology_without_recursive_births": {
+          "expert_count": 64,
+          "training_evaluations": 2352336,
+          "drift_holdout_accuracy": 0.9765625,
+          "retention_accuracy": 0.6484375,
+          "reconstruction_rmse": 6.988528463,
+          "prediction_rmse": 8.334581379,
+          "planning_exact_state_rate": 1.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_random_births": {
+          "expert_count": 68,
+          "training_evaluations": 201047,
+          "drift_holdout_accuracy": 0.96484375,
+          "retention_accuracy": 0.6640625,
+          "reconstruction_rmse": 7.397027436,
+          "prediction_rmse": 8.943476831,
+          "planning_exact_state_rate": 0.984375,
+          "expert_evaluations": 2288,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        }
+      },
+      "hard_gates": {
+        "expected_topology": true,
+        "base_holdout_accuracy": true,
+        "adaptation_training_accuracy": true,
+        "adapted_drift_holdout_accuracy": true,
+        "adapted_gain_over_static": true,
+        "base_holdout_retention": false,
+        "exact_routing": true,
+        "base_reconstruction_rmse": true,
+        "adapted_reconstruction_rmse": true,
+        "adapted_reconstruction_improvement": true,
+        "retention_reconstruction": true,
+        "base_prediction_rmse": true,
+        "adapted_prediction_rmse": true,
+        "adapted_prediction_improvement": true,
+        "retention_prediction": true,
+        "exact_world_state_target_rate": true,
+        "path_found_rate": true,
+        "checkpoint_identity": true,
+        "checkpoint_behavior": true,
+        "checkpoint_mutations": true,
+        "lineage_and_topology": true
+      },
+      "trial_result": "FAIL"
+    },
+    {
+      "trial_id": "trial-08-ambiguous",
+      "regime": "partially_observed_ambiguous",
+      "seed": "0x0408000000000008",
+      "dataset_seeds": {
+        "base_training": "0x28b00c8b3d322e56",
+        "base_holdout": "0xbc959ae447f27a9c",
+        "drift_adaptation_training": "0x924390d35b2a592a",
+        "drift_holdout": "0x5adc52056dbb377e",
+        "original_task_retention_holdout": "0x60e25d056ff28a31",
+        "planning_cases": "0xc54d048fd95f12d3"
+      },
+      "candidate": {
+        "expert_count": 68,
+        "base_births": 56,
+        "adaptation_births": 8,
+        "adaptation_retirements": 4,
+        "training_evaluations": 205054,
+        "checkpoint_size_bytes": 39438,
+        "model_identity": "0fe9747959f4a56f4561610ae56325b3d017d91f4ff00638285d940ea592edf0",
+        "behavior_identity": "e1db12c2c8a9a2670f07e9c4855bf58d052389015398a1498e72b46faf4dee31",
+        "base_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 1.0,
+          "reconstruction_rmse": 5.384427146,
+          "next_observation_prediction_rmse": 15.803773847,
+          "transition_accuracy": 0.46875,
+          "routing_certification_count": 239,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 3000,
+          "classification_checksum": "214882c78cb6f95f",
+          "reconstruction_checksum": "21c157eb8fc65f4b",
+          "prediction_checksum": "b74f4b2b443328bd",
+          "transition_checksum": "013fe1caa43a2a22"
+        },
+        "adaptation_training": {
+          "samples": 512,
+          "rejected": 0,
+          "accuracy": 0.962890625,
+          "reconstruction_rmse": 6.15628762,
+          "next_observation_prediction_rmse": 11.249369109,
+          "transition_accuracy": 0.703125,
+          "routing_certification_count": 483,
+          "complete_oracle_agreement": 512,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 5836,
+          "classification_checksum": "598bf0425151ac04",
+          "reconstruction_checksum": "24dee8f9e51a0e7f",
+          "prediction_checksum": "bf5ab8b8072e170a",
+          "transition_checksum": "96f611bc4a11e759"
+        },
+        "static_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.61328125,
+          "reconstruction_rmse": 8.173583379,
+          "next_observation_prediction_rmse": 21.228929994,
+          "transition_accuracy": 0.4375,
+          "routing_certification_count": 220,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 4064,
+          "classification_checksum": "97aa80fedfc1b1fc",
+          "reconstruction_checksum": "3dffca1293f32450",
+          "prediction_checksum": "a9a774c6d104954d",
+          "transition_checksum": "66a66252979f2300"
+        },
+        "adapted_model_drift_holdout": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.93359375,
+          "reconstruction_rmse": 6.776301734,
+          "next_observation_prediction_rmse": 15.132556407,
+          "transition_accuracy": 0.5625,
+          "routing_certification_count": 243,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2828,
+          "classification_checksum": "95c6f5cbdc6a52a9",
+          "reconstruction_checksum": "8e0014fb3f210cca",
+          "prediction_checksum": "03e2c825a95c8c93",
+          "transition_checksum": "86e8adcd14afe9d4"
+        },
+        "base_holdout_retention": {
+          "samples": 256,
+          "rejected": 0,
+          "accuracy": 0.875,
+          "reconstruction_rmse": 5.952975229,
+          "next_observation_prediction_rmse": 17.637557343,
+          "transition_accuracy": 0.46875,
+          "routing_certification_count": 242,
+          "complete_oracle_agreement": 256,
+          "routed_complete_mismatches": 0,
+          "expert_evaluations": 2888,
+          "classification_checksum": "c3efaa00c7fc24e9",
+          "reconstruction_checksum": "d924edcafab4d00c",
+          "prediction_checksum": "11c05b3355ddcda8",
+          "transition_checksum": "8b4cf577b6a0e491"
+        },
+        "planning": {
+          "cases": 64,
+          "path_found": 64,
+          "exact_world_state_target_reached": 19,
+          "goal_expert_reached": 41,
+          "executed_path_length": 209,
+          "optimal_path_length": 208,
+          "path_length_regret": 5,
+          "graph_disconnection_failures": 0,
+          "transition_model_error_failures": 23,
+          "state_aliasing_failures": 22,
+          "expansions": 1655,
+          "checksum": "e1a7ef0e8efb7ac9"
+        }
+      },
+      "checkpoint_verification": {
+        "roundtrip": true,
+        "identity_match": true,
+        "adaptation_training_evaluation_match": true,
+        "drift_holdout_evaluation_match": true,
+        "retention_evaluation_match": true,
+        "planning_match": true,
+        "complete_behavior_match": true,
+        "mutations": {
+          "retrieval_key_component": true,
+          "reconstruction_component": true,
+          "next_observation_component": true,
+          "label": true,
+          "label_count": true,
+          "lineage": true,
+          "transition_graph_edge": true,
+          "payload_byte": true,
+          "checkpoint_truncation": true,
+          "appended_unexpected_byte": true,
+          "incorrect_schema_version": true,
+          "checkpoint_substitution": true
+        }
+      },
+      "lineage_invariants": {
+        "sibling_generation_equality": true,
+        "parent_child_generation_increment": true,
+        "lineage_uniqueness": true,
+        "repeated_descendant_splitting": true,
+        "no_accidental_lineage_reuse": true,
+        "deterministic_topology_reproduction": true
+      },
+      "comparisons": {
+        "ravel_0_4_candidate": {
+          "expert_count": 68,
+          "training_evaluations": 205054,
+          "drift_holdout_accuracy": 0.93359375,
+          "retention_accuracy": 0.875,
+          "reconstruction_rmse": 6.776301734,
+          "prediction_rmse": 15.132556407,
+          "planning_exact_state_rate": 0.296875,
+          "expert_evaluations": 2828,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_8_expert": {
+          "expert_count": 8,
+          "training_evaluations": 61440,
+          "drift_holdout_accuracy": 0.203125,
+          "retention_accuracy": 0.21875,
+          "reconstruction_rmse": 18.973571631,
+          "prediction_rmse": 23.875998807,
+          "planning_exact_state_rate": 0.0,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 10578,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "flat_64_expert_complete_scan": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 0.61328125,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 8.074792865,
+          "prediction_rmse": 20.861741043,
+          "planning_exact_state_rate": 0.078125,
+          "expert_evaluations": 16384,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "fixed_topology_64_expert_routed": {
+          "expert_count": 64,
+          "training_evaluations": 2326528,
+          "drift_holdout_accuracy": 0.61328125,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 8.074792865,
+          "prediction_rmse": 20.861741043,
+          "planning_exact_state_rate": 0.078125,
+          "expert_evaluations": 3672,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "nearest_centroid_16_no_recursive_births": {
+          "expert_count": 16,
+          "training_evaluations": 188416,
+          "drift_holdout_accuracy": 0.37890625,
+          "retention_accuracy": 0.54296875,
+          "reconstruction_rmse": 13.662055881,
+          "prediction_rmse": 22.389715333,
+          "planning_exact_state_rate": 0.03125,
+          "expert_evaluations": 4096,
+          "checkpoint_size_bytes": 14426,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "no_adaptation_static": {
+          "expert_count": 64,
+          "training_evaluations": 126824,
+          "drift_holdout_accuracy": 0.61328125,
+          "retention_accuracy": 1.0,
+          "reconstruction_rmse": 8.173583379,
+          "prediction_rmse": 21.228929994,
+          "planning_exact_state_rate": 0.140625,
+          "expert_evaluations": 4064,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_replay": {
+          "expert_count": 68,
+          "training_evaluations": 180238,
+          "drift_holdout_accuracy": 0.9921875,
+          "retention_accuracy": 0.68359375,
+          "reconstruction_rmse": 6.74198883,
+          "prediction_rmse": 14.419368162,
+          "planning_exact_state_rate": 0.3125,
+          "expert_evaluations": 2768,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_without_retirement": {
+          "expert_count": 72,
+          "training_evaluations": 171256,
+          "drift_holdout_accuracy": 0.94140625,
+          "retention_accuracy": 0.87109375,
+          "reconstruction_rmse": 6.763869572,
+          "prediction_rmse": 15.078832884,
+          "planning_exact_state_rate": 0.265625,
+          "expert_evaluations": 2880,
+          "checkpoint_size_bytes": 41362,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_complete_scan_without_certification": {
+          "expert_count": 68,
+          "training_evaluations": 390270,
+          "drift_holdout_accuracy": 0.93359375,
+          "retention_accuracy": 0.875,
+          "reconstruction_rmse": 6.776301734,
+          "prediction_rmse": 15.132556407,
+          "planning_exact_state_rate": 0.296875,
+          "expert_evaluations": 17408,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_fixed_topology_without_recursive_births": {
+          "expert_count": 64,
+          "training_evaluations": 2354240,
+          "drift_holdout_accuracy": 0.98046875,
+          "retention_accuracy": 0.82421875,
+          "reconstruction_rmse": 6.68729757,
+          "prediction_rmse": 16.15325089,
+          "planning_exact_state_rate": 0.25,
+          "expert_evaluations": 2048,
+          "checkpoint_size_bytes": 37514,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        },
+        "ravel_random_births": {
+          "expert_count": 68,
+          "training_evaluations": 216387,
+          "drift_holdout_accuracy": 0.9375,
+          "retention_accuracy": 0.8046875,
+          "reconstruction_rmse": 6.807537642,
+          "prediction_rmse": 15.611341361,
+          "planning_exact_state_rate": 0.328125,
+          "expert_evaluations": 3008,
+          "checkpoint_size_bytes": 39438,
+          "runtime_observation_non_normative": {
+            "status": "UNKNOWN",
+            "reason": "excluded_from_canonical_deterministic_evidence"
+          }
+        }
+      },
+      "hard_gates": {
+        "expected_topology": true,
+        "base_holdout_accuracy": true,
+        "adaptation_training_accuracy": true,
+        "adapted_drift_holdout_accuracy": true,
+        "adapted_gain_over_static": true,
+        "base_holdout_retention": true,
+        "exact_routing": true,
+        "base_reconstruction_rmse": true,
+        "adapted_reconstruction_rmse": true,
+        "adapted_reconstruction_improvement": true,
+        "retention_reconstruction": true,
+        "base_prediction_rmse": true,
+        "adapted_prediction_rmse": true,
+        "adapted_prediction_improvement": true,
+        "retention_prediction": true,
+        "exact_world_state_target_rate": false,
+        "path_found_rate": true,
+        "checkpoint_identity": true,
+        "checkpoint_behavior": true,
+        "checkpoint_mutations": true,
+        "lineage_and_topology": true
+      },
+      "trial_result": "FAIL"
+    }
+  ],
+  "candidate_aggregates": {
+    "base_holdout_accuracy": {
+      "minimum": 0.9375,
+      "median": 0.98828125,
+      "maximum": 1.0,
+      "arithmetic_mean": 0.98095703125,
+      "population_standard_deviation": 0.020710263730906734
+    },
+    "adaptation_training_accuracy": {
+      "minimum": 0.962890625,
+      "median": 1.0,
+      "maximum": 1.0,
+      "arithmetic_mean": 0.988037109375,
+      "population_standard_deviation": 0.015729554363129505
+    },
+    "static_model_drift_holdout_accuracy": {
+      "minimum": 0.61328125,
+      "median": 0.955078125,
+      "maximum": 0.9921875,
+      "arithmetic_mean": 0.84228515625,
+      "population_standard_deviation": 0.16786581034443188
+    },
+    "adapted_model_drift_holdout_accuracy": {
+      "minimum": 0.93359375,
+      "median": 1.0,
+      "maximum": 1.0,
+      "arithmetic_mean": 0.9853515625,
+      "population_standard_deviation": 0.022333196535213422
+    },
+    "base_holdout_retention": {
+      "minimum": 0.671875,
+      "median": 1.0,
+      "maximum": 1.0,
+      "arithmetic_mean": 0.904296875,
+      "population_standard_deviation": 0.1358650803862397
+    },
+    "base_reconstruction_rmse": {
+      "minimum": 3.249159843,
+      "median": 4.779562945,
+      "maximum": 9.256042033,
+      "arithmetic_mean": 5.290470095125,
+      "population_standard_deviation": 1.7926340609447835
+    },
+    "adapted_drift_reconstruction_rmse": {
+      "minimum": 3.268650797,
+      "median": 4.7148156100000005,
+      "maximum": 11.722196472,
+      "arithmetic_mean": 5.595161787,
+      "population_standard_deviation": 2.7010520289568483
+    },
+    "base_prediction_rmse": {
+      "minimum": 5.274702577,
+      "median": 9.0684269465,
+      "maximum": 15.803773847,
+      "arithmetic_mean": 9.351916128375,
+      "population_standard_deviation": 3.3369641369339753
+    },
+    "adapted_drift_prediction_rmse": {
+      "minimum": 5.210900214,
+      "median": 7.5611356915000005,
+      "maximum": 15.132556407,
+      "arithmetic_mean": 9.0894363225,
+      "population_standard_deviation": 3.7918848016987137
+    },
+    "planning_exact_state_rate": {
+      "minimum": 0.296875,
+      "median": 0.9453125,
+      "maximum": 1.0,
+      "arithmetic_mean": 0.8671875,
+      "population_standard_deviation": 0.2222103539582483
+    },
+    "planning_path_found_rate": {
+      "minimum": 0.96875,
+      "median": 1.0,
+      "maximum": 1.0,
+      "arithmetic_mean": 0.99609375,
+      "population_standard_deviation": 0.010334966058846057
+    },
+    "expert_count": {
+      "minimum": 68.0,
+      "median": 68.0,
+      "maximum": 68.0,
+      "arithmetic_mean": 68.0,
+      "population_standard_deviation": 0.0
+    },
+    "training_evaluations": {
+      "minimum": 184288.0,
+      "median": 198176.5,
+      "maximum": 248728.0,
+      "arithmetic_mean": 201902.5,
+      "population_standard_deviation": 19212.06033979698
+    },
+    "checkpoint_size_bytes": {
+      "minimum": 39438.0,
+      "median": 39438.0,
+      "maximum": 39438.0,
+      "arithmetic_mean": 39438.0,
+      "population_standard_deviation": 0.0
+    }
+  },
+  "comparison_aggregates": {
+    "ravel_0_4_candidate": {
+      "drift_holdout_accuracy": {
+        "minimum": 0.93359375,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.9853515625,
+        "population_standard_deviation": 0.022333196535213422
+      },
+      "retention_accuracy": {
+        "minimum": 0.671875,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.904296875,
+        "population_standard_deviation": 0.1358650803862397
+      },
+      "reconstruction_rmse": {
+        "minimum": 3.268650797,
+        "median": 4.7148156100000005,
+        "maximum": 11.722196472,
+        "arithmetic_mean": 5.595161787,
+        "population_standard_deviation": 2.7010520289568483
+      },
+      "prediction_rmse": {
+        "minimum": 5.210900214,
+        "median": 7.5611356915000005,
+        "maximum": 15.132556407,
+        "arithmetic_mean": 9.0894363225,
+        "population_standard_deviation": 3.7918848016987137
+      },
+      "planning_exact_state_rate": {
+        "minimum": 0.296875,
+        "median": 0.9453125,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.8671875,
+        "population_standard_deviation": 0.2222103539582483
+      },
+      "expert_evaluations": {
+        "minimum": 2048.0,
+        "median": 2048.0,
+        "maximum": 2828.0,
+        "arithmetic_mean": 2175.5,
+        "population_standard_deviation": 258.83150890106094
+      },
+      "expert_count": {
+        "minimum": 68.0,
+        "median": 68.0,
+        "maximum": 68.0,
+        "arithmetic_mean": 68.0,
+        "population_standard_deviation": 0.0
+      },
+      "training_evaluations": {
+        "minimum": 184288.0,
+        "median": 198176.5,
+        "maximum": 248728.0,
+        "arithmetic_mean": 201902.5,
+        "population_standard_deviation": 19212.06033979698
+      },
+      "checkpoint_size_bytes": {
+        "minimum": 39438.0,
+        "median": 39438.0,
+        "maximum": 39438.0,
+        "arithmetic_mean": 39438.0,
+        "population_standard_deviation": 0.0
+      },
+      "runtime_observation_non_normative": {
+        "status": "UNKNOWN",
+        "reason": "per-variant wall-clock timing excluded from canonical deterministic evidence"
+      }
+    },
+    "fixed_8_expert": {
+      "drift_holdout_accuracy": {
+        "minimum": 0.1484375,
+        "median": 0.197265625,
+        "maximum": 0.234375,
+        "arithmetic_mean": 0.1923828125,
+        "population_standard_deviation": 0.02794743754151208
+      },
+      "retention_accuracy": {
+        "minimum": 0.15625,
+        "median": 0.216796875,
+        "maximum": 0.25,
+        "arithmetic_mean": 0.2080078125,
+        "population_standard_deviation": 0.03272577359397664
+      },
+      "reconstruction_rmse": {
+        "minimum": 16.462897466,
+        "median": 28.371648356,
+        "maximum": 30.667927368,
+        "arithmetic_mean": 25.591238309625,
+        "population_standard_deviation": 4.856857388778953
+      },
+      "prediction_rmse": {
+        "minimum": 17.871856266,
+        "median": 29.6558403175,
+        "maximum": 33.661330668,
+        "arithmetic_mean": 28.040879782,
+        "population_standard_deviation": 4.93676724301605
+      },
+      "planning_exact_state_rate": {
+        "minimum": 0.0,
+        "median": 0.03125,
+        "maximum": 0.078125,
+        "arithmetic_mean": 0.03515625,
+        "population_standard_deviation": 0.02174907954230477
+      },
+      "expert_evaluations": {
+        "minimum": 2048.0,
+        "median": 2048.0,
+        "maximum": 2048.0,
+        "arithmetic_mean": 2048.0,
+        "population_standard_deviation": 0.0
+      },
+      "expert_count": {
+        "minimum": 8.0,
+        "median": 8.0,
+        "maximum": 8.0,
+        "arithmetic_mean": 8.0,
+        "population_standard_deviation": 0.0
+      },
+      "training_evaluations": {
+        "minimum": 61440.0,
+        "median": 61440.0,
+        "maximum": 61440.0,
+        "arithmetic_mean": 61440.0,
+        "population_standard_deviation": 0.0
+      },
+      "checkpoint_size_bytes": {
+        "minimum": 10578.0,
+        "median": 10578.0,
+        "maximum": 10578.0,
+        "arithmetic_mean": 10578.0,
+        "population_standard_deviation": 0.0
+      },
+      "runtime_observation_non_normative": {
+        "status": "UNKNOWN",
+        "reason": "per-variant wall-clock timing excluded from canonical deterministic evidence"
+      }
+    },
+    "flat_64_expert_complete_scan": {
+      "drift_holdout_accuracy": {
+        "minimum": 0.61328125,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.86181640625,
+        "population_standard_deviation": 0.17861151926413585
+      },
+      "retention_accuracy": {
+        "minimum": 1.0,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 1.0,
+        "population_standard_deviation": 0.0
+      },
+      "reconstruction_rmse": {
+        "minimum": 3.239324581,
+        "median": 5.5792778625,
+        "maximum": 11.498955243,
+        "arithmetic_mean": 6.0709421279999995,
+        "population_standard_deviation": 2.8331546433765546
+      },
+      "prediction_rmse": {
+        "minimum": 5.964526836,
+        "median": 9.8226950355,
+        "maximum": 23.603471108,
+        "arithmetic_mean": 12.626418247125,
+        "population_standard_deviation": 6.444365190744533
+      },
+      "planning_exact_state_rate": {
+        "minimum": 0.078125,
+        "median": 0.9609375,
+        "maximum": 0.984375,
+        "arithmetic_mean": 0.79296875,
+        "population_standard_deviation": 0.30083197624203367
+      },
+      "expert_evaluations": {
+        "minimum": 16384.0,
+        "median": 16384.0,
+        "maximum": 16384.0,
+        "arithmetic_mean": 16384.0,
+        "population_standard_deviation": 0.0
+      },
+      "expert_count": {
+        "minimum": 64.0,
+        "median": 64.0,
+        "maximum": 64.0,
+        "arithmetic_mean": 64.0,
+        "population_standard_deviation": 0.0
+      },
+      "training_evaluations": {
+        "minimum": 2326528.0,
+        "median": 2326528.0,
+        "maximum": 2326528.0,
+        "arithmetic_mean": 2326528.0,
+        "population_standard_deviation": 0.0
+      },
+      "checkpoint_size_bytes": {
+        "minimum": 37514.0,
+        "median": 37514.0,
+        "maximum": 37514.0,
+        "arithmetic_mean": 37514.0,
+        "population_standard_deviation": 0.0
+      },
+      "runtime_observation_non_normative": {
+        "status": "UNKNOWN",
+        "reason": "per-variant wall-clock timing excluded from canonical deterministic evidence"
+      }
+    },
+    "fixed_topology_64_expert_routed": {
+      "drift_holdout_accuracy": {
+        "minimum": 0.61328125,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.86181640625,
+        "population_standard_deviation": 0.17861151926413585
+      },
+      "retention_accuracy": {
+        "minimum": 1.0,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 1.0,
+        "population_standard_deviation": 0.0
+      },
+      "reconstruction_rmse": {
+        "minimum": 3.239324581,
+        "median": 5.5792778625,
+        "maximum": 11.498955243,
+        "arithmetic_mean": 6.0709421279999995,
+        "population_standard_deviation": 2.8331546433765546
+      },
+      "prediction_rmse": {
+        "minimum": 5.964526836,
+        "median": 9.8226950355,
+        "maximum": 23.603471108,
+        "arithmetic_mean": 12.626418247125,
+        "population_standard_deviation": 6.444365190744533
+      },
+      "planning_exact_state_rate": {
+        "minimum": 0.078125,
+        "median": 0.9609375,
+        "maximum": 0.984375,
+        "arithmetic_mean": 0.79296875,
+        "population_standard_deviation": 0.30083197624203367
+      },
+      "expert_evaluations": {
+        "minimum": 2048.0,
+        "median": 2048.0,
+        "maximum": 3672.0,
+        "arithmetic_mean": 2286.0,
+        "population_standard_deviation": 528.8591494906749
+      },
+      "expert_count": {
+        "minimum": 64.0,
+        "median": 64.0,
+        "maximum": 64.0,
+        "arithmetic_mean": 64.0,
+        "population_standard_deviation": 0.0
+      },
+      "training_evaluations": {
+        "minimum": 2326528.0,
+        "median": 2326528.0,
+        "maximum": 2326528.0,
+        "arithmetic_mean": 2326528.0,
+        "population_standard_deviation": 0.0
+      },
+      "checkpoint_size_bytes": {
+        "minimum": 37514.0,
+        "median": 37514.0,
+        "maximum": 37514.0,
+        "arithmetic_mean": 37514.0,
+        "population_standard_deviation": 0.0
+      },
+      "runtime_observation_non_normative": {
+        "status": "UNKNOWN",
+        "reason": "per-variant wall-clock timing excluded from canonical deterministic evidence"
+      }
+    },
+    "nearest_centroid_16_no_recursive_births": {
+      "drift_holdout_accuracy": {
+        "minimum": 0.203125,
+        "median": 0.22265625,
+        "maximum": 0.37890625,
+        "arithmetic_mean": 0.248046875,
+        "population_standard_deviation": 0.055928988528423255
+      },
+      "retention_accuracy": {
+        "minimum": 0.203125,
+        "median": 0.26171875,
+        "maximum": 0.54296875,
+        "arithmetic_mean": 0.28955078125,
+        "population_standard_deviation": 0.09865577354956519
+      },
+      "reconstruction_rmse": {
+        "minimum": 11.97511352,
+        "median": 22.367615947,
+        "maximum": 25.316094113,
+        "arithmetic_mean": 20.45029755575,
+        "population_standard_deviation": 4.6132397661509135
+      },
+      "prediction_rmse": {
+        "minimum": 11.988090221,
+        "median": 24.540759106,
+        "maximum": 29.618836762,
+        "arithmetic_mean": 23.61753008875,
+        "population_standard_deviation": 5.052748093230206
+      },
+      "planning_exact_state_rate": {
+        "minimum": 0.03125,
+        "median": 0.1484375,
+        "maximum": 0.328125,
+        "arithmetic_mean": 0.14453125,
+        "population_standard_deviation": 0.08258740043697646
+      },
+      "expert_evaluations": {
+        "minimum": 4096.0,
+        "median": 4096.0,
+        "maximum": 4096.0,
+        "arithmetic_mean": 4096.0,
+        "population_standard_deviation": 0.0
+      },
+      "expert_count": {
+        "minimum": 16.0,
+        "median": 16.0,
+        "maximum": 16.0,
+        "arithmetic_mean": 16.0,
+        "population_standard_deviation": 0.0
+      },
+      "training_evaluations": {
+        "minimum": 188416.0,
+        "median": 188416.0,
+        "maximum": 188416.0,
+        "arithmetic_mean": 188416.0,
+        "population_standard_deviation": 0.0
+      },
+      "checkpoint_size_bytes": {
+        "minimum": 14426.0,
+        "median": 14426.0,
+        "maximum": 14426.0,
+        "arithmetic_mean": 14426.0,
+        "population_standard_deviation": 0.0
+      },
+      "runtime_observation_non_normative": {
+        "status": "UNKNOWN",
+        "reason": "per-variant wall-clock timing excluded from canonical deterministic evidence"
+      }
+    },
+    "no_adaptation_static": {
+      "drift_holdout_accuracy": {
+        "minimum": 0.61328125,
+        "median": 0.955078125,
+        "maximum": 0.9921875,
+        "arithmetic_mean": 0.84228515625,
+        "population_standard_deviation": 0.16786581034443188
+      },
+      "retention_accuracy": {
+        "minimum": 0.95703125,
+        "median": 0.974609375,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.97998046875,
+        "population_standard_deviation": 0.016392002276947773
+      },
+      "reconstruction_rmse": {
+        "minimum": 3.245941506,
+        "median": 6.6470930164999995,
+        "maximum": 12.208403881,
+        "arithmetic_mean": 6.7377749685,
+        "population_standard_deviation": 2.72848463878845
+      },
+      "prediction_rmse": {
+        "minimum": 6.308541448,
+        "median": 9.388836358,
+        "maximum": 23.74263423,
+        "arithmetic_mean": 12.86596623975,
+        "population_standard_deviation": 6.398827412838275
+      },
+      "planning_exact_state_rate": {
+        "minimum": 0.140625,
+        "median": 0.78125,
+        "maximum": 0.984375,
+        "arithmetic_mean": 0.677734375,
+        "population_standard_deviation": 0.2596921888678679
+      },
+      "expert_evaluations": {
+        "minimum": 2048.0,
+        "median": 2216.0,
+        "maximum": 4064.0,
+        "arithmetic_mean": 2461.0,
+        "population_standard_deviation": 640.2991488359172
+      },
+      "expert_count": {
+        "minimum": 64.0,
+        "median": 64.0,
+        "maximum": 64.0,
+        "arithmetic_mean": 64.0,
+        "population_standard_deviation": 0.0
+      },
+      "training_evaluations": {
+        "minimum": 126824.0,
+        "median": 132444.0,
+        "maximum": 192824.0,
+        "arithmetic_mean": 140426.0,
+        "population_standard_deviation": 20299.651918198007
+      },
+      "checkpoint_size_bytes": {
+        "minimum": 37514.0,
+        "median": 37514.0,
+        "maximum": 37514.0,
+        "arithmetic_mean": 37514.0,
+        "population_standard_deviation": 0.0
+      },
+      "runtime_observation_non_normative": {
+        "status": "UNKNOWN",
+        "reason": "per-variant wall-clock timing excluded from canonical deterministic evidence"
+      }
+    },
+    "ravel_without_replay": {
+      "drift_holdout_accuracy": {
+        "minimum": 0.9921875,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.9990234375,
+        "population_standard_deviation": 0.0025837415147115144
+      },
+      "retention_accuracy": {
+        "minimum": 0.6328125,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.86962890625,
+        "population_standard_deviation": 0.1688627360964158
+      },
+      "reconstruction_rmse": {
+        "minimum": 3.353389407,
+        "median": 4.5911728345,
+        "maximum": 12.117639144,
+        "arithmetic_mean": 5.642386046625,
+        "population_standard_deviation": 2.793336054256016
+      },
+      "prediction_rmse": {
+        "minimum": 5.858492042,
+        "median": 8.003230965,
+        "maximum": 14.675433687,
+        "arithmetic_mean": 9.18131778325,
+        "population_standard_deviation": 3.359626208001222
+      },
+      "planning_exact_state_rate": {
+        "minimum": 0.3125,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.888671875,
+        "population_standard_deviation": 0.2228189509716563
+      },
+      "expert_evaluations": {
+        "minimum": 2048.0,
+        "median": 2048.0,
+        "maximum": 2768.0,
+        "arithmetic_mean": 2213.0,
+        "population_standard_deviation": 287.35866091002026
+      },
+      "expert_count": {
+        "minimum": 68.0,
+        "median": 68.0,
+        "maximum": 68.0,
+        "arithmetic_mean": 68.0,
+        "population_standard_deviation": 0.0
+      },
+      "training_evaluations": {
+        "minimum": 167904.0,
+        "median": 180181.5,
+        "maximum": 231960.0,
+        "arithmetic_mean": 183194.0,
+        "population_standard_deviation": 19129.63024342081
+      },
+      "checkpoint_size_bytes": {
+        "minimum": 39438.0,
+        "median": 39438.0,
+        "maximum": 39438.0,
+        "arithmetic_mean": 39438.0,
+        "population_standard_deviation": 0.0
+      },
+      "runtime_observation_non_normative": {
+        "status": "UNKNOWN",
+        "reason": "per-variant wall-clock timing excluded from canonical deterministic evidence"
+      }
+    },
+    "ravel_without_retirement": {
+      "drift_holdout_accuracy": {
+        "minimum": 0.94140625,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.9853515625,
+        "population_standard_deviation": 0.020739024005464162
+      },
+      "retention_accuracy": {
+        "minimum": 0.671875,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.91064453125,
+        "population_standard_deviation": 0.12593397263350678
+      },
+      "reconstruction_rmse": {
+        "minimum": 3.268070888,
+        "median": 4.7137006485,
+        "maximum": 11.715737213,
+        "arithmetic_mean": 5.59219561325,
+        "population_standard_deviation": 2.697993650013105
+      },
+      "prediction_rmse": {
+        "minimum": 5.628626399,
+        "median": 9.162368425499999,
+        "maximum": 15.118959391,
+        "arithmetic_mean": 10.028339925625,
+        "population_standard_deviation": 3.6227605449468716
+      },
+      "planning_exact_state_rate": {
+        "minimum": 0.265625,
+        "median": 0.9140625,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.84375,
+        "population_standard_deviation": 0.2265625
+      },
+      "expert_evaluations": {
+        "minimum": 2048.0,
+        "median": 2272.0,
+        "maximum": 3328.0,
+        "arithmetic_mean": 2424.0,
+        "population_standard_deviation": 447.3566809605061
+      },
+      "expert_count": {
+        "minimum": 72.0,
+        "median": 72.0,
+        "maximum": 72.0,
+        "arithmetic_mean": 72.0,
+        "population_standard_deviation": 0.0
+      },
+      "training_evaluations": {
+        "minimum": 159712.0,
+        "median": 170800.0,
+        "maximum": 224152.0,
+        "arithmetic_mean": 174729.0,
+        "population_standard_deviation": 19324.385190737634
+      },
+      "checkpoint_size_bytes": {
+        "minimum": 41362.0,
+        "median": 41362.0,
+        "maximum": 41362.0,
+        "arithmetic_mean": 41362.0,
+        "population_standard_deviation": 0.0
+      },
+      "runtime_observation_non_normative": {
+        "status": "UNKNOWN",
+        "reason": "per-variant wall-clock timing excluded from canonical deterministic evidence"
+      }
+    },
+    "ravel_complete_scan_without_certification": {
+      "drift_holdout_accuracy": {
+        "minimum": 0.93359375,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.9853515625,
+        "population_standard_deviation": 0.022333196535213422
+      },
+      "retention_accuracy": {
+        "minimum": 0.671875,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.904296875,
+        "population_standard_deviation": 0.1358650803862397
+      },
+      "reconstruction_rmse": {
+        "minimum": 3.268650797,
+        "median": 4.7148156100000005,
+        "maximum": 11.722196472,
+        "arithmetic_mean": 5.595161787,
+        "population_standard_deviation": 2.7010520289568483
+      },
+      "prediction_rmse": {
+        "minimum": 5.210900214,
+        "median": 7.5611356915000005,
+        "maximum": 15.132556407,
+        "arithmetic_mean": 9.0894363225,
+        "population_standard_deviation": 3.7918848016987137
+      },
+      "planning_exact_state_rate": {
+        "minimum": 0.296875,
+        "median": 0.9453125,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.8671875,
+        "population_standard_deviation": 0.2222103539582483
+      },
+      "expert_evaluations": {
+        "minimum": 17408.0,
+        "median": 17408.0,
+        "maximum": 17408.0,
+        "arithmetic_mean": 17408.0,
+        "population_standard_deviation": 0.0
+      },
+      "expert_count": {
+        "minimum": 68.0,
+        "median": 68.0,
+        "maximum": 68.0,
+        "arithmetic_mean": 68.0,
+        "population_standard_deviation": 0.0
+      },
+      "training_evaluations": {
+        "minimum": 380896.0,
+        "median": 387604.5,
+        "maximum": 443800.0,
+        "arithmetic_mean": 393782.5,
+        "population_standard_deviation": 19305.77754196914
+      },
+      "checkpoint_size_bytes": {
+        "minimum": 39438.0,
+        "median": 39438.0,
+        "maximum": 39438.0,
+        "arithmetic_mean": 39438.0,
+        "population_standard_deviation": 0.0
+      },
+      "runtime_observation_non_normative": {
+        "status": "UNKNOWN",
+        "reason": "per-variant wall-clock timing excluded from canonical deterministic evidence"
+      }
+    },
+    "ravel_fixed_topology_without_recursive_births": {
+      "drift_holdout_accuracy": {
+        "minimum": 0.9765625,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.9921875,
+        "population_standard_deviation": 0.01014873520059889
+      },
+      "retention_accuracy": {
+        "minimum": 0.6484375,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.89208984375,
+        "population_standard_deviation": 0.14756033875539998
+      },
+      "reconstruction_rmse": {
+        "minimum": 3.276899436,
+        "median": 4.7239634425000006,
+        "maximum": 11.73443203,
+        "arithmetic_mean": 5.593109469375,
+        "population_standard_deviation": 2.7001961915669406
+      },
+      "prediction_rmse": {
+        "minimum": 3.725665254,
+        "median": 7.1216687819999995,
+        "maximum": 16.15325089,
+        "arithmetic_mean": 8.72064317175,
+        "population_standard_deviation": 4.220537239010188
+      },
+      "planning_exact_state_rate": {
+        "minimum": 0.25,
+        "median": 1.0,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.884765625,
+        "population_standard_deviation": 0.24642679596887263
+      },
+      "expert_evaluations": {
+        "minimum": 2048.0,
+        "median": 2048.0,
+        "maximum": 2272.0,
+        "arithmetic_mean": 2076.0,
+        "population_standard_deviation": 74.08103670980854
+      },
+      "expert_count": {
+        "minimum": 64.0,
+        "median": 64.0,
+        "maximum": 64.0,
+        "arithmetic_mean": 64.0,
+        "population_standard_deviation": 0.0
+      },
+      "training_evaluations": {
+        "minimum": 2351104.0,
+        "median": 2351104.0,
+        "maximum": 2354240.0,
+        "arithmetic_mean": 2351657.0,
+        "population_standard_deviation": 1055.2833742649411
+      },
+      "checkpoint_size_bytes": {
+        "minimum": 37514.0,
+        "median": 37514.0,
+        "maximum": 37514.0,
+        "arithmetic_mean": 37514.0,
+        "population_standard_deviation": 0.0
+      },
+      "runtime_observation_non_normative": {
+        "status": "UNKNOWN",
+        "reason": "per-variant wall-clock timing excluded from canonical deterministic evidence"
+      }
+    },
+    "ravel_random_births": {
+      "drift_holdout_accuracy": {
+        "minimum": 0.9375,
+        "median": 0.96875,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.97265625,
+        "population_standard_deviation": 0.01943334838098867
+      },
+      "retention_accuracy": {
+        "minimum": 0.6640625,
+        "median": 0.962890625,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.87890625,
+        "population_standard_deviation": 0.13695570983014227
+      },
+      "reconstruction_rmse": {
+        "minimum": 3.278805288,
+        "median": 4.984041905,
+        "maximum": 12.370829046,
+        "arithmetic_mean": 5.988308013375001,
+        "population_standard_deviation": 2.769990490368177
+      },
+      "prediction_rmse": {
+        "minimum": 5.244062968,
+        "median": 8.0238689135,
+        "maximum": 15.611341361,
+        "arithmetic_mean": 9.355864837624999,
+        "population_standard_deviation": 3.7909629244858127
+      },
+      "planning_exact_state_rate": {
+        "minimum": 0.328125,
+        "median": 0.8359375,
+        "maximum": 1.0,
+        "arithmetic_mean": 0.798828125,
+        "population_standard_deviation": 0.21699034160443495
+      },
+      "expert_evaluations": {
+        "minimum": 2048.0,
+        "median": 2198.0,
+        "maximum": 3008.0,
+        "arithmetic_mean": 2348.0,
+        "population_standard_deviation": 340.73450074801644
+      },
+      "expert_count": {
+        "minimum": 68.0,
+        "median": 68.0,
+        "maximum": 68.0,
+        "arithmetic_mean": 68.0,
+        "population_standard_deviation": 0.0
+      },
+      "training_evaluations": {
+        "minimum": 181952.0,
+        "median": 190351.5,
+        "maximum": 259742.0,
+        "arithmetic_mean": 201174.375,
+        "population_standard_deviation": 24560.557062786156
+      },
+      "checkpoint_size_bytes": {
+        "minimum": 39438.0,
+        "median": 39438.0,
+        "maximum": 39438.0,
+        "arithmetic_mean": 39438.0,
+        "population_standard_deviation": 0.0
+      },
+      "runtime_observation_non_normative": {
+        "status": "UNKNOWN",
+        "reason": "per-variant wall-clock timing excluded from canonical deterministic evidence"
+      }
+    }
+  },
+  "candidate_mean_drift_accuracy_delta_vs_comparisons": {
+    "fixed_8_expert": 0.79296875,
+    "flat_64_expert_complete_scan": 0.12353515625,
+    "fixed_topology_64_expert_routed": 0.12353515625,
+    "nearest_centroid_16_no_recursive_births": 0.7373046875,
+    "no_adaptation_static": 0.14306640625,
+    "ravel_without_replay": -0.013671875,
+    "ravel_without_retirement": 0.0,
+    "ravel_complete_scan_without_certification": 0.0,
+    "ravel_fixed_topology_without_recursive_births": -0.0068359375,
+    "ravel_random_births": 0.0126953125
+  },
+  "comparison_interpretation": "mixed_do_not_infer_superiority",
+  "trial_summary": {
+    "declared": 8,
+    "passing": 0,
+    "failing": 8,
+    "pass_rule": "all_8_trials_pass"
+  },
+  "development_result": "FAIL",
+  "formal_mncs_status": "UNKNOWN",
+  "formal_mncds_status": "UNKNOWN",
+  "promotion_authorized": false
+}

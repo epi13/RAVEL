@@ -1,0 +1,19 @@
+{
+  "schema":"ravel-unified-evidence/0.3",
+  "architecture":{"event_dimensions":8,"classes":8,"actions":4,"world_states":64,"route_width":8},
+  "base_training":{"initial_experts":8,"final_experts":64,"births":56,"samples_processed":393216,"expert_evaluations":4851616,"certified_routes":359202,"model_digest":"4d4e9116810140b8"},
+  "continual_adaptation":{"births":24,"retired":8,"final_experts":80,"samples_processed":360448,"expert_evaluations":2883584,"certified_routes":360448,"model_digest":"c2404c08943b3afd"},
+  "evaluation":{
+    "base_holdout":{"experts":64,"samples":8192,"accuracy":0.968261719,"exact_mismatches":0,"certified_rate":1.000000000,"mean_experts":8.000000,"reconstruction_rmse":4.899726995,"next_prediction_rmse":5.069874856,"transition_accuracy":0.956909180,"checksum":"c6c3a074be666611"},
+    "static_on_drift":{"experts":64,"samples":16384,"accuracy":0.718994141,"exact_mismatches":0,"certified_rate":1.000000000,"mean_experts":8.000000,"reconstruction_rmse":6.627691159,"next_prediction_rmse":6.767901838,"transition_accuracy":0.960510254,"checksum":"52481ff252ecd16a"},
+    "adapted_on_drift":{"experts":80,"samples":16384,"accuracy":1.000000000,"exact_mismatches":0,"certified_rate":1.000000000,"mean_experts":8.000000,"reconstruction_rmse":3.204095334,"next_prediction_rmse":3.276330631,"transition_accuracy":0.992919922,"checksum":"0caa892e0e5a6491"},
+    "adapted_retention":{"experts":80,"samples":8192,"accuracy":0.967041016,"exact_mismatches":0,"certified_rate":1.000000000,"mean_experts":8.000000,"reconstruction_rmse":3.327176195,"next_prediction_rmse":3.662946981,"transition_accuracy":0.910278320,"checksum":"da7ff096a14faaab"}
+  },
+  "planning":{"base":{"cases":512,"solved":512,"exact_goals":371,"expansions":16731,"checksum":"4d61c4f676aa6191"},"adapted":{"cases":512,"solved":512,"exact_goals":505,"expansions":17055,"checksum":"af3530ab3af661c4"}},
+  "checkpoint":{"roundtrip":true,"digest_match":true,"evaluation_match":true},
+  "gates":{"base_accuracy_at_least_0_95":true,"adapted_drift_accuracy_at_least_0_95":true,"drift_gain_at_least_0_20":true,"retention_at_least_0_90":true,"transition_accuracy_at_least_0_95":true,"planning_success_at_least_0_90":true,"exact_routing":true,"checkpoint_reproducible":true},
+  "development_result":"PASS",
+  "formal_mncs_status":"UNKNOWN",
+  "formal_mncds_status":"UNKNOWN",
+  "promotion_authorized":false
+}

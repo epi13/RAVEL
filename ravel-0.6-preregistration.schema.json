@@ -1,0 +1,415 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mncs.dev/schema/experimental/ravel-preregistration-0.6.json",
+  "title": "RAVEL 0.6 preregistration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "preregistration_id",
+    "study_id",
+    "normative_for_epoch",
+    "created_at",
+    "status",
+    "status_precedence",
+    "baseline",
+    "permitted_recursive_feedback",
+    "hypothesis",
+    "candidate_policy",
+    "authorities",
+    "partitions",
+    "seed_derivation",
+    "datasets_per_trial",
+    "mechanism",
+    "environment",
+    "metrics",
+    "hard_gates",
+    "comparisons",
+    "ablations",
+    "checkpoint_rules",
+    "mutation_campaign",
+    "selection_policy",
+    "future_final_protocol",
+    "source_and_manifest_rules",
+    "unknown_policy",
+    "stopping_rules",
+    "initial_disposition"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ravel-preregistration/0.6"
+    },
+    "preregistration_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "study_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "normative_for_epoch": {
+      "const": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "const": "PREREGISTERED_BEFORE_IMPLEMENTATION"
+    },
+    "status_precedence": {
+      "const": "FAIL > UNKNOWN > PASS"
+    },
+    "baseline": {
+      "type": "object",
+      "required": [
+        "study_id",
+        "candidate_id",
+        "immutable",
+        "source_path",
+        "source_sha256",
+        "source_digest",
+        "preregistration_path",
+        "preregistration_sha256",
+        "manifest_path",
+        "manifest_sha256",
+        "raw_observations_sha256",
+        "trial_evidence_sha256",
+        "assurance_case_sha256",
+        "execution_integrity",
+        "development_result",
+        "formal_mncs_status",
+        "formal_mncds_status",
+        "promotion_authorized"
+      ],
+      "properties": {
+        "immutable": {
+          "const": true
+        },
+        "development_result": {
+          "const": "FAIL"
+        },
+        "formal_mncs_status": {
+          "const": "UNKNOWN"
+        },
+        "formal_mncds_status": {
+          "const": "UNKNOWN"
+        },
+        "promotion_authorized": {
+          "const": false
+        }
+      }
+    },
+    "permitted_recursive_feedback": {
+      "type": "array",
+      "minItems": 6,
+      "items": {
+        "type": "object",
+        "required": [
+          "finding_id",
+          "observation",
+          "permitted_use",
+          "prohibited_use"
+        ]
+      }
+    },
+    "hypothesis": {
+      "type": "object",
+      "required": [
+        "primary",
+        "primary_regimes",
+        "secondary_diagnostics",
+        "non_goals"
+      ]
+    },
+    "candidate_policy": {
+      "type": "object",
+      "required": [
+        "implementation_status",
+        "selected_candidate",
+        "first_candidate_id",
+        "naming_rule",
+        "material_change_rule",
+        "maximum_candidate_identities",
+        "post_limit_action"
+      ],
+      "properties": {
+        "implementation_status": {
+          "const": "NOT_IMPLEMENTED"
+        },
+        "selected_candidate": {
+          "type": "null"
+        }
+      }
+    },
+    "authorities": {
+      "type": "object",
+      "required": [
+        "generator",
+        "selector",
+        "final_evaluator",
+        "final_seed_custodian",
+        "evaluator_rule",
+        "independence_boundary"
+      ]
+    },
+    "partitions": {
+      "type": "array",
+      "minItems": 6,
+      "items": {
+        "type": "object",
+        "required": [
+          "partition_id",
+          "purpose",
+          "seed_domain",
+          "visible_to_generator",
+          "protected"
+        ]
+      }
+    },
+    "seed_derivation": {
+      "type": "object",
+      "required": [
+        "root_seed",
+        "algorithm",
+        "framing",
+        "development_seeds",
+        "selection_seeds",
+        "future_final_seeds",
+        "future_final_seed_state",
+        "prohibition"
+      ],
+      "properties": {
+        "development_seeds": {
+          "$ref": "#/$defs/seeds"
+        },
+        "selection_seeds": {
+          "$ref": "#/$defs/seeds"
+        },
+        "future_final_seeds": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "future_final_seed_state": {
+          "const": "NOT_OBTAINED"
+        }
+      }
+    },
+    "datasets_per_trial": {
+      "type": "object",
+      "minProperties": 7
+    },
+    "mechanism": {
+      "type": "object",
+      "required": [
+        "name",
+        "required_features",
+        "update_acceptance",
+        "no_acceptance_behavior",
+        "budget"
+      ]
+    },
+    "environment": {
+      "type": "object",
+      "required": [
+        "language",
+        "standard",
+        "canonical_compiler_command",
+        "link_libraries",
+        "required_recorded_identities",
+        "optional_profiles",
+        "missing_optional_profile"
+      ]
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "primary",
+        "secondary"
+      ]
+    },
+    "hard_gates": {
+      "type": "object",
+      "required": [
+        "common",
+        "label_drift",
+        "combined_observation_and_label_drift"
+      ]
+    },
+    "comparisons": {
+      "$ref": "#/$defs/nonemptyStrings"
+    },
+    "ablations": {
+      "$ref": "#/$defs/nonemptyStrings"
+    },
+    "checkpoint_rules": {
+      "type": "object",
+      "required": [
+        "format",
+        "required_roundtrip_scope",
+        "mutation_rejection_required",
+        "substitution_rejection_required"
+      ]
+    },
+    "mutation_campaign": {
+      "$ref": "#/$defs/nonemptyStrings"
+    },
+    "selection_policy": {
+      "type": "object",
+      "required": [
+        "eligibility",
+        "no_eligible_candidate",
+        "ordering",
+        "future_final_use"
+      ]
+    },
+    "future_final_protocol": {
+      "type": "object",
+      "required": [
+        "state",
+        "seed_material_present",
+        "prerequisites",
+        "seed_request",
+        "derivation",
+        "minimum_trials",
+        "custody_if_no_external_actor",
+        "independent_evaluation_if_no_external_actor",
+        "one_shot",
+        "same_epoch_repair_feedback",
+        "development_generator_access"
+      ],
+      "properties": {
+        "state": {
+          "const": "NOT_STARTED"
+        },
+        "seed_material_present": {
+          "const": false
+        },
+        "custody_if_no_external_actor": {
+          "const": "UNKNOWN"
+        },
+        "independent_evaluation_if_no_external_actor": {
+          "const": "UNKNOWN"
+        },
+        "one_shot": {
+          "const": true
+        },
+        "same_epoch_repair_feedback": {
+          "const": false
+        },
+        "development_generator_access": {
+          "const": "FORBIDDEN"
+        }
+      }
+    },
+    "source_and_manifest_rules": {
+      "type": "object",
+      "required": [
+        "implementation_entrypoint_rule",
+        "evaluator_rule",
+        "generator_rule",
+        "ordered_manifest_required",
+        "manifest_must_bind",
+        "digest",
+        "unexpected_execution_shards"
+      ]
+    },
+    "unknown_policy": {
+      "type": "object",
+      "required": [
+        "missing_required_evidence",
+        "unsupported_required_construct",
+        "timeout",
+        "crash",
+        "missing_executable",
+        "malformed_response",
+        "output_limit",
+        "identity_drift",
+        "aggregation",
+        "workflow_success_is_conformance"
+      ]
+    },
+    "stopping_rules": {
+      "$ref": "#/$defs/nonemptyStrings"
+    },
+    "initial_disposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_implementation",
+        "development_evaluation",
+        "final_evaluation",
+        "protected_custody",
+        "independent_evaluation",
+        "formal_mncs_status",
+        "formal_mncds_status",
+        "promotion_authorized"
+      ],
+      "properties": {
+        "candidate_implementation": {
+          "const": "NOT_IMPLEMENTED"
+        },
+        "development_evaluation": {
+          "const": "UNKNOWN"
+        },
+        "final_evaluation": {
+          "const": "UNKNOWN"
+        },
+        "protected_custody": {
+          "const": "UNKNOWN"
+        },
+        "independent_evaluation": {
+          "const": "UNKNOWN"
+        },
+        "formal_mncs_status": {
+          "const": "UNKNOWN"
+        },
+        "formal_mncds_status": {
+          "const": "UNKNOWN"
+        },
+        "promotion_authorized": {
+          "const": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nonemptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "seeds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "trial_id",
+          "regime",
+          "seed"
+        ],
+        "properties": {
+          "trial_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "regime": {
+            "enum": [
+              "label_drift",
+              "combined_observation_and_label_drift"
+            ]
+          },
+          "seed": {
+            "type": "string",
+            "pattern": "^0x[0-9a-f]{16}$"
+          }
+        }
+      }
+    }
+  }
+}

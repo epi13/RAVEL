@@ -1,0 +1,82 @@
+{
+  "schema": "ravel-source-manifest/0.4",
+  "entrypoint": "ravel_0_4.c",
+  "generated_execution_shards": [],
+  "generator_source": null,
+  "source_provenance": "human_maintained_c11_no_generator",
+  "evidence_schema_versions": [
+    "ravel-raw-observations/0.4",
+    "ravel-trial-evidence/0.4",
+    "ravel-negative-evidence/0.4",
+    "ravel-assurance-case/0.4"
+  ],
+  "digest_algorithm": "sha256",
+  "digest_procedure": "For each file in declared order, hash uint32_be(path_utf8_length), path_utf8, uint64_be(file_length), and exact file bytes.",
+  "ordered_files": [
+    {
+      "order": 0,
+      "role": "entrypoint",
+      "path": "ravel_0_4.c",
+      "bytes": 91563,
+      "sha256": "5243022245bce97b2e3be6dd46e397d33445c25469b8ce9a364c6a104e757cd4"
+    },
+    {
+      "order": 1,
+      "role": "contract",
+      "path": "RAVEL_0_4_CONTRACT.md",
+      "bytes": 2857,
+      "sha256": "e6a2d6ec9eb6c73521e575c608994f8a0da3f911611613e51b5515fd3197048d"
+    },
+    {
+      "order": 2,
+      "role": "scope",
+      "path": "RAVEL_0_4_SCOPE.md",
+      "bytes": 2825,
+      "sha256": "5912d94993d4c7b120cfdc376a794beeaae374646016c1279b1697a58bc39a68"
+    },
+    {
+      "order": 3,
+      "role": "preregistration",
+      "path": "ravel-0.4-preregistration.json",
+      "bytes": 4046,
+      "sha256": "d2e5e268392d0b341cfee96401d9da9bde36e8df8b69501512d54ee1bd373c8f"
+    },
+    {
+      "order": 4,
+      "role": "manifest_specification",
+      "path": "ravel-0.4-source-manifest-spec.json",
+      "bytes": 1448,
+      "sha256": "d8548832deb03a35cd2f91e7f60c39408cf818734f74cb1f33fd516d514b9102"
+    },
+    {
+      "order": 5,
+      "role": "threat_model",
+      "path": "ravel-0.4-threat-model.json",
+      "bytes": 3497,
+      "sha256": "fca61fadad5c8d7feb16a0eebe5b9e09a78e048ae057ee389d0d88d7b2b2007e"
+    },
+    {
+      "order": 6,
+      "role": "limitations",
+      "path": "ravel-0.4-limitations.md",
+      "bytes": 1072,
+      "sha256": "92c75aebd78fbdf0eea3ccc6c16b3c3d03ba23b35dc356c4bb831cc5a7d8466b"
+    },
+    {
+      "order": 7,
+      "role": "evaluator_and_evidence_generator",
+      "path": "tools/ravel_0_4_evidence.py",
+      "bytes": 23566,
+      "sha256": "c6fdef88d32a0496bbab60def535f5fce13563f9aff6c4b954e7af92875731b5"
+    },
+    {
+      "order": 8,
+      "role": "source_digest_utility",
+      "path": "tools/ravel_source_digest.py",
+      "bytes": 8590,
+      "sha256": "3b161bb5baab1ea2a2413770a051f457347c4381ee4f92ef4ba9560d7601bb74"
+    }
+  ],
+  "source_digest": "1a8b8f0fcbabf0ec2000c8bfd89a754a0c203cf0c2f1747c6e32fb862123937e",
+  "unexpected_execution_shards": []
+}

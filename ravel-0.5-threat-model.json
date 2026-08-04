@@ -1,0 +1,67 @@
+{
+  "schema": "ravel-threat-model/0.5",
+  "threat_model_id": "ravel.adaptive-mechanism-correction.threats.v1",
+  "assets": [
+    "frozen preregistration and final validation seed boundary",
+    "untouched drift and retention holdouts",
+    "raw integer observations",
+    "independent gate derivation",
+    "canonical checkpoint identity and behavior",
+    "replay and topology decision provenance",
+    "transition support and planning dispositions",
+    "ordered source and execution identity"
+  ],
+  "threats": [
+    {
+      "id": "holdout-feedback",
+      "control": "holdouts are passed only to post-adaptation evaluation and are prohibited from replay, topology, thresholds, and selection",
+      "residual": "repository-visible seeds are not protected from future studies"
+    },
+    {
+      "id": "self-verdict",
+      "control": "the executable emits no hard gate, trial result, aggregate result, or formal disposition",
+      "residual": "the evaluator and harness share repository custody"
+    },
+    {
+      "id": "metric-or-verdict-mutation",
+      "control": "strict schemas, independent recalculation, canonical comparison, and distinct mutation tests reject changes",
+      "residual": "no external witness or signature exists"
+    },
+    {
+      "id": "replay-collapse",
+      "control": "deterministic strata, uniqueness, sparse-strata behavior, and coverage metrics are tested",
+      "residual": "the bounded strata do not model open-world rarity"
+    },
+    {
+      "id": "unsafe-topology",
+      "control": "adaptation-only objectives, anchored experts, bounded births and retirements, and retirement invariants",
+      "residual": "local objectives do not prove global optimality"
+    },
+    {
+      "id": "unsupported-transition",
+      "control": "per-action support below the frozen minimum remains unknown and cannot enter the graph",
+      "residual": "top-k two truncates richer transition distributions"
+    },
+    {
+      "id": "planning-alias",
+      "control": "exact, expert, belief-set, aliasing, disconnection, unsupported, and model-error outcomes are separate",
+      "residual": "the synthetic belief set is provided by the harness rather than learned"
+    },
+    {
+      "id": "source-or-build-substitution",
+      "control": "ordered manifest binds source, contracts, evaluator, generator, build files, flags, schemas, CI, and maintained provenance",
+      "residual": "repository hashes are not signed release attestations"
+    }
+  ],
+  "residual_unknowns": [
+    "independent protected evaluation",
+    "real-data and distribution-shift behavior",
+    "cross-organizational and heterogeneous-host reproduction",
+    "operational authorization and rollback",
+    "formal MNCS conformance",
+    "formal MNCDS conformance"
+  ],
+  "formal_mncs_status": "UNKNOWN",
+  "formal_mncds_status": "UNKNOWN",
+  "promotion_authorized": false
+}

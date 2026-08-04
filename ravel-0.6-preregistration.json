@@ -1,0 +1,599 @@
+{
+  "schema": "ravel-preregistration/0.6",
+  "preregistration_id": "ravel-0.6-preregistration-revision-1",
+  "study_id": "ravel.retention-constrained-adaptation.epoch-1",
+  "normative_for_epoch": true,
+  "created_at": "2026-08-01T00:00:00Z",
+  "status": "PREREGISTERED_BEFORE_IMPLEMENTATION",
+  "status_precedence": "FAIL > UNKNOWN > PASS",
+  "baseline": {
+    "study_id": "ravel.adaptive-mechanism-correction.epoch-1",
+    "candidate_id": "ravel-0.5-candidate-1",
+    "immutable": true,
+    "source_path": "case-studies/ravel/ravel_0_5.c",
+    "source_sha256": "1a8466ea1805811873c461fb891aaeaec18f6c9e7491b5ea7bd09bf698be102d",
+    "source_digest": "201e0373cc8d8f2fb26f284f44b0f87a5751a047d91556213b7aa7bf07e26fa4",
+    "preregistration_path": "case-studies/ravel/ravel-0.5-preregistration.json",
+    "preregistration_sha256": "f240c391b92823471132ffce1eeed154b3f03dc2af1e3e1f789690a99eb4cfaa",
+    "manifest_path": "case-studies/ravel/ravel-0.5-source-and-execution-manifest.json",
+    "manifest_sha256": "18006006db509269ee374a39133bb25d8452edc0fe0103a43fa92c5660fd89d0",
+    "raw_observations_sha256": "bb34d0292a9286ea321d50d31919dc43793a58b90b4c7a7892f91552b841f354",
+    "trial_evidence_sha256": "9ffefe97e5331b65e5b998f9c2d3aac91cdf9cca246a377ca421a3bef0ba0e80",
+    "assurance_case_sha256": "4bcce0a8dbcc6ff2ce085b809736be33511fffdc648f0c1545daeac7e695f429",
+    "execution_integrity": "PASS",
+    "development_result": "FAIL",
+    "formal_mncs_status": "UNKNOWN",
+    "formal_mncds_status": "UNKNOWN",
+    "promotion_authorized": false
+  },
+  "permitted_recursive_feedback": [
+    {
+      "finding_id": "ravel-0.5-label-gain-retention",
+      "observation": "Three label-drift trials failed the frozen label-gain gate while retention constraints remained material.",
+      "permitted_use": "design new retention-constrained development mechanisms",
+      "prohibited_use": "relabel as RAVEL 0.6 final evaluation"
+    },
+    {
+      "finding_id": "ravel-0.5-transition-prediction-retention",
+      "observation": "One transition-drift trial failed original-task next-observation prediction retention.",
+      "permitted_use": "design transition-support preservation and retention probes",
+      "prohibited_use": "repair RAVEL 0.5 or reuse its final seed"
+    },
+    {
+      "finding_id": "ravel-0.5-combined-planning",
+      "observation": "One combined-drift trial failed the exact-state planning gate.",
+      "permitted_use": "retain planning as a bounded diagnostic and hard combined gate",
+      "prohibited_use": "tune against the 0.5 final trial"
+    },
+    {
+      "finding_id": "ravel-0.5-ambiguous-belief-efficiency",
+      "observation": "Ambiguous trials failed belief/path planning or conditional-inference efficiency gates.",
+      "permitted_use": "record secondary diagnostics and explicit non-goals",
+      "prohibited_use": "broaden the primary 0.6 hypothesis"
+    },
+    {
+      "finding_id": "ravel-0.5-mixed-paired-pareto",
+      "observation": "Paired Pareto comparisons were mixed.",
+      "permitted_use": "require paired reporting without a superiority claim",
+      "prohibited_use": "claim broad efficiency superiority"
+    },
+    {
+      "finding_id": "ravel-0.5-assurance-provenance",
+      "observation": "All published 0.5 assurance, custody, provenance, and external-evidence limitations remain applicable.",
+      "permitted_use": "strengthen 0.6 preregistration and identity controls",
+      "prohibited_use": "claim local code can manufacture independence or custody"
+    }
+  ],
+  "hypothesis": {
+    "primary": "A retention-constrained adaptation policy using stratified replay protection, objective-tested updates, and transition-support preservation can improve label-drift and combined-drift holdout performance while preserving base-task retention and original-task next-observation prediction within frozen bounds.",
+    "primary_regimes": [
+      "label_drift",
+      "combined_observation_and_label_drift"
+    ],
+    "secondary_diagnostics": [
+      "exact-state planning",
+      "belief-set planning",
+      "conditional-inference efficiency",
+      "paired Pareto outcomes"
+    ],
+    "non_goals": [
+      "make all trials pass",
+      "broad ambiguous-belief planning superiority",
+      "universal efficiency superiority",
+      "real-data or production generalization",
+      "formal conformance or promotion"
+    ]
+  },
+  "candidate_policy": {
+    "implementation_status": "NOT_IMPLEMENTED",
+    "selected_candidate": null,
+    "first_candidate_id": "ravel-0.6-candidate-001",
+    "naming_rule": "^ravel-0\\.6-candidate-[0-9]{3}$",
+    "material_change_rule": "Every implementation change after material evaluation creates the next candidate identity.",
+    "maximum_candidate_identities": 8,
+    "post_limit_action": "Start a new preregistration revision or epoch; do not weaken gates."
+  },
+  "authorities": {
+    "generator": {
+      "authority_id": "ravel-0.6-development-generator",
+      "custody": "repository_operator_controlled",
+      "may_access": [
+        "development partitions",
+        "development retention probes",
+        "development planning diagnostics"
+      ],
+      "must_not_access": [
+        "selection observations before candidate evaluation",
+        "future final seed material",
+        "future final observations"
+      ]
+    },
+    "selector": {
+      "authority_id": "ravel-0.6-selection-evaluator",
+      "custody": "repository_operator_controlled",
+      "may_access_after_candidate_freeze": [
+        "selection partitions",
+        "frozen candidate identities"
+      ],
+      "must_not_repair": "A candidate from its selection observations."
+    },
+    "final_evaluator": {
+      "authority_id": "UNASSIGNED",
+      "preferred_actor": "external evaluator distinct from generator and selector",
+      "status": "UNKNOWN"
+    },
+    "final_seed_custodian": {
+      "authority_id": "UNASSIGNED",
+      "preferred_actor": "external custodian distinct from generator",
+      "protected_custody": "UNKNOWN"
+    },
+    "evaluator_rule": "The implementation emits raw observations only; a separately maintained evaluator derives all gates and dispositions.",
+    "independence_boundary": "Repository-local generator/evaluator separation does not establish operational or organizational independence."
+  },
+  "partitions": [
+    {
+      "partition_id": "ravel-0.6-development-adaptation-v1",
+      "purpose": "mechanism implementation and development repair",
+      "seed_domain": "ravel-0.6/development",
+      "visible_to_generator": true,
+      "protected": false
+    },
+    {
+      "partition_id": "ravel-0.6-selection-v1",
+      "purpose": "frozen candidate selection only",
+      "seed_domain": "ravel-0.6/selection",
+      "visible_to_generator": false,
+      "protected": false
+    },
+    {
+      "partition_id": "ravel-0.6-future-final-reservation-v1",
+      "purpose": "future one-shot final evaluation",
+      "seed_domain": "ravel-0.6/final/post-freeze-custodian-material",
+      "visible_to_generator": false,
+      "protected": "UNKNOWN"
+    },
+    {
+      "partition_id": "ravel-0.6-retention-holdout-v1",
+      "purpose": "original-task classification and representation retention",
+      "seed_domain": "ravel-0.6/retention",
+      "visible_to_generator": false,
+      "protected": false
+    },
+    {
+      "partition_id": "ravel-0.6-transition-retention-v1",
+      "purpose": "original-task next-observation and transition-support retention",
+      "seed_domain": "ravel-0.6/transition-retention",
+      "visible_to_generator": false,
+      "protected": false
+    },
+    {
+      "partition_id": "ravel-0.6-planning-diagnostics-v1",
+      "purpose": "exact-state and belief-planning diagnostics",
+      "seed_domain": "ravel-0.6/planning",
+      "visible_to_generator": false,
+      "protected": false
+    }
+  ],
+  "seed_derivation": {
+    "root_seed": "0x524156454c303644",
+    "algorithm": "sha256-first-u64-big-endian",
+    "framing": "root_seed_u64_be || utf8('ravel-0.6\\0') || utf8(phase) || zero_byte || utf8(regime) || zero_byte || index_u32_be",
+    "development_seeds": [
+      {
+        "trial_id": "development-label-01",
+        "regime": "label_drift",
+        "seed": "0x0a31e8cc9b0027a0"
+      },
+      {
+        "trial_id": "development-label-02",
+        "regime": "label_drift",
+        "seed": "0x03f56834ccd0d3d3"
+      },
+      {
+        "trial_id": "development-label-03",
+        "regime": "label_drift",
+        "seed": "0x5a8d9a6c4bbdd0b4"
+      },
+      {
+        "trial_id": "development-label-04",
+        "regime": "label_drift",
+        "seed": "0x10f8dcc5d4749795"
+      },
+      {
+        "trial_id": "development-combined-01",
+        "regime": "combined_observation_and_label_drift",
+        "seed": "0xccb7555695e5d7a5"
+      },
+      {
+        "trial_id": "development-combined-02",
+        "regime": "combined_observation_and_label_drift",
+        "seed": "0xb272eac5c943235e"
+      },
+      {
+        "trial_id": "development-combined-03",
+        "regime": "combined_observation_and_label_drift",
+        "seed": "0xcf103ff18fbae499"
+      },
+      {
+        "trial_id": "development-combined-04",
+        "regime": "combined_observation_and_label_drift",
+        "seed": "0x9079fcf25f25f034"
+      }
+    ],
+    "selection_seeds": [
+      {
+        "trial_id": "selection-label-01",
+        "regime": "label_drift",
+        "seed": "0xf9872feaeed11760"
+      },
+      {
+        "trial_id": "selection-label-02",
+        "regime": "label_drift",
+        "seed": "0xcf0fa6f591fc4094"
+      },
+      {
+        "trial_id": "selection-combined-01",
+        "regime": "combined_observation_and_label_drift",
+        "seed": "0xad8469dc02bb0f39"
+      },
+      {
+        "trial_id": "selection-combined-02",
+        "regime": "combined_observation_and_label_drift",
+        "seed": "0x0d33c2594a3b3ee4"
+      }
+    ],
+    "future_final_seeds": [],
+    "future_final_seed_state": "NOT_OBTAINED",
+    "prohibition": "No RAVEL 0.5 final seed or future RAVEL 0.6 final seed may be used for development, selection, repair, or threshold changes."
+  },
+  "datasets_per_trial": {
+    "base_training": 1024,
+    "base_holdout": 256,
+    "drift_adaptation_training": 512,
+    "drift_holdout": 256,
+    "original_task_retention_holdout": 256,
+    "transition_retention_holdout": 256,
+    "planning_diagnostics": 64
+  },
+  "mechanism": {
+    "name": "retention-constrained adaptation",
+    "required_features": [
+      "deterministic stratified replay protection",
+      "objective-tested updates with an explicit rejected/no-change outcome",
+      "base-task retention constraints",
+      "original-task transition-support preservation",
+      "unique-support retirement protection",
+      "deterministic tie-breaking and recorded decision provenance"
+    ],
+    "update_acceptance": [
+      "adaptation objective improves by at least the declared development epsilon",
+      "retention accuracy and representation floors remain satisfied",
+      "original-task prediction degradation remains within its floor",
+      "no uniquely supported transition becomes unsupported",
+      "capacity and compute budgets remain satisfied"
+    ],
+    "no_acceptance_behavior": "Retain the preceding candidate state unchanged.",
+    "budget": {
+      "maximum_experts": 80,
+      "maximum_births_per_trial": 16,
+      "maximum_retirements_per_trial": 4,
+      "replay_records": 256,
+      "maximum_objective_tested_update_passes": 2,
+      "maximum_training_evaluation_ratio_vs_matched_fixed_topology": 1.1,
+      "maximum_candidate_identities": 8
+    }
+  },
+  "environment": {
+    "language": "C",
+    "standard": "C11",
+    "canonical_compiler_command": [
+      "cc",
+      "-std=c11",
+      "-O3",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pedantic"
+    ],
+    "link_libraries": [
+      "m"
+    ],
+    "required_recorded_identities": [
+      "compiler executable SHA-256",
+      "compiler version output digest",
+      "source manifest SHA-256",
+      "evaluator SHA-256",
+      "preregistration SHA-256",
+      "environment-key names",
+      "command argv",
+      "exit status",
+      "stdout and stderr digests"
+    ],
+    "optional_profiles": [
+      "clang C11 warnings-as-errors",
+      "GCC C11 warnings-as-errors",
+      "address and undefined behavior sanitizers"
+    ],
+    "missing_optional_profile": "UNKNOWN informational evidence, never PASS"
+  },
+  "metrics": {
+    "primary": [
+      "adapted_drift_accuracy",
+      "drift_accuracy_delta",
+      "retention_accuracy",
+      "retention_accuracy_delta_from_base",
+      "retention_prediction_degradation",
+      "reconstruction_improvement_ratio",
+      "prediction_improvement_ratio",
+      "transition_accuracy_delta",
+      "exact_state_rate"
+    ],
+    "secondary": [
+      "belief_success_rate",
+      "path_found_rate",
+      "inference_evaluation_ratio_vs_flat64",
+      "training_evaluation_ratio_vs_matched_fixed_topology",
+      "accepted_births",
+      "accepted_retirements",
+      "paired_pareto_outcomes"
+    ]
+  },
+  "hard_gates": {
+    "common": [
+      {
+        "gate_id": "base_holdout_accuracy",
+        "metric": "base_accuracy",
+        "operator": "ge",
+        "value": 0.85
+      },
+      {
+        "gate_id": "base_holdout_retention",
+        "metric": "retention_accuracy",
+        "operator": "ge",
+        "value": 0.9
+      },
+      {
+        "gate_id": "retention_loss_floor",
+        "metric": "retention_accuracy_delta_from_base",
+        "operator": "ge",
+        "value": -0.1
+      },
+      {
+        "gate_id": "old_prediction_retention",
+        "metric": "retention_prediction_degradation",
+        "operator": "le",
+        "value": 1.0
+      },
+      {
+        "gate_id": "routing_oracle_equivalence",
+        "metric": "routing_mismatches",
+        "operator": "eq",
+        "value": 0
+      },
+      {
+        "gate_id": "replay_size",
+        "metric": "replay_selected",
+        "operator": "eq",
+        "value": 256
+      },
+      {
+        "gate_id": "transition_unique_support",
+        "metric": "unique_transition_support_losses",
+        "operator": "eq",
+        "value": 0
+      },
+      {
+        "gate_id": "checkpoint_identity_and_behavior",
+        "metric": "checkpoint_roundtrip_complete",
+        "operator": "eq",
+        "value": true
+      },
+      {
+        "gate_id": "lineage_invariants",
+        "metric": "lineage_invariants",
+        "operator": "eq",
+        "value": true
+      },
+      {
+        "gate_id": "expert_capacity",
+        "metric": "expert_count",
+        "operator": "le",
+        "value": 80
+      },
+      {
+        "gate_id": "matched_compute_budget",
+        "metric": "matched_compute_training_evaluation_ratio",
+        "operator": "le",
+        "value": 1.1
+      }
+    ],
+    "label_drift": [
+      {
+        "gate_id": "label_adaptation",
+        "metric": "adapted_drift_accuracy",
+        "operator": "ge",
+        "value": 0.6
+      },
+      {
+        "gate_id": "label_gain",
+        "metric": "drift_accuracy_delta",
+        "operator": "ge",
+        "value": 0.04
+      },
+      {
+        "gate_id": "label_planning_non_inferiority",
+        "metric": "exact_state_rate_delta",
+        "operator": "ge",
+        "value": -0.05
+      }
+    ],
+    "combined_observation_and_label_drift": [
+      {
+        "gate_id": "combined_adaptation",
+        "metric": "adapted_drift_accuracy",
+        "operator": "ge",
+        "value": 0.65
+      },
+      {
+        "gate_id": "combined_gain",
+        "metric": "drift_accuracy_delta",
+        "operator": "ge",
+        "value": 0.05
+      },
+      {
+        "gate_id": "combined_reconstruction",
+        "metric": "reconstruction_improvement_ratio",
+        "operator": "ge",
+        "value": 0.0
+      },
+      {
+        "gate_id": "combined_prediction",
+        "metric": "prediction_improvement_ratio",
+        "operator": "ge",
+        "value": 0.0
+      },
+      {
+        "gate_id": "combined_transition_non_inferiority",
+        "metric": "transition_accuracy_delta",
+        "operator": "ge",
+        "value": -0.15
+      },
+      {
+        "gate_id": "combined_exact_planning",
+        "metric": "exact_state_rate",
+        "operator": "ge",
+        "value": 0.5
+      }
+    ]
+  },
+  "comparisons": [
+    "frozen RAVEL 0.5 candidate under matched 0.6 development partitions",
+    "fixed-topology 64-expert routed matched-compute baseline",
+    "no-adaptation static baseline",
+    "flat 64-expert complete-scan reference"
+  ],
+  "ablations": [
+    "no retention constraint",
+    "no transition-support preservation",
+    "periodic replay instead of stratified replay",
+    "unconditional updates instead of objective-tested updates",
+    "no births",
+    "no retirements"
+  ],
+  "checkpoint_rules": {
+    "format": "versioned canonical big-endian fixed-point record with SHA-256 payload identity",
+    "required_roundtrip_scope": [
+      "classification",
+      "reconstruction",
+      "next-observation prediction",
+      "transition support",
+      "routing",
+      "planning",
+      "topology",
+      "lineage",
+      "replay provenance",
+      "retention constraints",
+      "reported raw metrics"
+    ],
+    "mutation_rejection_required": true,
+    "substitution_rejection_required": true
+  },
+  "mutation_campaign": [
+    "raw metric mutation",
+    "threshold mutation",
+    "development seed mutation",
+    "selection seed mutation",
+    "partition identity substitution",
+    "candidate identity substitution",
+    "executable verdict injection",
+    "evaluator substitution",
+    "source omission or reordering",
+    "compiler profile mutation",
+    "checkpoint field, payload, truncation, append, schema, and substitution mutations",
+    "retention constraint removal",
+    "transition unique-support removal",
+    "nondeterministic output"
+  ],
+  "selection_policy": {
+    "eligibility": "Every selection trial must PASS every common and regime-specific hard gate.",
+    "no_eligible_candidate": "Stop the epoch with no selected candidate and development evaluation FAIL or UNKNOWN according to available evidence.",
+    "ordering": [
+      "descending minimum per-trial drift_accuracy_delta",
+      "descending minimum per-trial retention_accuracy_delta_from_base",
+      "ascending maximum retention_prediction_degradation",
+      "ascending total training evaluations",
+      "ascending numeric candidate suffix"
+    ],
+    "future_final_use": "Forbidden for selection or tie-breaking."
+  },
+  "future_final_protocol": {
+    "state": "NOT_STARTED",
+    "seed_material_present": false,
+    "prerequisites": [
+      "one selected candidate identity",
+      "frozen source and execution manifest",
+      "frozen evaluator identity",
+      "frozen compiler profiles",
+      "frozen thresholds and partitions",
+      "recorded request to a final seed custodian"
+    ],
+    "seed_request": "After freeze, request fresh unpredictable seed material from an external custodian when available.",
+    "derivation": "sha256-first-u64-big-endian over custodian material, frozen candidate identity, regime, and trial index",
+    "minimum_trials": {
+      "label_drift": 4,
+      "combined_observation_and_label_drift": 4
+    },
+    "custody_if_no_external_actor": "UNKNOWN",
+    "independent_evaluation_if_no_external_actor": "UNKNOWN",
+    "one_shot": true,
+    "same_epoch_repair_feedback": false,
+    "development_generator_access": "FORBIDDEN"
+  },
+  "source_and_manifest_rules": {
+    "implementation_entrypoint_rule": "case-studies/ravel/ravel_0_6_candidate_NNN.c",
+    "evaluator_rule": "case-studies/ravel/tools/ravel_0_6_evaluator.py",
+    "generator_rule": "case-studies/ravel/tools/ravel_0_6_development.py",
+    "ordered_manifest_required": true,
+    "manifest_must_bind": [
+      "implementation",
+      "scope and preregistration",
+      "evaluator and development tooling",
+      "compiler profiles",
+      "schemas",
+      "build files",
+      "raw and derived evidence",
+      "checkpoint identities"
+    ],
+    "digest": "sha256",
+    "unexpected_execution_shards": "FAIL"
+  },
+  "unknown_policy": {
+    "missing_required_evidence": "UNKNOWN",
+    "unsupported_required_construct": "UNKNOWN",
+    "timeout": "UNKNOWN",
+    "crash": "UNKNOWN",
+    "missing_executable": "UNKNOWN",
+    "malformed_response": "UNKNOWN",
+    "output_limit": "UNKNOWN",
+    "identity_drift": "UNKNOWN",
+    "aggregation": "FAIL > UNKNOWN > PASS",
+    "workflow_success_is_conformance": false
+  },
+  "stopping_rules": [
+    "Stop when eight candidate identities have received material evaluation.",
+    "Stop with no selected candidate when selection eligibility is empty.",
+    "Stop and start a new revision or epoch after any material hypothesis, threshold, evaluator, partition, or final-protocol change.",
+    "Stop same-epoch repair after the first final evaluation.",
+    "Do not weaken gates, remove failed trials, or change expected results to obtain PASS."
+  ],
+  "initial_disposition": {
+    "candidate_implementation": "NOT_IMPLEMENTED",
+    "development_evaluation": "UNKNOWN",
+    "final_evaluation": "UNKNOWN",
+    "protected_custody": "UNKNOWN",
+    "independent_evaluation": "UNKNOWN",
+    "formal_mncs_status": "UNKNOWN",
+    "formal_mncds_status": "UNKNOWN",
+    "promotion_authorized": false
+  }
+}

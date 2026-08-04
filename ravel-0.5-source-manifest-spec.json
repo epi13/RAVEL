@@ -1,0 +1,114 @@
+{
+  "schema": "ravel-source-manifest-specification/0.5",
+  "entrypoint": "case-studies/ravel/ravel_0_5.c",
+  "maintained_execution_sources": [
+    "case-studies/ravel/ravel_0_5.c"
+  ],
+  "generated_execution_shards": [],
+  "execution_source_discovery_globs": [
+    "case-studies/ravel/ravel_0_5*.c",
+    "case-studies/ravel/ravel_0_5*.inc"
+  ],
+  "source_provenance": {
+    "classification": "maintained_source",
+    "generator": null,
+    "statement": "RAVEL 0.5 is directly maintained C11 source. No higher-level generator or generated execution shard exists."
+  },
+  "build_configuration": {
+    "language": "C",
+    "standard": "C11",
+    "canonical_compiler": "cc",
+    "canonical_flags": [
+      "-std=c11",
+      "-O3",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pedantic"
+    ],
+    "link_libraries": [
+      "m"
+    ]
+  },
+  "checkpoint_schema": {
+    "magic_hex": "524156454c303500",
+    "version": 5,
+    "byte_order": "big_endian",
+    "real_encoding": "signed_q20_int64",
+    "payload_digest": "sha256"
+  },
+  "evidence_schema_versions": [
+    "ravel-preregistration/0.5",
+    "ravel-raw-trial/0.5",
+    "ravel-raw-observations/0.5",
+    "ravel-self-test-observations/0.5",
+    "ravel-trial-evidence/0.5",
+    "ravel-negative-evidence/0.5",
+    "ravel-source-and-execution-manifest/0.5",
+    "ravel-assurance-case/0.5"
+  ],
+  "digest_algorithm": "sha256",
+  "digest_procedure": "For each ordered entry, hash uint32_be(path_utf8_length), path_utf8, uint64_be(content_length), and exact content bytes; concatenate frames into one SHA-256 stream.",
+  "ordered_files": [
+    {
+      "role": "entrypoint",
+      "path": "case-studies/ravel/ravel_0_5.c"
+    },
+    {
+      "role": "contract",
+      "path": "case-studies/ravel/RAVEL_0_5_CONTRACT.md"
+    },
+    {
+      "role": "scope",
+      "path": "case-studies/ravel/RAVEL_0_5_SCOPE.md"
+    },
+    {
+      "role": "postmortem",
+      "path": "case-studies/ravel/RAVEL_0_5_POSTMORTEM.md"
+    },
+    {
+      "role": "development_corpus",
+      "path": "case-studies/ravel/ravel-0.5-development-corpus.json"
+    },
+    {
+      "role": "preregistration",
+      "path": "case-studies/ravel/ravel-0.5-preregistration.json"
+    },
+    {
+      "role": "threat_model",
+      "path": "case-studies/ravel/ravel-0.5-threat-model.json"
+    },
+    {
+      "role": "limitations",
+      "path": "case-studies/ravel/ravel-0.5-limitations.md"
+    },
+    {
+      "role": "independent_evaluator",
+      "path": "case-studies/ravel/tools/ravel_0_5_evaluator.py"
+    },
+    {
+      "role": "evidence_generator",
+      "path": "case-studies/ravel/tools/ravel_0_5_evidence.py"
+    },
+    {
+      "role": "source_digest_utility",
+      "path": "case-studies/ravel/tools/ravel_0_5_source_digest.py"
+    },
+    {
+      "role": "manifest_specification",
+      "path": "case-studies/ravel/ravel-0.5-source-manifest-spec.json"
+    },
+    {
+      "role": "case_build_specification",
+      "path": "case-studies/ravel/Makefile"
+    },
+    {
+      "role": "root_build_specification",
+      "path": "Makefile"
+    },
+    {
+      "role": "ci_workflow",
+      "path": ".github/workflows/ravel-0.5.yml"
+    }
+  ]
+}

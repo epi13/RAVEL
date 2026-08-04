@@ -1,0 +1,41 @@
+{
+  "schema": "ravel-capsule-evidence/0.1",
+  "environment": {
+    "compiler": "cc 14.2.0",
+    "optimization": "-O3",
+    "captured_date": "2026-07-27",
+    "timings_are_observational": true
+  },
+  "experts": 256,
+  "route_width": 24,
+  "workloads": {
+    "familiar": {
+      "queries": 100000,
+      "mismatches": 0,
+      "certified_rate": 1.0,
+      "mean_experts": 24.0,
+      "reduction": 0.90625,
+      "candidate_ns": 14380373,
+      "reference_ns": 86998955,
+      "checksum": "0000034300750035"
+    },
+    "uniform": {
+      "queries": 25000,
+      "mismatches": 0,
+      "certified_rate": 0.02236,
+      "mean_experts": 250.81248,
+      "reduction": 0.02026375,
+      "candidate_ns": 26611235,
+      "reference_ns": 22155051,
+      "checksum": "00000025002106a7"
+    }
+  },
+  "gates": {
+    "all_mismatches_equal_zero": true,
+    "familiar_certified_rate_at_least_0_95": true,
+    "familiar_mean_experts_at_most_32": true
+  },
+  "development_result": "PASS",
+  "formal_mncs_status": "UNKNOWN",
+  "formal_mncds_status": "UNKNOWN"
+}
