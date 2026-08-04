@@ -6,10 +6,42 @@ RAVEL is an adaptive control and learning layer for evidence-driven machine-nati
 
 RAVEL should make better decisions over time without being allowed to redefine truth, weaken evaluation, or promote its own candidates.
 
+## Governing authority
+
+RAVEL operates beneath the Machine-Native Complexity Standard (MNCS) and the Machine-Native Complexity Development Standard (MNCDS).
+
+```text
+MNCS
+  defines contracts, evidence semantics, status, conformance, and claim boundaries
+                                      |
+                                      v
+MNCDS
+  operationalizes MNCS for decomposition, development, evidence flow, and lifecycle
+                                      |
+                    +-----------------+-----------------+
+                    |                                   |
+                    v                                   v
+          RAVEL control plane                  Forge/tool plane
+      memory, hypotheses, policy          bounded verification and witnesses
+                    |                                   |
+                    +-----------------+-----------------+
+                                      |
+                                      v
+                          candidate and environment evidence
+```
+
+The foundational relationship is:
+
+> **MNCS defines authority. MNCDS operationalizes it. Forge executes it. RAVEL reasons and learns beneath it.**
+
+MNCS and MNCDS are not ordinary peer components in the control loop. They define the rules under which every component participates.
+
+See [`AUTHORITY_MODEL.md`](AUTHORITY_MODEL.md) for the complete authority boundary.
+
 ## System boundary
 
 ```text
-                         immutable policy and evaluator authority
+                   MNCS/MNCDS contracts and governing invariants
                                          |
                                          v
 agent/model -> RAVEL control plane -> Forge/tool plane -> environment
@@ -41,6 +73,8 @@ RAVEL performs:
 - transfer-gate enforcement; and
 - policy evaluation under fixed budgets.
 
+RAVEL may recommend actions, but it cannot redefine MNCS/MNCDS status, broaden claims beyond evidence, weaken governing contracts, or treat its confidence as conformance.
+
 ### Forge
 
 Forge performs deterministic or tightly bounded operations such as:
@@ -57,33 +91,39 @@ Forge performs deterministic or tightly bounded operations such as:
 
 Forge should expose evidence through stable provider-neutral contracts. Clang, LLVM, Joern, sanitizers, model checkers, and custom micro-verifiers are providers behind those contracts rather than the architectural identity of the checks.
 
-### Evaluator and policy authority
+Forge does not define the meaning of MNCS or MNCDS. Its result has authority only within its governing contract, declared scope, environment, witness, and limitations.
 
-The evaluator establishes dispositions under a preregistered protocol. RAVEL cannot modify:
+### MNCS/MNCDS-governed evaluation
+
+The evaluator establishes dispositions under a declared MNCS/MNCDS-governed protocol. RAVEL cannot modify:
 
 - the evaluator implementation used for the active trial;
 - acceptance thresholds;
 - protected partitions or seed identities;
 - resource budgets after observing outcomes;
 - evidence custody rules;
-- promotion authority; or
+- formal status semantics;
+- conformance or promotion boundaries; or
 - historical evidence records.
+
+The evaluator is not a sovereign layer above MNCS. Its authority is delegated and bounded by the governing standard and development protocol.
 
 ## Core control loop
 
 A bounded RAVEL episode should follow this sequence:
 
-1. **Observe context.** Bind the candidate, task, environment, constraints, prior knowledge, and current evidence.
-2. **Identify uncertainty.** Record what is unknown and which decisions depend on it.
-3. **Generate competing hypotheses.** Preserve plausible alternatives and explicit falsifiers.
-4. **Select a bounded probe.** Choose the least expensive evidence action likely to distinguish the hypotheses.
-5. **Record predictions.** State expected effects, invariants, costs, and acceptable regressions before execution.
-6. **Invoke Forge or another provider.** Receive structured observations and witnesses.
-7. **Evaluate without reinterpretation.** Preserve raw verifier status and derive a separate hypothesis disposition.
-8. **Choose the next action.** Repair, gather more evidence, abstain, reject, or freeze the candidate.
-9. **Record the episode.** Store identities, actions, outcomes, costs, and unresolved alternatives.
-10. **Extract provisional knowledge.** Create principles or strategies only when attribution and scope support them.
-11. **Test transfer.** Reuse remains restricted until separate contexts support the declared scope.
+1. **Bind governing authority.** Identify the applicable MNCS/MNCDS contracts, status semantics, claim boundary, and development protocol.
+2. **Observe context.** Bind the candidate, task, environment, constraints, prior knowledge, and current evidence.
+3. **Identify uncertainty.** Record what is unknown and which decisions depend on it.
+4. **Generate competing hypotheses.** Preserve plausible alternatives and explicit falsifiers.
+5. **Select a bounded probe.** Choose the least expensive evidence action likely to distinguish the hypotheses.
+6. **Record predictions.** State expected effects, invariants, costs, and acceptable regressions before execution.
+7. **Invoke Forge or another provider.** Receive structured observations and witnesses under the governing verifier contract.
+8. **Evaluate without reinterpretation.** Preserve raw verifier status and derive a separate hypothesis disposition.
+9. **Choose the next action.** Repair, gather more evidence, abstain, reject, or freeze the candidate.
+10. **Record the episode.** Store identities, actions, outcomes, costs, governing contracts, and unresolved alternatives.
+11. **Extract provisional knowledge.** Create principles or strategies only when attribution and scope support them.
+12. **Test transfer.** Reuse remains restricted until separate contexts support the declared scope.
 
 ## Separation of statuses
 
@@ -91,15 +131,33 @@ RAVEL must not collapse different state spaces into one score.
 
 Examples include:
 
+- MNCS/MNCDS conformance status;
 - verifier status: `PASS | FAIL | UNKNOWN`;
+- candidate disposition;
 - episode outcome: `success | error | neutral | abstention`;
 - hypothesis disposition: `open | supported | challenged | rejected | inconclusive`;
 - principle maturity: `provisional | supported | challenged | rejected | retired`;
 - transfer status: `untested | failed | partial | supported`;
 - strategy reuse status: `untested | restricted | supported | retired`; and
-- candidate disposition under its governing protocol.
+- custody or evidence-authority class.
 
-A supported hypothesis does not convert a failed verifier into a pass. A successful episode does not establish a supported transferable principle.
+A supported hypothesis does not convert a failed verifier into a pass. A successful episode does not establish a supported transferable principle. A repository-local result does not establish protected custody or formal conformance.
+
+RAVEL confidence and formal status are orthogonal:
+
+```text
+RAVEL confidence: 99.8%
+MNCS disposition: UNKNOWN
+```
+
+and:
+
+```text
+RAVEL confidence: 42%
+MNCS disposition: PASS
+```
+
+are both valid states.
 
 ## Forge interface
 
@@ -107,6 +165,7 @@ The first RAVEL–Forge interface should be narrow. A verifier request should co
 
 - request identity;
 - candidate and artifact identities;
+- governing MNCS/MNCDS contract identity and version;
 - verifier contract identity and version;
 - bounded question;
 - required witness form;
@@ -118,6 +177,7 @@ The first RAVEL–Forge interface should be narrow. A verifier request should co
 A verifier response should contain:
 
 - request and provider identities;
+- governing contract identity;
 - raw status;
 - structured observations;
 - witness or counterexample identity;
@@ -134,6 +194,7 @@ RAVEL should reason over the normalized contract while retaining provider-specif
 RAVEL's orchestration policy is itself a candidate. Competing policies should be compared under equal:
 
 - task sets;
+- MNCS/MNCDS contracts;
 - evidence access;
 - tool availability;
 - compute and time budgets;
@@ -150,9 +211,9 @@ Useful comparisons include:
 - governed portfolios of strategies; and
 - ablations that remove memory classes or transfer gates.
 
-The relevant question is not whether RAVEL can produce a better result once. It is whether a declared policy improves outcomes, cost, calibration, retention, and transfer without weakening evaluation.
+The relevant question is not whether RAVEL can produce a better result once. It is whether a declared policy improves outcomes, cost, calibration, retention, and transfer without weakening evaluation or changing the governing authority.
 
-## Trust boundary
+## Authority and trust boundary
 
 RAVEL is not trusted merely because it is the intelligence layer. It must be able to say:
 
@@ -165,9 +226,15 @@ RAVEL is not trusted merely because it is the intelligence layer. It must be abl
 
 Abstention is a valid and learnable outcome.
 
+Forge is also not sovereign. It executes bounded checks whose meaning is supplied by MNCS/MNCDS contracts. A provider cannot establish a broader claim than the contract and evidence allow.
+
+The architectural invariant is:
+
+> **RAVEL may remember any accurately typed experience, but only MNCS/MNCDS-governed evidence can establish the status and permitted use of that experience.**
+
 ## Initial implementation order
 
-1. Define versioned evidence and experience schemas.
+1. Define versioned MNCS/MNCDS-governed evidence and experience schemas.
 2. Build an append-only local experience store.
 3. Add a small Forge adapter for a handful of micro-verifiers.
 4. Implement deterministic evidence-gap and verifier-selection rules.
