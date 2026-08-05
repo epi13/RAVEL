@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/epi13/RAVEL/schemas/consolidation-proposal.schema.json",
+  "title": "RAVEL consolidation proposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "proposal_id",
+    "method_version",
+    "created_at",
+    "memory_class",
+    "canonical_statement",
+    "scope",
+    "member_ids",
+    "supporting_ids",
+    "contradicting_ids",
+    "superseded_ids",
+    "retrieval_keys",
+    "clustering_confidence",
+    "status",
+    "limitations"
+  ],
+  "properties": {
+    "proposal_id": {
+      "type": "string",
+      "pattern": "^consolidation:[a-f0-9]{24}$"
+    },
+    "method_version": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "format": "date-time"},
+    "memory_class": {
+      "enum": ["episodic", "causal", "semantic", "procedural", "negative"]
+    },
+    "canonical_statement": {"type": "string", "minLength": 1},
+    "scope": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "string"}
+    },
+    "member_ids": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "supporting_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "contradicting_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "superseded_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "retrieval_keys": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "clustering_confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "status": {"const": "proposed"},
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}
