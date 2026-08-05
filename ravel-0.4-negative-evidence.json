@@ -1,0 +1,241 @@
+{
+  "schema": "ravel-negative-evidence/0.4",
+  "tests": {
+    "malformed_observation": {
+      "expected_disposition": "reject",
+      "observed": true,
+      "pass": true
+    },
+    "out_of_domain_value": {
+      "expected_disposition": "fall_back",
+      "observed": true,
+      "pass": true
+    },
+    "empty_expert_assignment": {
+      "expected_disposition": "reject",
+      "observed": true,
+      "pass": true
+    },
+    "degenerate_expert_assignment": {
+      "expected_disposition": "reject",
+      "observed": true,
+      "pass": true
+    },
+    "duplicate_expert": {
+      "expected_disposition": "reject",
+      "observed": true,
+      "pass": true
+    },
+    "tied_distance": {
+      "expected_disposition": "preserve_non_promotion",
+      "observed": true,
+      "pass": true
+    },
+    "routing_lower_bound_equality": {
+      "expected_disposition": "fall_back",
+      "observed": true,
+      "pass": true
+    },
+    "maximum_expert_capacity": {
+      "expected_disposition": "preserve_non_promotion",
+      "observed": true,
+      "pass": true
+    },
+    "birth_beyond_capacity": {
+      "expected_disposition": "reject",
+      "observed": true,
+      "pass": true
+    },
+    "wrong_lifecycle_retirement": {
+      "expected_disposition": "reject",
+      "observed": true,
+      "pass": true
+    },
+    "poisoned_adaptation_labels": {
+      "expected_disposition": "fail_a_gate",
+      "observed": true,
+      "pass": true
+    },
+    "poisoned_transition_observations": {
+      "expected_disposition": "fail_a_gate",
+      "observed": true,
+      "pass": true
+    },
+    "replay_removal": {
+      "expected_disposition": "fail_a_gate",
+      "observed": true,
+      "pass": true
+    },
+    "catastrophic_forgetting_condition": {
+      "expected_disposition": "fail_a_gate",
+      "observed": true,
+      "pass": true
+    },
+    "evidence_file_mutation": {
+      "expected_disposition": "reject",
+      "observed": true,
+      "pass": true
+    },
+    "stale_assurance_digest": {
+      "expected_disposition": "reject",
+      "observed": true,
+      "pass": true
+    },
+    "nondeterministic_output_detection": {
+      "expected_disposition": "reject",
+      "observed": true,
+      "pass": true,
+      "note": "two independent process executions were byte-identical"
+    }
+  },
+  "checkpoint_mutation_campaign": {
+    "trial-01-separated": {
+      "expected_disposition": "reject_or_fail_equivalence",
+      "mutations": {
+        "retrieval_key_component": true,
+        "reconstruction_component": true,
+        "next_observation_component": true,
+        "label": true,
+        "label_count": true,
+        "lineage": true,
+        "transition_graph_edge": true,
+        "payload_byte": true,
+        "checkpoint_truncation": true,
+        "appended_unexpected_byte": true,
+        "incorrect_schema_version": true,
+        "checkpoint_substitution": true
+      },
+      "pass": true
+    },
+    "trial-02-overlap": {
+      "expected_disposition": "reject_or_fail_equivalence",
+      "mutations": {
+        "retrieval_key_component": true,
+        "reconstruction_component": true,
+        "next_observation_component": true,
+        "label": true,
+        "label_count": true,
+        "lineage": true,
+        "transition_graph_edge": true,
+        "payload_byte": true,
+        "checkpoint_truncation": true,
+        "appended_unexpected_byte": true,
+        "incorrect_schema_version": true,
+        "checkpoint_substitution": true
+      },
+      "pass": true
+    },
+    "trial-03-noise": {
+      "expected_disposition": "reject_or_fail_equivalence",
+      "mutations": {
+        "retrieval_key_component": true,
+        "reconstruction_component": true,
+        "next_observation_component": true,
+        "label": true,
+        "label_count": true,
+        "lineage": true,
+        "transition_graph_edge": true,
+        "payload_byte": true,
+        "checkpoint_truncation": true,
+        "appended_unexpected_byte": true,
+        "incorrect_schema_version": true,
+        "checkpoint_substitution": true
+      },
+      "pass": true
+    },
+    "trial-04-label": {
+      "expected_disposition": "reject_or_fail_equivalence",
+      "mutations": {
+        "retrieval_key_component": true,
+        "reconstruction_component": true,
+        "next_observation_component": true,
+        "label": true,
+        "label_count": true,
+        "lineage": true,
+        "transition_graph_edge": true,
+        "payload_byte": true,
+        "checkpoint_truncation": true,
+        "appended_unexpected_byte": true,
+        "incorrect_schema_version": true,
+        "checkpoint_substitution": true
+      },
+      "pass": true
+    },
+    "trial-05-observation": {
+      "expected_disposition": "reject_or_fail_equivalence",
+      "mutations": {
+        "retrieval_key_component": true,
+        "reconstruction_component": true,
+        "next_observation_component": true,
+        "label": true,
+        "label_count": true,
+        "lineage": true,
+        "transition_graph_edge": true,
+        "payload_byte": true,
+        "checkpoint_truncation": true,
+        "appended_unexpected_byte": true,
+        "incorrect_schema_version": true,
+        "checkpoint_substitution": true
+      },
+      "pass": true
+    },
+    "trial-06-transition": {
+      "expected_disposition": "reject_or_fail_equivalence",
+      "mutations": {
+        "retrieval_key_component": true,
+        "reconstruction_component": true,
+        "next_observation_component": true,
+        "label": true,
+        "label_count": true,
+        "lineage": true,
+        "transition_graph_edge": true,
+        "payload_byte": true,
+        "checkpoint_truncation": true,
+        "appended_unexpected_byte": true,
+        "incorrect_schema_version": true,
+        "checkpoint_substitution": true
+      },
+      "pass": true
+    },
+    "trial-07-combined": {
+      "expected_disposition": "reject_or_fail_equivalence",
+      "mutations": {
+        "retrieval_key_component": true,
+        "reconstruction_component": true,
+        "next_observation_component": true,
+        "label": true,
+        "label_count": true,
+        "lineage": true,
+        "transition_graph_edge": true,
+        "payload_byte": true,
+        "checkpoint_truncation": true,
+        "appended_unexpected_byte": true,
+        "incorrect_schema_version": true,
+        "checkpoint_substitution": true
+      },
+      "pass": true
+    },
+    "trial-08-ambiguous": {
+      "expected_disposition": "reject_or_fail_equivalence",
+      "mutations": {
+        "retrieval_key_component": true,
+        "reconstruction_component": true,
+        "next_observation_component": true,
+        "label": true,
+        "label_count": true,
+        "lineage": true,
+        "transition_graph_edge": true,
+        "payload_byte": true,
+        "checkpoint_truncation": true,
+        "appended_unexpected_byte": true,
+        "incorrect_schema_version": true,
+        "checkpoint_substitution": true
+      },
+      "pass": true
+    }
+  },
+  "all_negative_tests_pass": true,
+  "formal_mncs_status": "UNKNOWN",
+  "formal_mncds_status": "UNKNOWN",
+  "promotion_authorized": false
+}

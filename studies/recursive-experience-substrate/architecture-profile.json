@@ -1,0 +1,195 @@
+{
+  "schema": "mncs-recursive-experience-substrate/0.1",
+  "profile_id": "ravel-recursive-experience-substrate-v1",
+  "status": "design-only",
+  "relationship": {
+    "phase": "post-ravel-0.6",
+    "extends_recursive_architecture_study": true,
+    "changes_existing_preregistration": false,
+    "may_modify_frozen_ravel_0_4_or_0_5": false,
+    "may_modify_ravel_0_6_preregistration_or_final_material": false
+  },
+  "immutable_authority": {
+    "experience_system_may_modify_evaluator": false,
+    "experience_system_may_modify_thresholds": false,
+    "experience_system_may_modify_partitions": false,
+    "experience_system_may_modify_resource_policy": false,
+    "experience_system_may_access_future_final_before_freeze": false,
+    "experience_system_may_authorize_promotion": false,
+    "experience_system_may_delete_failed_or_rejected_records": false
+  },
+  "memory_classes": [
+    "episodic",
+    "causal",
+    "semantic",
+    "procedural",
+    "negative"
+  ],
+  "record_vocabulary": {
+    "experience_episode": [
+      "episode_id",
+      "candidate_identity",
+      "context_identity",
+      "observation_identity",
+      "outcome_class",
+      "route",
+      "prediction",
+      "actual",
+      "resource_cost",
+      "observed_anomalies"
+    ],
+    "causal_hypothesis": [
+      "hypothesis_id",
+      "statement",
+      "supporting_episode_ids",
+      "competing_hypothesis_ids",
+      "required_probe_ids",
+      "falsifier",
+      "recorded_before_intervention",
+      "disposition"
+    ],
+    "intervention_record": [
+      "intervention_id",
+      "hypothesis_id",
+      "parent_candidate_identity",
+      "child_candidate_identity",
+      "operation",
+      "affected_surfaces",
+      "predicted_effects",
+      "resource_budget",
+      "rollback_target"
+    ],
+    "causal_attribution": [
+      "attribution_id",
+      "intervention_id",
+      "actual_effects",
+      "hypothesis_disposition",
+      "alternative_explanations_remaining",
+      "credit_classes",
+      "evaluator_identity"
+    ],
+    "learned_principle": [
+      "principle_id",
+      "statement",
+      "scope",
+      "supporting_attribution_ids",
+      "counterexample_episode_ids",
+      "maturity",
+      "transfer_status",
+      "falsifier"
+    ],
+    "strategy_record": [
+      "strategy_id",
+      "principle_ids",
+      "trigger",
+      "recommended_intervention",
+      "preconditions",
+      "known_failure_modes",
+      "applicability_scope",
+      "reuse_status"
+    ]
+  },
+  "allowed_statuses": {
+    "episode_outcome_class": [
+      "success",
+      "error",
+      "neutral",
+      "abstention"
+    ],
+    "hypothesis_disposition": [
+      "open",
+      "supported",
+      "challenged",
+      "rejected",
+      "inconclusive"
+    ],
+    "principle_maturity": [
+      "provisional",
+      "supported",
+      "challenged",
+      "rejected",
+      "retired"
+    ],
+    "transfer_status": [
+      "untested",
+      "failed",
+      "partial",
+      "supported"
+    ],
+    "strategy_reuse_status": [
+      "untested",
+      "restricted",
+      "supported",
+      "retired"
+    ]
+  },
+  "required_episode_outcomes": [
+    "success",
+    "error",
+    "neutral",
+    "abstention"
+  ],
+  "credit_classes": [
+    "immediate",
+    "enabling",
+    "delayed-descendant",
+    "transfer",
+    "retention",
+    "negative-downstream"
+  ],
+  "diagnostic_requirements": {
+    "structured_probe_identity_required": true,
+    "counterfactual_or_control_required_for_supported_causal_claim": true,
+    "aggregate_score_alone_may_support_causal_claim": false,
+    "provider_or_verifier_status_may_be_redefined": false,
+    "hidden_reasoning_transcript_required": false
+  },
+  "reuse_rules": {
+    "principle_must_bind_supporting_attributions": true,
+    "strategy_must_bind_principles": true,
+    "untested_transfer_may_authorize_global_reuse": false,
+    "failed_and_rejected_experience_must_remain_retrievable": true,
+    "reuse_must_bind_context_and_candidate_lineage": true
+  },
+  "required_controls": [
+    "shuffled-attribution-control",
+    "success-memory-ablation",
+    "negative-memory-ablation",
+    "transfer-holdout",
+    "aggregate-only-feedback-control"
+  ],
+  "hard_gates": [
+    "immutable-evaluator-authority",
+    "immutable-threshold-partition-and-resource-authority",
+    "append-only-experience-lineage",
+    "hypotheses-recorded-before-intervention",
+    "predictions-recorded-before-evaluation",
+    "all-outcome-classes-retained",
+    "supported-causal-claims-bind-controls-or-counterfactuals",
+    "principles-bind-attributions-and-falsifiers",
+    "strategies-bind-principles-and-known-failure-modes",
+    "global-reuse-requires-transfer-support",
+    "future-final-material-unavailable-before-freeze"
+  ],
+  "required_negative_tests": [
+    "evaluator-authority-expansion",
+    "error-only-memory",
+    "deleted-failure-memory",
+    "post-hoc-hypothesis",
+    "unsupported-principle",
+    "strategy-without-failure-modes",
+    "global-reuse-without-transfer",
+    "attribution-without-credit-class",
+    "aggregate-only-causal-promotion",
+    "future-final-early-access"
+  ],
+  "claim_boundary": {
+    "formal_mncs_status": "UNKNOWN",
+    "formal_mncds_status": "UNKNOWN",
+    "causal_validity_outside_declared_tasks": "UNKNOWN",
+    "general_recursive_self_improvement": "UNKNOWN",
+    "independent_evaluation": "UNKNOWN",
+    "protected_custody": "UNKNOWN",
+    "promotion_authorized": false
+  }
+}

@@ -1,0 +1,231 @@
+{
+  "schema": "mncs-recursive-architecture-study/0.1",
+  "study_id": "recursive-architecture-comparison-v1",
+  "status": "preregistered-design-only",
+  "relationship_to_ravel": {
+    "phase": "post-ravel-0.6",
+    "may_use_frozen_prior_results_as_design_evidence": true,
+    "may_modify_ravel_0_4_or_0_5": false,
+    "may_modify_ravel_0_6_preregistration_or_final_material": false
+  },
+  "immutable_authority": {
+    "evaluator_identity": "evaluator.recursive-architecture-v1",
+    "threshold_policy_identity": "thresholds.recursive-architecture-v1",
+    "partition_policy_identity": "partitions.recursive-architecture-v1",
+    "resource_policy_identity": "resources.recursive-architecture-v1",
+    "generator_may_modify_evaluator": false,
+    "generator_may_modify_thresholds": false,
+    "generator_may_modify_partitions": false,
+    "generator_may_modify_resource_policy": false,
+    "generator_may_access_future_final_before_freeze": false,
+    "generator_may_authorize_promotion": false
+  },
+  "budgets": {
+    "candidate_slots_per_arm": 8,
+    "max_lineage_depth": 8,
+    "max_children_per_candidate": 3,
+    "max_bounded_operations_per_arm": 1000000,
+    "equal_budget_before_adaptive_portfolio_allocation": true
+  },
+  "architecture_arms": [
+    {
+      "id": "manual-repair",
+      "class": "baseline",
+      "recursive_layers": [],
+      "candidate_replacement": true,
+      "in_place_mutation_after_evaluation": false,
+      "feedback": "structured-correct",
+      "policy_replacement": false,
+      "portfolio_allocation": false
+    },
+    {
+      "id": "structural-expert",
+      "class": "candidate",
+      "recursive_layers": ["parameter", "structural"],
+      "candidate_replacement": true,
+      "in_place_mutation_after_evaluation": false,
+      "feedback": "structured-correct",
+      "policy_replacement": false,
+      "portfolio_allocation": false
+    },
+    {
+      "id": "candidate-lineage",
+      "class": "candidate",
+      "recursive_layers": ["parameter", "structural"],
+      "candidate_replacement": true,
+      "in_place_mutation_after_evaluation": false,
+      "feedback": "structured-correct",
+      "policy_replacement": false,
+      "portfolio_allocation": false
+    },
+    {
+      "id": "policy-meta",
+      "class": "candidate",
+      "recursive_layers": ["parameter", "structural", "policy"],
+      "candidate_replacement": true,
+      "in_place_mutation_after_evaluation": false,
+      "feedback": "structured-correct",
+      "policy_replacement": true,
+      "portfolio_allocation": false
+    },
+    {
+      "id": "governed-portfolio",
+      "class": "candidate",
+      "recursive_layers": ["parameter", "structural", "policy", "portfolio"],
+      "candidate_replacement": true,
+      "in_place_mutation_after_evaluation": false,
+      "feedback": "structured-correct",
+      "policy_replacement": true,
+      "portfolio_allocation": true
+    },
+    {
+      "id": "random-proposal-control",
+      "class": "control",
+      "recursive_layers": ["structural"],
+      "candidate_replacement": true,
+      "in_place_mutation_after_evaluation": false,
+      "feedback": "none",
+      "policy_replacement": false,
+      "portfolio_allocation": false
+    },
+    {
+      "id": "shuffled-feedback-control",
+      "class": "control",
+      "recursive_layers": ["structural", "policy"],
+      "candidate_replacement": true,
+      "in_place_mutation_after_evaluation": false,
+      "feedback": "shuffled",
+      "policy_replacement": true,
+      "portfolio_allocation": false
+    },
+    {
+      "id": "diagnostic-ablation-control",
+      "class": "control",
+      "recursive_layers": ["structural", "policy"],
+      "candidate_replacement": true,
+      "in_place_mutation_after_evaluation": false,
+      "feedback": "aggregate-only",
+      "policy_replacement": true,
+      "portfolio_allocation": false
+    }
+  ],
+  "candidate_record_required_fields": [
+    "candidate_id",
+    "parent_ids",
+    "content_identity",
+    "proposal_identity",
+    "evidence_input_ids",
+    "predicted_effects",
+    "falsifier",
+    "resource_budget",
+    "actual_effects",
+    "disposition",
+    "rollback_target"
+  ],
+  "prediction_dimensions": [
+    "targeted_failure_codes",
+    "metrics_expected_to_improve",
+    "metrics_expected_to_remain_invariant",
+    "maximum_accepted_regressions",
+    "expected_resource_delta",
+    "affected_surfaces",
+    "falsifier"
+  ],
+  "task_families": [
+    "structural-source-analysis",
+    "classification-and-representation-drift",
+    "transition-support-and-planning-drift",
+    "composed-contract-partial-revalidation",
+    "certified-routing-with-exact-fallback"
+  ],
+  "partitions": [
+    "development",
+    "selection",
+    "retention",
+    "transition-retention",
+    "planning",
+    "transfer-unseen",
+    "future-final"
+  ],
+  "primary_metrics": [
+    "improvement_per_candidate",
+    "improvement_per_bounded_operation",
+    "transfer_regime_performance",
+    "retention_preservation",
+    "transition_support_preservation",
+    "rejected_update_rollback_equality",
+    "prediction_calibration"
+  ],
+  "recursion_health_metrics": [
+    "accepted_update_rate",
+    "lineage_depth",
+    "branching_factor",
+    "duplicate_candidate_rate",
+    "evidence_reuse_depth",
+    "time_to_stagnation",
+    "unknown_rate",
+    "evaluator_disagreement_rate",
+    "architecture_generation_concentration",
+    "authority_violation_attempts"
+  ],
+  "hard_gates": [
+    "zero_evaluator_identity_changes",
+    "zero_threshold_changes",
+    "zero_partition_policy_changes",
+    "zero_resource_policy_changes",
+    "zero_future_final_access_before_freeze",
+    "acyclic_append_only_lineage",
+    "rejected_transactions_preserve_parent_identity",
+    "candidate_budget_respected",
+    "operation_budget_respected",
+    "predictions_recorded_before_evaluation",
+    "all_failures_and_unknowns_retained"
+  ],
+  "required_controls": [
+    "random-proposal-control",
+    "shuffled-feedback-control",
+    "diagnostic-ablation-control"
+  ],
+  "required_negative_tests": [
+    "evaluator-modification",
+    "threshold-modification",
+    "partition-modification",
+    "resource-policy-modification",
+    "future-final-early-access",
+    "in-place-post-evaluation-mutation",
+    "lineage-cycle",
+    "missing-parent",
+    "deleted-rejected-candidate",
+    "post-hoc-prediction",
+    "candidate-budget-overflow",
+    "operation-budget-overflow",
+    "selection-feedback-same-candidate-repair",
+    "rejected-update-checkpoint-change",
+    "portfolio-silent-arm-removal",
+    "missing-causal-feedback-control"
+  ],
+  "stop_rules": [
+    "candidate-budget-exhausted",
+    "operation-budget-exhausted",
+    "authority-expansion-attempt",
+    "execution-integrity-failure",
+    "stagnation-window-reached",
+    "unresolved-evaluator-disagreement",
+    "future-final-contamination"
+  ],
+  "selection_rule": {
+    "requires_all_hard_gates": true,
+    "uses_pareto_reporting": true,
+    "single_aggregate_may_override_hard_gate": false,
+    "recursive_feedback_claim_requires_control_advantage": true,
+    "policy_recursion_claim_requires_fixed_policy_advantage": true,
+    "portfolio_claim_requires_equal_budget_prephase": true
+  },
+  "claim_boundary": {
+    "formal_mncs_status": "UNKNOWN",
+    "formal_mncds_status": "UNKNOWN",
+    "independent_evaluation": "UNKNOWN",
+    "protected_custody": "UNKNOWN",
+    "promotion_authorized": false
+  }
+}

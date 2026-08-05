@@ -1,0 +1,206 @@
+{
+  "schema": "mncs-recursive-experience-records/0.1",
+  "profile_id": "ravel-recursive-experience-substrate-v1",
+  "record_bundle_id": "recursive-experience-reference-v1",
+  "records": {
+    "experience_episode": [
+      {
+        "episode_id": "episode:transition-divergence-error",
+        "candidate_identity": "candidate:ravel-experience-parent",
+        "context_identity": "context:partial-observation-development",
+        "observation_identity": "observation:state-alias-17",
+        "outcome_class": "error",
+        "route": [
+          "expert:observation-equivalent-a"
+        ],
+        "prediction": "action:left",
+        "actual": "action:right",
+        "resource_cost": 18,
+        "observed_anomalies": [
+          "representation-match-with-transition-divergence"
+        ]
+      },
+      {
+        "episode_id": "episode:transition-aware-success",
+        "candidate_identity": "candidate:ravel-experience-child",
+        "context_identity": "context:partial-observation-development",
+        "observation_identity": "observation:state-alias-17",
+        "outcome_class": "success",
+        "route": [
+          "expert:transition-aware-b"
+        ],
+        "prediction": "action:right",
+        "actual": "action:right",
+        "resource_cost": 21,
+        "observed_anomalies": []
+      },
+      {
+        "episode_id": "episode:unaffected-base-neutral",
+        "candidate_identity": "candidate:ravel-experience-child",
+        "context_identity": "context:base-retention",
+        "observation_identity": "observation:base-04",
+        "outcome_class": "neutral",
+        "route": [
+          "expert:base-anchor"
+        ],
+        "prediction": "action:stay",
+        "actual": "action:stay",
+        "resource_cost": 20,
+        "observed_anomalies": [
+          "no-material-change"
+        ]
+      },
+      {
+        "episode_id": "episode:sparse-support-abstention",
+        "candidate_identity": "candidate:ravel-experience-child",
+        "context_identity": "context:sparse-transition-support",
+        "observation_identity": "observation:sparse-09",
+        "outcome_class": "abstention",
+        "route": [],
+        "prediction": "UNKNOWN",
+        "actual": "evidence-insufficient",
+        "resource_cost": 7,
+        "observed_anomalies": [
+          "transition-support-incomplete"
+        ]
+      }
+    ],
+    "causal_hypothesis": [
+      {
+        "hypothesis_id": "hypothesis:routing-equivalence-defect",
+        "statement": "Observation-equivalent states were routed together despite divergent supported transitions.",
+        "supporting_episode_ids": [
+          "episode:transition-divergence-error"
+        ],
+        "competing_hypothesis_ids": [
+          "hypothesis:capacity-insufficient"
+        ],
+        "required_probe_ids": [
+          "probe:transition-aware-counterfactual",
+          "probe:fixed-capacity-routing-control"
+        ],
+        "falsifier": "The error persists when routing uses transition support while expert capacity is held fixed.",
+        "recorded_before_intervention": true,
+        "disposition": "supported"
+      },
+      {
+        "hypothesis_id": "hypothesis:capacity-insufficient",
+        "statement": "The error was caused only by insufficient expert capacity.",
+        "supporting_episode_ids": [
+          "episode:transition-divergence-error"
+        ],
+        "competing_hypothesis_ids": [
+          "hypothesis:routing-equivalence-defect"
+        ],
+        "required_probe_ids": [
+          "probe:fixed-capacity-routing-control"
+        ],
+        "falsifier": "The error is removed without adding expert capacity.",
+        "recorded_before_intervention": true,
+        "disposition": "rejected"
+      }
+    ],
+    "intervention_record": [
+      {
+        "intervention_id": "intervention:transition-aware-routing",
+        "hypothesis_id": "hypothesis:routing-equivalence-defect",
+        "parent_candidate_identity": "candidate:ravel-experience-parent",
+        "child_candidate_identity": "candidate:ravel-experience-child",
+        "operation": "replace-routing-equivalence-policy",
+        "affected_surfaces": [
+          "router",
+          "transition-index"
+        ],
+        "predicted_effects": {
+          "transition_accuracy": "increase",
+          "base_accuracy": "invariant",
+          "routing_cost": "increase-within-bound"
+        },
+        "resource_budget": {
+          "max_additional_operations": 8,
+          "max_additional_experts": 0
+        },
+        "rollback_target": "candidate:ravel-experience-parent"
+      }
+    ],
+    "causal_attribution": [
+      {
+        "attribution_id": "attribution:transition-aware-routing",
+        "intervention_id": "intervention:transition-aware-routing",
+        "actual_effects": {
+          "transition_accuracy_delta": 0.14,
+          "base_accuracy_delta": 0.0,
+          "routing_cost_delta": 0.03,
+          "transfer_accuracy_delta": 0.09
+        },
+        "hypothesis_disposition": "supported",
+        "alternative_explanations_remaining": [],
+        "credit_classes": [
+          "immediate",
+          "transfer",
+          "retention"
+        ],
+        "evaluator_identity": "evaluator:recursive-experience-reference-v1"
+      }
+    ],
+    "learned_principle": [
+      {
+        "principle_id": "principle:transition-aware-routing-identity",
+        "statement": "Observation-equivalent states must not share routing identity when their supported transition distributions diverge.",
+        "scope": {
+          "mechanisms": [
+            "routing",
+            "transition-memory"
+          ],
+          "contexts": [
+            "partial-observation",
+            "representation-drift"
+          ]
+        },
+        "supporting_attribution_ids": [
+          "attribution:transition-aware-routing"
+        ],
+        "counterexample_episode_ids": [
+          "episode:sparse-support-abstention"
+        ],
+        "maturity": "supported",
+        "transfer_status": "supported",
+        "falsifier": "A held-out context with complete transition support performs no better under transition-aware routing."
+      }
+    ],
+    "strategy_record": [
+      {
+        "strategy_id": "strategy:split-routing-equivalence-class",
+        "principle_ids": [
+          "principle:transition-aware-routing-identity"
+        ],
+        "trigger": "representation-similarity-with-transition-divergence",
+        "recommended_intervention": "split-routing-equivalence-class",
+        "preconditions": [
+          "transition-support-complete",
+          "routing-cost-budget-available"
+        ],
+        "known_failure_modes": [
+          "sparse-transition-evidence",
+          "temporary-environment-drift"
+        ],
+        "applicability_scope": {
+          "mechanisms": [
+            "routing"
+          ],
+          "contexts": [
+            "partial-observation"
+          ]
+        },
+        "reuse_status": "supported"
+      }
+    ]
+  },
+  "controls_applied": [
+    "shuffled-attribution-control",
+    "success-memory-ablation",
+    "negative-memory-ablation",
+    "transfer-holdout",
+    "aggregate-only-feedback-control"
+  ]
+}

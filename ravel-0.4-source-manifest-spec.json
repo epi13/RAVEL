@@ -1,0 +1,57 @@
+{
+  "schema": "ravel-source-manifest-spec/0.4",
+  "digest_algorithm": "sha256",
+  "digest_procedure": "For each file in declared order, hash uint32_be(path_utf8_length), path_utf8, uint64_be(file_length), and exact file bytes.",
+  "entrypoint": "ravel_0_4.c",
+  "generated_execution_shards": [],
+  "source_provenance": "human_maintained_c11_no_generator",
+  "ordered_files": [
+    {
+      "role": "entrypoint",
+      "path": "ravel_0_4.c"
+    },
+    {
+      "role": "contract",
+      "path": "RAVEL_0_4_CONTRACT.md"
+    },
+    {
+      "role": "scope",
+      "path": "RAVEL_0_4_SCOPE.md"
+    },
+    {
+      "role": "preregistration",
+      "path": "ravel-0.4-preregistration.json"
+    },
+    {
+      "role": "manifest_specification",
+      "path": "ravel-0.4-source-manifest-spec.json"
+    },
+    {
+      "role": "threat_model",
+      "path": "ravel-0.4-threat-model.json"
+    },
+    {
+      "role": "limitations",
+      "path": "ravel-0.4-limitations.md"
+    },
+    {
+      "role": "evaluator_and_evidence_generator",
+      "path": "tools/ravel_0_4_evidence.py"
+    },
+    {
+      "role": "source_digest_utility",
+      "path": "tools/ravel_source_digest.py"
+    }
+  ],
+  "evidence_schema_versions": [
+    "ravel-raw-observations/0.4",
+    "ravel-trial-evidence/0.4",
+    "ravel-negative-evidence/0.4",
+    "ravel-assurance-case/0.4"
+  ],
+  "execution_shard_discovery_globs": [
+    "ravel_0_4/*.inc",
+    "ravel_0_4/*.c",
+    "ravel_0_4/*.h"
+  ]
+}

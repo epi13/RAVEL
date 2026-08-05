@@ -1,0 +1,61 @@
+{
+  "schema_version": "0.1",
+  "threat_model_id": "ravel-t.training.threats.v1",
+  "assets": [
+    "training and holdout separation",
+    "full-scan oracle semantics",
+    "route certificate",
+    "expert lineage",
+    "split budget",
+    "development thresholds",
+    "reported evidence"
+  ],
+  "threats": [
+    {
+      "id": "RT1",
+      "threat": "recursive training rewrites its own evaluator or pass gates",
+      "mitigation": "evaluator, seeds, oracle, thresholds, and promotion fields are outside the mutable training surface",
+      "evidence": "TRAINING_CONTRACT.md and training-preregistration.json"
+    },
+    {
+      "id": "RT2",
+      "threat": "approximate routing changes training assignments",
+      "mitigation": "every routed assignment uses an exact lower-bound certificate and otherwise completes a full scan",
+      "evidence": "zero holdout routed-versus-full-scan mismatches"
+    },
+    {
+      "id": "RT3",
+      "threat": "unbounded expert birth consumes memory or compute",
+      "mitigation": "expert count is capped at 64 and each round may create at most eight children",
+      "evidence": "final expert and split counters"
+    },
+    {
+      "id": "RT4",
+      "threat": "lineage or topology changes become irreproducible",
+      "mitigation": "fixed seeds, deterministic tie breaking, and a published lineage digest",
+      "evidence": "repeatable training-evidence.json"
+    },
+    {
+      "id": "RT5",
+      "threat": "synthetic task construction leaks an easy solution into the claim",
+      "mitigation": "claim is limited to a mechanism proof and formal status remains UNKNOWN",
+      "evidence": "explicit claim boundary"
+    },
+    {
+      "id": "RT6",
+      "threat": "malicious or drifting data causes unstable expert proliferation",
+      "mitigation": "not established in epoch 1; production and continual-training use are prohibited",
+      "evidence": "residual UNKNOWN"
+    }
+  ],
+  "residual_unknowns": [
+    "real-world data generalization",
+    "protected evaluator custody",
+    "poisoning and backdoor resistance",
+    "catastrophic forgetting",
+    "expert retirement and merge safety",
+    "distributed and accelerator training",
+    "gradient-based parameter integration",
+    "cross-host reproduction"
+  ]
+}

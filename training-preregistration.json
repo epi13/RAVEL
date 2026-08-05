@@ -1,0 +1,53 @@
+{
+  "schema_version": "0.2",
+  "study_id": "ravel.recursive-training.epoch-1.v1",
+  "candidate_id": "ravel-t.recursive-expert-trainer.c11.v1",
+  "task": {
+    "type": "deterministic_synthetic_classification",
+    "dimensions": 8,
+    "classes": 8,
+    "latent_regions": 64,
+    "development_samples": 32768,
+    "holdout_samples": 8192,
+    "development_seed": "0x747261696e000001",
+    "holdout_seed": "0x686f6c646f757401"
+  },
+  "candidate": {
+    "initial_experts": 8,
+    "maximum_experts": 64,
+    "births_per_round_max": 8,
+    "route_width": 8,
+    "final_refinement_rounds": 5,
+    "uncertain_route_behavior": "complete_full_scan",
+    "selection": "error_ranked_shard_split",
+    "lineage_identity": "deterministic_mix64"
+  },
+  "baselines": [
+    {
+      "id": "ravel.baseline.fixed8.nearest-centroid.v1",
+      "experts": 8,
+      "refinement_rounds": 10,
+      "routing": "full_scan"
+    },
+    {
+      "id": "ravel.baseline.flat64.nearest-centroid.v1",
+      "experts": 64,
+      "refinement_rounds": 10,
+      "routing": "full_scan"
+    }
+  ],
+  "hard_gates": {
+    "final_experts": 64,
+    "successful_births": 56,
+    "holdout_exact_mismatches_max": 0,
+    "holdout_accuracy_min": 0.95,
+    "accuracy_deficit_vs_flat64_max": 0.01,
+    "accuracy_gain_vs_fixed8_min": 0.20,
+    "holdout_mean_experts_max": 16.0
+  },
+  "formal_status_if_passed": {
+    "mncs": "UNKNOWN",
+    "mncds": "UNKNOWN",
+    "promotion_authorized": false
+  }
+}

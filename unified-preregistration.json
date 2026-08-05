@@ -1,0 +1,41 @@
+{
+  "schema_version": "0.3",
+  "study_id": "ravel.unified.synthetic.epoch-1.v1",
+  "candidate": "ravel-u.unified-expert-lattice.v0.3",
+  "frozen_inputs": {
+    "base_train_seed": "0x747261696e550001",
+    "base_holdout_seed": "0x686f6c6455000001",
+    "adaptation_seed": "0x6164617074550001",
+    "base_train_events": 32768,
+    "base_holdout_events": 8192,
+    "adaptation_events": 16384,
+    "replay_events": 8192,
+    "planning_cases": 512
+  },
+  "topology": {
+    "initial_experts": 8,
+    "base_experts": 64,
+    "adaptation_births": 24,
+    "adaptation_retirements": 8,
+    "final_experts": 80,
+    "maximum_experts": 96,
+    "route_width": 8
+  },
+  "hard_gates": {
+    "base_holdout_accuracy_min": 0.95,
+    "adapted_drift_accuracy_min": 0.95,
+    "adapted_gain_over_static_min": 0.20,
+    "post_adaptation_retention_min": 0.90,
+    "adapted_transition_accuracy_min": 0.95,
+    "adapted_planning_success_min": 0.90,
+    "routed_oracle_mismatches_max": 0,
+    "checkpoint_digest_match": true,
+    "checkpoint_evaluation_match": true
+  },
+  "selection_rule": "No candidate selection occurs inside this epoch. The single frozen implementation receives PASS only when every hard gate passes.",
+  "formal_status_if_development_passes": {
+    "mncs": "UNKNOWN",
+    "mncds": "UNKNOWN",
+    "promotion_authorized": false
+  }
+}
