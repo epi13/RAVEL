@@ -9,8 +9,9 @@ protected evidence.
 
 ### 1. Scope and preregistration
 
-Examples: `RAVEL_0_6_SCOPE.md`, `RAVEL_0_6_PREREGISTRATION.md`, and
-`ravel-0.6-preregistration.json`.
+Examples: `ravel_versions/0.6/RAVEL_0_6_SCOPE.md`,
+`ravel_versions/0.6/RAVEL_0_6_PREREGISTRATION.md`, and
+`ravel_versions/0.6/ravel-0.6-preregistration.json`.
 
 These files define the question, candidate limits, partitions, seeds, gates,
 change rules, and claim boundaries before evaluation. They establish the
@@ -18,7 +19,8 @@ protocol, not the outcome.
 
 ### 2. Readable contract
 
-Examples: `RAVEL_0_4_CONTRACT.md` and `RAVEL_0_5_CONTRACT.md`.
+Examples: `ravel_versions/0.4/RAVEL_0_4_CONTRACT.md` and
+`ravel_versions/0.5/RAVEL_0_5_CONTRACT.md`.
 
 The contract explains required behavior and limits in human-readable form. It is
 an authority surface for review, but it does not prove the source implements the
@@ -26,7 +28,8 @@ contract.
 
 ### 3. Mechanism source
 
-Examples: `ravel_0_4.c` and `ravel_0_5.c`.
+Examples: `ravel_versions/0.4/ravel_0_4.c` and
+`ravel_versions/0.5/ravel_0_5.c`.
 
 The maintained source defines the executable mechanism. For a generated 0.6
 candidate, the generator, frozen input identity, transformation rules, and output
@@ -34,8 +37,8 @@ identity are all part of the implementation story.
 
 ### 4. Raw observations
 
-Examples: `ravel-0.4-raw-observations.json` and
-`ravel-0.5-raw-observations.json`.
+Examples: `ravel_versions/0.4/ravel-0.4-raw-observations.json` and
+`ravel_versions/0.5/ravel-0.5-raw-observations.json`.
 
 These records should contain facts emitted by the executable, such as counts,
 checksums, predictions, topology, resource measurements, and integrity facts.
@@ -44,8 +47,8 @@ external evaluator is responsible for deriving it.
 
 ### 5. Evaluator-derived evidence
 
-Examples: `ravel-0.5-trial-evidence.json` and
-`ravel-0.5-negative-evidence.json`.
+Examples: `ravel_versions/0.5/ravel-0.5-trial-evidence.json` and
+`ravel_versions/0.5/ravel-0.5-negative-evidence.json`.
 
 The evaluator checks the frozen matrix, validates record structure, derives
 metrics, applies hard gates, rejects contradictions, and preserves failures. The
@@ -55,8 +58,8 @@ merely because it is a separate program.
 
 ### 6. Source and execution identity
 
-Examples: `ravel-0.4-source-manifest.json` and
-`ravel-0.5-source-and-execution-manifest.json`.
+Examples: `ravel_versions/0.4/ravel-0.4-source-manifest.json` and
+`ravel_versions/0.5/ravel-0.5-source-and-execution-manifest.json`.
 
 These records bind ordered files, digests, compiler or execution details, and
 other identity facts. They answer which implementation and execution surface the
@@ -65,8 +68,8 @@ material change rather than harmless cleanup.
 
 ### 7. Assurance case
 
-Examples: `ravel-0.4-assurance-case.json` and
-`ravel-0.5-assurance-case.json`.
+Examples: `ravel_versions/0.4/ravel-0.4-assurance-case.json` and
+`ravel_versions/0.5/ravel-0.5-assurance-case.json`.
 
 The assurance case combines the available facts into a bounded disposition. It
 should retain limitations, `UNKNOWN` conditions, failed gates, and explicit
@@ -74,15 +77,16 @@ non-promotion fields.
 
 ### 8. Human-readable results and postmortems
 
-Examples: `RAVEL_0_4_RESULTS.md`, `RAVEL_0_5_RESULTS.md`, and
-`RAVEL_0_5_POSTMORTEM.md`.
+Examples: `ravel_versions/0.4/RAVEL_0_4_RESULTS.md`,
+`ravel_versions/0.5/RAVEL_0_5_RESULTS.md`, and
+`ravel_versions/0.5/RAVEL_0_5_POSTMORTEM.md`.
 
 These files explain the evidence to readers. They are useful summaries, but the
 underlying JSON and source identities remain the auditable basis.
 
 ### 9. Runtime observations
 
-Example: `ravel-0.5-runtime-observations.json`.
+Example: `ravel_versions/0.5/ravel-0.5-runtime-observations.json`.
 
 Wall-clock timing is host-specific and non-normative. Deterministic expert,
 operation, or evaluation counts are the canonical work measures unless a

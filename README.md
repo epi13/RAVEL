@@ -91,7 +91,7 @@ See [`docs/KNOWLEDGE_MODEL.md`](docs/KNOWLEDGE_MODEL.md) for the proposed storag
 
 RAVEL originated inside [`epi13/machine-native-complexity-standard`](https://github.com/epi13/machine-native-complexity-standard). The standalone repository should preserve that provenance and the identity of frozen evidence.
 
-The recommended extraction is history-preserving rather than a manual file copy. See [`MIGRATION.md`](MIGRATION.md) for the exact boundary, source commit, and migration sequence.
+The recommended extraction is history-preserving rather than a manual file copy. See [`docs/MIGRATION.md`](docs/MIGRATION.md) for the exact boundary, source commit, and migration sequence.
 
 ## Current repository plan
 

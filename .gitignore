@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+
+# Local build and evidence diagnostics
+ravel_versions/**/ravel
+ravel_versions/**/ravel_train
+ravel_versions/**/ravel_unified_bin
+ravel_versions/**/ravel_0_4_bin
+ravel_versions/**/ravel_0_5_bin
+ravel_versions/**/diagnostics/
+ravel_versions/**/evidence-actual.json
+ravel_versions/**/unified-actual.json
+ravel_versions/**/ravel-*-checkpoint.bin
+ravel-*-checkpoint.bin

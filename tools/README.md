@@ -4,6 +4,13 @@ The scripts in this directory build, verify, mutate, digest, and summarize RAVEL
 evidence. They are support tools, not automatic sources of independent custody,
 organizational independence, or promotion authority.
 
+The preserved 0.4 and 0.5 modules retain their original case-root assumptions
+and bytes. Run `ravel_versions/0.4/run_evidence.py`,
+`ravel_versions/0.4/run_source_digest.py`, or
+`ravel_versions/0.5/run_evidence.py` through the root Makefile for the relocated
+layout; those small runners provide path compatibility without rewriting frozen
+modules or historical logical paths.
+
 ## Tool categories
 
 | Tool | Role |
@@ -89,7 +96,7 @@ separation alone is not organizational independence or protected evaluation.
 
 The current candidate-001 corrections expand planning traversal to all declared
 transition slots and remove inherited empirical support from adaptation births.
-See `../RAVEL_0_6_NEXT_STEPS.md` for the remaining lifecycle and evidence work.
+See `../ravel_versions/0.6/RAVEL_0_6_NEXT_STEPS.md` for the remaining lifecycle and evidence work.
 
 ## Adding or changing a tool
 
