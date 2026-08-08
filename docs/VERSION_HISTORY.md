@@ -10,7 +10,8 @@ actual contracts, observations, and dispositions.
 experts are provably unable to win, while falling back to the complete oracle
 otherwise?
 
-**Primary files:** `ravel.c`, `CONTRACT.md`, and `evidence.json`.
+**Primary files:** `ravel_versions/baseline/ravel.c`,
+`ravel_versions/baseline/CONTRACT.md`, and `ravel_versions/baseline/evidence.json`.
 
 The study generated 256 experts and retrieved 24 candidates per familiar query.
 Historical development observations reported zero mismatches, complete
@@ -25,8 +26,9 @@ production evidence.
 **Question:** Can routed assignments, unresolved error, bounded splits, and child
 lineage recursively build a more capable expert population?
 
-**Primary files:** `ravel_train.c`, `TRAINING_CONTRACT.md`, and the
-`training-*.json` records.
+**Primary files:** `ravel_versions/training/ravel_train.c`,
+`ravel_versions/training/TRAINING_CONTRACT.md`, and the
+`ravel_versions/training/training-*.json` records.
 
 The recursive 8-to-64 study historically reached the same reported holdout
 accuracy as the flat 64-expert comparison while using substantially fewer
@@ -43,10 +45,13 @@ representation, classification, action-conditioned prediction, transition
 memory, bounded planning, adaptation, retirement, lineage, and checkpoint
 identity?
 
-**Primary files:** `ravel_unified.c`, `ravel_unified/*.inc`,
-`UNIFIED_CONTRACT.md`, `unified-preregistration.json`,
-`unified-evidence.json`, `unified-threat-model.json`, and
-`unified-assurance-case.json`.
+**Primary files:** `ravel_versions/unified/ravel_unified.c`,
+`ravel_versions/unified/ravel_unified/*.inc`,
+`ravel_versions/unified/UNIFIED_CONTRACT.md`,
+`ravel_versions/unified/unified-preregistration.json`,
+`ravel_versions/unified/unified-evidence.json`,
+`ravel_versions/unified/unified-threat-model.json`, and
+`ravel_versions/unified/unified-assurance-case.json`.
 
 The synthetic world contained 64 states, four actions, eight labels, and
 8-dimensional observations. Historical development output reported strong base
@@ -71,15 +76,15 @@ without removing unfavorable cases?
 
 **Primary files:**
 
-- `ravel_0_4.c`;
-- `RAVEL_0_4_CONTRACT.md`;
-- `ravel-0.4-preregistration.json`;
-- `ravel-0.4-raw-observations.json`;
-- `ravel-0.4-trial-evidence.json`;
-- `ravel-0.4-negative-evidence.json`;
-- `ravel-0.4-source-manifest.json`;
-- `ravel-0.4-assurance-case.json`; and
-- `RAVEL_0_4_RESULTS.md`.
+- `ravel_versions/0.4/ravel_0_4.c`;
+- `ravel_versions/0.4/RAVEL_0_4_CONTRACT.md`;
+- `ravel_versions/0.4/ravel-0.4-preregistration.json`;
+- `ravel_versions/0.4/ravel-0.4-raw-observations.json`;
+- `ravel_versions/0.4/ravel-0.4-trial-evidence.json`;
+- `ravel_versions/0.4/ravel-0.4-negative-evidence.json`;
+- `ravel_versions/0.4/ravel-0.4-source-manifest.json`;
+- `ravel_versions/0.4/ravel-0.4-assurance-case.json`; and
+- `ravel_versions/0.4/RAVEL_0_4_RESULTS.md`.
 
 RAVEL 0.4 introduced disjoint training, adaptation, holdout, retention, and
 planning partitions; canonical checkpoint encoding; complete restored-behavior
@@ -98,18 +103,18 @@ the most important 0.4 defects without weakening the frozen evidence boundary?
 
 **Primary files:**
 
-- `ravel_0_5.c`;
-- `RAVEL_0_5_CONTRACT.md`;
-- `ravel-0.5-preregistration.json`;
+- `ravel_versions/0.5/ravel_0_5.c`;
+- `ravel_versions/0.5/RAVEL_0_5_CONTRACT.md`;
+- `ravel_versions/0.5/ravel-0.5-preregistration.json`;
 - `tools/ravel_0_5_evaluator.py`;
 - `tools/ravel_0_5_evidence.py`;
-- `ravel-0.5-raw-observations.json`;
-- `ravel-0.5-trial-evidence.json`;
-- `ravel-0.5-negative-evidence.json`;
-- `ravel-0.5-source-and-execution-manifest.json`;
-- `ravel-0.5-assurance-case.json`;
-- `RAVEL_0_5_RESULTS.md`; and
-- `RAVEL_0_5_POSTMORTEM.md`.
+- `ravel_versions/0.5/ravel-0.5-raw-observations.json`;
+- `ravel_versions/0.5/ravel-0.5-trial-evidence.json`;
+- `ravel_versions/0.5/ravel-0.5-negative-evidence.json`;
+- `ravel_versions/0.5/ravel-0.5-source-and-execution-manifest.json`;
+- `ravel_versions/0.5/ravel-0.5-assurance-case.json`;
+- `ravel_versions/0.5/RAVEL_0_5_RESULTS.md`; and
+- `ravel_versions/0.5/RAVEL_0_5_POSTMORTEM.md`.
 
 Mechanism changes included stratified replay, anchored base experts,
 objective-tested lifecycle changes, normalized residual channels,
@@ -136,14 +141,14 @@ separated development and selection lifecycle?
 
 **Primary files:**
 
-- `RAVEL_0_6_SCOPE.md`;
-- `RAVEL_0_6_PREREGISTRATION.md`;
-- `ravel-0.6-preregistration.json`;
-- `ravel-0.6-threat-model.json`;
-- `ravel-0.6-development-record.json`;
-- `ravel-0.6-limitations.md`;
+- `ravel_versions/0.6/RAVEL_0_6_SCOPE.md`;
+- `ravel_versions/0.6/RAVEL_0_6_PREREGISTRATION.md`;
+- `ravel_versions/0.6/ravel-0.6-preregistration.json`;
+- `ravel_versions/0.6/ravel-0.6-threat-model.json`;
+- `ravel_versions/0.6/ravel-0.6-development-record.json`;
+- `ravel_versions/0.6/ravel-0.6-limitations.md`;
 - `tools/ravel_0_6_seed_candidate.py`; and
-- `RAVEL_0_6_NEXT_STEPS.md`.
+- `ravel_versions/0.6/RAVEL_0_6_NEXT_STEPS.md`.
 
 The epoch was preregistered before implementation. Development, selection,
 retention, transition-retention, planning, and future-final partitions have

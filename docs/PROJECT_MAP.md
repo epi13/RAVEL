@@ -1,141 +1,69 @@
 # RAVEL project map
 
-RAVEL is organized by evidence role and research epoch. The parent directory is
-partly flat because historical evidence binds exact paths, filenames, ordering,
-and digests. This guide provides logical grouping without relocating frozen
-artifacts.
+Project-level metadata stays at the repository root. Version-bound source and
+evidence are grouped under `ravel_versions/`; historical manifest path strings
+remain unchanged and are resolved by the versioned compatibility runners.
 
-## 1. Landing and cross-version orientation
+## Implementations and authority
 
-| File | Purpose |
-|---|---|
-| `README.md` | Main entry point, status summary, commands, and claim boundary |
-| `docs/README.md` | Documentation hub |
-| `docs/VERSION_HISTORY.md` | Cross-version development history |
-| `docs/EVIDENCE_GUIDE.md` | Evidence-layer and claim interpretation |
-| `ARCHITECTURE_GAPS.md` | Why 0.3 unified previously separate mechanism roles and what remained external |
+| Epoch | Implementation | Contract or authority |
+|---|---|---|
+| 0.1 | `ravel_versions/baseline/ravel.c` | `ravel_versions/baseline/CONTRACT.md` |
+| 0.2 | `ravel_versions/training/ravel_train.c` | `ravel_versions/training/TRAINING_CONTRACT.md` |
+| 0.3 | `ravel_versions/unified/ravel_unified.c` plus its `.inc` files | `ravel_versions/unified/UNIFIED_CONTRACT.md` |
+| 0.4 | `ravel_versions/0.4/ravel_0_4.c` | `ravel_versions/0.4/RAVEL_0_4_CONTRACT.md` |
+| 0.5 | `ravel_versions/0.5/ravel_0_5.c` | `ravel_versions/0.5/RAVEL_0_5_CONTRACT.md` |
+| 0.6 | Candidate source is derived by `tools/ravel_0_6_seed_candidate.py` | `ravel_versions/0.6/RAVEL_0_6_SCOPE.md` and preregistration |
 
-## 2. Mechanism implementations
+Build binaries are local outputs and are removed by `make clean`.
 
-| Epoch | Implementation |
-|---|---|
-| 0.1 | `ravel.c` |
-| 0.2 | `ravel_train.c` |
-| 0.3 | `ravel_unified.c` plus `ravel_unified/*.inc` |
-| 0.4 | `ravel_0_4.c` |
-| 0.5 | `ravel_0_5.c` |
-| 0.6 | Reproducible development source derived by `tools/ravel_0_6_seed_candidate.py`; no selected or final implementation is claimed |
+## Protocol, evidence, and identity
 
-Generated binaries such as `ravel`, `ravel_train`, `ravel_unified_bin`,
-`ravel_0_4_bin`, and `ravel_0_5_bin` are build outputs and are removed by the
-local clean targets.
+The baseline, training, and unified records live beside their implementation in
+`ravel_versions/baseline/`, `ravel_versions/training/`, and
+`ravel_versions/unified/`. The 0.4, 0.5, and 0.6 directories each contain their
+scope or preregistration, contracts, source, observations, manifests, assurance
+records, limitations, and results or development material.
 
-## 3. Readable behavioral authority
-
-| Epoch | Contract or authority |
-|---|---|
-| 0.1 | `CONTRACT.md` |
-| 0.2 | `TRAINING_CONTRACT.md` |
-| 0.3 | `UNIFIED_CONTRACT.md` |
-| 0.4 | `RAVEL_0_4_CONTRACT.md` |
-| 0.5 | `RAVEL_0_5_CONTRACT.md` |
-| 0.6 | `RAVEL_0_6_SCOPE.md` and `RAVEL_0_6_PREREGISTRATION.md` |
-
-Contracts explain expected behavior, limits, gates, and exclusions. They are not
-substitutes for raw observations or source identity.
-
-## 4. Protocol and preregistration
-
-Common protocol files include:
-
-- `unified-preregistration.json` for the historical unified study;
-- `ravel-0.4-preregistration.json` for the frozen 0.4 matrix;
-- `ravel-0.5-preregistration.json` for the frozen 0.5 matrix; and
-- `ravel-0.6-preregistration.json` for the new preregistered epoch.
-
-The 0.6 support set also includes:
-
-- `ravel-0.6-threat-model.json`;
-- `ravel-0.6-development-record.json`;
-- `ravel-0.6-limitations.md`; and
-- `RAVEL_0_6_NEXT_STEPS.md`.
-
-Preregistration files define what may be changed, which partitions and seeds are
-permitted, how candidates are identified, and how results are derived.
-
-## 5. Raw observations and derived evidence
-
-### Historical studies
-
-- `evidence.json` and `evidence-actual.json` — 0.1 expected and local actual
-  output.
-- `training-*.json` — 0.2 protocol and evidence records.
-- `unified-evidence.json` — deterministic 0.3 observations.
-- `unified-threat-model.json` and `unified-assurance-case.json` — historical
-  threats and bounded disposition.
-
-### RAVEL 0.4
-
-- `ravel-0.4-raw-observations.json` — direct executable output;
-- `ravel-0.4-trial-evidence.json` — derived per-trial evidence;
-- `ravel-0.4-negative-evidence.json` — mutation and adversarial evidence;
-- `RAVEL_0_4_RESULTS.md` — generated human-readable results; and
-- `ravel-0.4-assurance-case.json` — bounded non-promotion disposition.
-
-### RAVEL 0.5
-
-- `ravel-0.5-raw-observations.json` — direct executable output;
-- `ravel-0.5-trial-evidence.json` — evaluator-derived trial evidence;
-- `ravel-0.5-negative-evidence.json` — evaluator and mutation evidence;
-- `ravel-0.5-runtime-observations.json` — host-specific, non-normative timing;
-- `RAVEL_0_5_RESULTS.md` — generated human-readable results;
-- `RAVEL_0_5_POSTMORTEM.md` — retained failure analysis; and
-- `ravel-0.5-assurance-case.json` — bounded non-promotion disposition.
-
-Read [EVIDENCE_GUIDE.md](EVIDENCE_GUIDE.md) before comparing these layers.
-
-## 6. Source and execution identity
+The source identity records are:
 
 | Epoch | Identity records |
 |---|---|
-| 0.4 | `ravel-0.4-source-manifest-spec.json` and `ravel-0.4-source-manifest.json` |
-| 0.5 | `ravel-0.5-source-manifest-spec.json` and `ravel-0.5-source-and-execution-manifest.json` |
+| 0.4 | `ravel_versions/0.4/ravel-0.4-source-manifest-spec.json` and `ravel_versions/0.4/ravel-0.4-source-manifest.json` |
+| 0.5 | `ravel_versions/0.5/ravel-0.5-source-manifest-spec.json` and `ravel_versions/0.5/ravel-0.5-source-and-execution-manifest.json` |
 
-Digest tools under `tools/` validate ordered source identity and assurance-case
-bindings. These records are why appearance-only file moves can be semantically
-material.
+The manifest contents retain their historical logical paths. The compatibility
+runners map those identities to their current physical locations without
+regenerating the frozen records.
 
-## 7. Evaluators and support tooling
+## Documentation and tooling
 
-See [`../tools/README.md`](../tools/README.md) for script-level detail.
+- [Version history](VERSION_HISTORY.md) explains each epoch and preserves its
+  recorded outcomes.
+- [Evidence guide](EVIDENCE_GUIDE.md) explains the evidence layers and claim
+  boundaries.
+- [Architecture gaps](ARCHITECTURE_GAPS.md) records the early design gaps.
+- [`../tools/README.md`](../tools/README.md) documents evaluators, digest tools,
+  mutation checks, runtime capture, and 0.6 candidate derivation.
+- [`MIGRATION.md`](MIGRATION.md) records the standalone extraction provenance.
 
-The main categories are:
+## Build and verification entry points
 
-- evidence generation and verification;
-- independent metric and gate derivation;
-- source and execution digest verification;
-- runtime observation capture;
-- mutation and negative testing; and
-- bounded 0.6 candidate source derivation.
+From the repository root, the main checks are:
 
-## 8. Build and verification entry points
+- `make test`
+- `make training-check`
+- `make unified-check`
+- `make 0.4-check`
+- `make 0.5-check`
 
-The local `Makefile` exposes version-specific targets. The repository root
-`Makefile` forwards the most important checks under names such as:
+Additional compiler-matrix, sanitizer, runtime, checkpoint, lineage, negative,
+and mutation targets remain available in the root Makefile.
 
-- `ravel-test`;
-- `ravel-training-check`;
-- `ravel-unified-check`;
-- `ravel-0.4-check`; and
-- `ravel-0.5-check`.
+## Placement rule
 
-Use verification targets before any target that rewrites evidence.
-
-## 9. Where new work belongs
-
-- Cross-version explanation or navigation: `docs/`.
-- Evaluator, digest, mutation, or derivation script: `tools/`.
-- New epoch source, contract, preregistration, and evidence: use a clearly
-  versioned identity and document the complete lifecycle before adding files.
-- Historical frozen artifacts: do not rename, regroup, or rewrite merely for
-  visual consistency.
+Cross-version explanation belongs under `docs/`; executable support tooling stays
+under `tools/`; version-bound material belongs under `ravel_versions/`. Physical
+moves of historical artifacts are acceptable only when their bytes and recorded
+logical identities remain intact. Recorded `FAIL`, `UNKNOWN`, and non-promotion
+outcomes are not rewritten.

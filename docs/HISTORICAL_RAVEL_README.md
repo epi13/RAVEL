@@ -18,35 +18,32 @@ by purpose without rewriting or relocating those historical records.
 
 | Goal | Entry point |
 |---|---|
-| Understand the project at a glance | [Version history](docs/VERSION_HISTORY.md) |
-| Find source, contracts, evidence, and plans | [Project map](docs/PROJECT_MAP.md) |
-| Understand what each evidence file proves | [Evidence guide](docs/EVIDENCE_GUIDE.md) |
-| Browse the RAVEL documentation set | [Documentation hub](docs/README.md) |
-| Understand evaluator and generation scripts | [Tooling guide](tools/README.md) |
+| Understand the project at a glance | [Version history](VERSION_HISTORY.md) |
+| Find source, contracts, evidence, and plans | [Project map](PROJECT_MAP.md) |
+| Understand what each evidence file proves | [Evidence guide](EVIDENCE_GUIDE.md) |
+| Browse the RAVEL documentation set | [Documentation hub](README.md) |
+| Understand evaluator and generation scripts | [Tooling guide](../tools/README.md) |
 | Review the architectural idea and exclusions | [Architecture gaps](ARCHITECTURE_GAPS.md) |
-| Continue bounded 0.6 development | [RAVEL 0.6 next steps](RAVEL_0_6_NEXT_STEPS.md) |
+| Continue bounded 0.6 development | [RAVEL 0.6 next steps](../ravel_versions/0.6/RAVEL_0_6_NEXT_STEPS.md) |
 
 ## Project shape
 
 ```text
-case-studies/ravel/
-├── README.md                 # landing page
-├── docs/                     # human navigation and explanatory guides
-├── tools/                    # evaluators, evidence builders, and digest tools
-├── ravel_unified/            # maintained 0.3 split implementation units
-├── ravel*.c                  # versioned mechanism implementations
-├── *_CONTRACT.md             # readable behavioral authority
-├── RAVEL_*                   # results, postmortems, scopes, and plans
-├── ravel-*.json              # protocols, observations, manifests, and assurance
-└── Makefile                  # local build, verification, and evidence targets
+ravel_versions/
+├── baseline/                # early exact-inference implementation and evidence
+├── training/                # recursive training implementation and evidence
+├── unified/                 # 0.3 unified implementation and evidence
+├── 0.4/                     # frozen 0.4 source and evidence package
+├── 0.5/                     # frozen 0.5 source and evidence package
+└── 0.6/                     # preregistered 0.6 planning material
 ```
 
-The top-level RAVEL directory remains partly flat on purpose. Versioned source,
-preregistrations, observations, manifests, and assurance records are linked by
-exact filenames and digests. Moving them merely for appearance could invalidate
-historical identity or make prior evidence harder to reproduce. New explanatory
-documentation belongs under `docs/`; executable support tooling belongs under
-`tools/`.
+The repository root keeps only project-level entry points and metadata. Versioned
+source, preregistrations, observations, manifests, and assurance records are
+grouped under `ravel_versions/`; preserved logical paths in historical manifests
+are resolved by the compatibility runners used by the versioned checks. New
+explanatory documentation belongs under `docs/`; executable support tooling
+belongs under `tools/`.
 
 ## Epoch status
 
@@ -60,21 +57,21 @@ documentation belongs under `docs/`; executable support tooling belongs under
 | RAVEL 0.6 | Retention-constrained adaptation epoch | Preregistered; candidate-001 derivation prepared; selection and final evaluation `UNKNOWN` |
 
 Detailed results, limitations, and links are collected in
-[docs/VERSION_HISTORY.md](docs/VERSION_HISTORY.md).
+[VERSION_HISTORY.md](VERSION_HISTORY.md).
 
 ## Common verification commands
 
 From the repository root:
 
 ```bash
-make ravel-test
-make ravel-training-check
-make ravel-unified-check
-make ravel-0.4-check
-make ravel-0.5-check
+make test
+make training-check
+make unified-check
+make 0.4-check
+make 0.5-check
 ```
 
-From this directory:
+Additional checks from the repository root:
 
 ```bash
 make all
@@ -88,7 +85,7 @@ make 0.5-sanitizers
 
 Commands ending in `-check`, `-test`, `-compiler-matrix`, or `-sanitizers` are
 verification-oriented. Commands ending in `-evidence` or `-runtime` can rewrite
-repository-visible development records; review [tools/README.md](tools/README.md)
+repository-visible development records; review [tools/README.md](../tools/README.md)
 before using them.
 
 Requirements vary by epoch but generally include a C11 compiler, Python 3, the C

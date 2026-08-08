@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 
 RAVEL_DIR = Path(__file__).resolve().parents[1]
-FROZEN_SOURCE = RAVEL_DIR / "ravel_0_5.c"
+FROZEN_SOURCE = RAVEL_DIR / "ravel_versions/0.5/ravel_0_5.c"
 FROZEN_SOURCE_SHA256 = "1a8466ea1805811873c461fb891aaeaec18f6c9e7491b5ea7bd09bf698be102d"
 
 OLD_SEED_FUNCTION = """\

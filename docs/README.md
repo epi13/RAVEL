@@ -1,8 +1,8 @@
 # RAVEL documentation hub
 
-This directory is the human-navigation layer for the RAVEL case study. It does
-not replace versioned contracts, preregistrations, raw observations, manifests,
-or assurance records in the parent directory.
+This directory is the human-navigation layer for the standalone RAVEL project.
+It does not replace versioned contracts, preregistrations, raw observations,
+manifests, or assurance records under `../ravel_versions/`.
 
 ## Guides
 
@@ -33,6 +33,6 @@ claims.
 
 Add explanatory, cross-version, or navigational material here. Keep executable
 support scripts under `../tools/`. Keep version-bound contracts, source,
-preregistrations, observations, manifests, and assurance records in their
-existing versioned locations unless a new epoch explicitly defines a different
-layout and identity scheme.
+preregistrations, observations, manifests, and assurance records under
+`../ravel_versions/` unless a new epoch explicitly defines a different layout
+and identity scheme.
