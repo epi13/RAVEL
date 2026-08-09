@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ravel-fabric-observation/0.1",
+  "title": "RAVEL development Fabric reference report",
+  "type": "object",
+  "required": ["schema", "status", "authority", "semantics", "providers"],
+  "properties": {
+    "schema": {"const": "ravel-fabric-reference-run/0.1"},
+    "status": {"enum": ["PASS", "FAIL", "UNKNOWN"]},
+    "authority": {"const": "development-only"},
+    "semantics": {"type": "string"},
+    "selection_material": {"const": "not-dispatched"},
+    "final_material": {"const": "not-dispatched"},
+    "providers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["workload", "observations", "reconciliation", "bundle", "fabric_status"],
+        "properties": {
+          "workload": {"type": "object"},
+          "observations": {"type": "array", "items": {"type": "object"}},
+          "reconciliation": {"type": "object"},
+          "bundle": {"type": "object"},
+          "replay": {"type": "object"},
+          "negative_cases": {"type": "object"},
+          "fabric_status": {"enum": ["PASS", "FAIL", "UNKNOWN"]}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

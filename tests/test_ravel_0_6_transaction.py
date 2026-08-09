@@ -140,6 +140,30 @@ class CandidateTransactionTests(unittest.TestCase):
         self.assertEqual(evaluation.status, "UNKNOWN")
         self.assertIn("malformed_required_observation", evaluation.reason_codes)
 
+    def test_mechanism_failure_with_valid_compute_remains_fail(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            payload = build_and_trial(
+                build_candidate_source(FROZEN_SOURCE.read_bytes()), Path(directory)
+            )
+        payload["candidate"]["adaptation_transaction"]["raw"]["base_accuracy_after_q20"] = 0
+        payload["candidate"]["adaptation_transaction"]["committed"] = False
+        payload["candidate"]["adaptation_transaction"]["failed_constraint_mask"] = 4
+        evaluation = evaluate_trial(payload, expected_provider_id="ravel-toy-branching-c/1")
+        self.assertEqual(evaluation.mechanism_status, "FAIL")
+        self.assertEqual(evaluation.matched_compute_status, "PASS")
+        self.assertEqual(evaluation.status, "FAIL")
+
+    def test_execution_integrity_failure_is_unknown_not_mechanism_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            payload = build_and_trial(
+                build_candidate_source(FROZEN_SOURCE.read_bytes()), Path(directory)
+            )
+        payload["execution_integrity_status"] = "FAIL"
+        evaluation = evaluate_trial(payload, expected_provider_id="ravel-toy-branching-c/1")
+        self.assertEqual(evaluation.mechanism_status, "PASS")
+        self.assertEqual(evaluation.execution_integrity_status, "UNKNOWN")
+        self.assertEqual(evaluation.status, "UNKNOWN")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,31 @@
+{
+  "schema": "ravel-family-compatibility-lock/1",
+  "authority": "compatibility evidence only",
+  "checked_at": "2026-08-09",
+  "contracts": {
+    "mncs-fabric": {
+      "commit": "b7eb8d8e544f0f53328e0332309f7445937a631e",
+      "public_surfaces": ["FabricService", "LocalController", "LocalWorker", "NetworkController", "TLSNetworkTransport", "execution records", "receipts", "reconciliation"]
+    },
+    "mncs-forge-mcp": {
+      "commit": "7710ea606bd592e0be95957c96132e8732fbb955",
+      "public_surfaces": ["project configuration", "declared development workflows", "lifecycle records"]
+    },
+    "machine-native-complexity-standard": {
+      "commit": "80f08d312dce963265c7f69ac5b4bae8245bd692",
+      "public_surfaces": ["execution bundle", "execution receipt"]
+    },
+    "Machine-Native-Experimental-Learning": {
+      "commit": "57b07b2d25a8ea9dad93ea396ae5cc0dff7f9f5b",
+      "public_surfaces": ["DistributedWorkload", "LocalFabricBackend", "NetworkFabricBackend", "Fabric execution observation"]
+    },
+    "MNCS-Commons": {
+      "commit": "b1eb5a1081bbb63ee3a6284e8046035bd72a47bc",
+      "public_surfaces": ["CompatibilityApplication", "live compatibility report"]
+    },
+    "mncs-language": {
+      "commit": "f234cc8079faa5895a38b7abce0c96031f7d2565",
+      "public_surfaces": ["semantic identities", "HIR", "verifier request/result identities"]
+    }
+  }
+}

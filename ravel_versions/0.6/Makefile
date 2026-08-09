@@ -1,7 +1,7 @@
 CC ?= cc
 CFLAGS ?= -std=c11 -O3 -Wall -Wextra -Werror -pedantic
 
-.PHONY: build behavioral-test transaction-test component-test policy-test decomposition-test negative-test provider-test evaluator-test forge-test receipt-test abi-test compiler-matrix sanitizers
+.PHONY: build behavioral-test transaction-test component-test policy-test decomposition-test negative-test provider-test evaluator-test forge-test receipt-test abi-test fabric-test compiler-matrix sanitizers
 
 build:
 	@set -e; out=$$(mktemp -d); python3 tools/ravel_0_6_build.py build --output-dir "$$out"; \
@@ -39,6 +39,9 @@ receipt-test:
 
 abi-test:
 	python3 -m unittest tests/test_ravel_0_6_decomposition.py tests/test_mncs_bundles.py
+
+fabric-test:
+	python3 -m unittest tests/test_ravel_fabric.py
 
 compiler-matrix:
 	@set -eu; for compiler in gcc clang; do \

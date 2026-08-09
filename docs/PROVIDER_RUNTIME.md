@@ -36,11 +36,29 @@ normal test suite fail.
 The local Forge `0.1.0a2` checkout was inspected and exercised for this
 iteration. Its current CLI exposes typed project, provider, verifier, candidate,
 workflow, bundle, and lifecycle operations; RAVEL's project-local configuration
-declares 13 development workflows in a fresh local Forge ledger; twelve
-bounded workflows passed and live family compatibility remained
-`UNKNOWN` for unavailable sibling producer checkouts. The project-scoped Forge readiness policy is separate from the frozen
-RAVEL preregistration and does not consume selection data. The precedence is
-`FAIL > UNKNOWN > PASS`.
+declares 17 development workflows. The new Fabric capability and family-lock
+workflow passed; the family-lock workflow currently remains `UNKNOWN` because
+the inspected Fabric checkout has uncommitted sibling changes. The Fabric
+reference workflow passed through Forge after the local reference matrix was
+repaired. The project-scoped Forge readiness
+policy is separate from the frozen RAVEL preregistration and does not consume
+selection data. The precedence is `FAIL > UNKNOWN > PASS`.
 `ForgeCliProvider` invokes that JSON interface when explicitly configured and
 preserves lifecycle rejection as raw `UNKNOWN`. Forge remains optional for the
 core package and is not reimplemented by RAVEL.
+
+## Fabric execution substrate
+
+`ravel.fabric.FabricLocalBackend` is the development reference implementation.
+It uses only the public MNCS Fabric service/controller/worker boundary and
+delegates bundle construction to the official MNCS execution-bundle tooling.
+The reference matrix executes both providers with two logical local workers.
+Fabric reconciliation passes for matching immutable records; RAVEL records the
+replication scope and does not call it independence.
+
+`FabricNetworkBackend` is optional and unavailable without explicit operator
+TLS configuration. It requires a matching pre-staged Fabric manifest and never
+falls back to SSH or unauthenticated transport. Missing capabilities, missing
+trust material, conflicting replays, and incomplete bundle execution facts stay
+`UNKNOWN` or `FAIL` according to the governing contract; they are not converted
+to RAVEL success.

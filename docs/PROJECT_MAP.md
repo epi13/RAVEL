@@ -47,6 +47,8 @@ regenerating the frozen records.
   recorded outcomes.
 - [Evidence guide](EVIDENCE_GUIDE.md) explains the evidence layers and claim
   boundaries.
+- [Fabric integration](FABRIC_INTEGRATION.md) documents the bounded RAVEL /
+  Forge / Fabric development path and its status boundaries.
 - [Architecture gaps](ARCHITECTURE_GAPS.md) records the early design gaps.
 - [`../tools/README.md`](../tools/README.md) documents evaluators, digest tools,
   mutation checks, runtime capture, and 0.6 candidate derivation.
@@ -61,6 +63,10 @@ regenerating the frozen records.
   freeze/selection infrastructure; it has not consumed selection data.
 - `src/ravel/experience.py` binds scoped execution outcomes to advisory memory,
   retaining negative and `UNKNOWN` outcomes.
+- `src/ravel/fabric.py` defines the development-only Fabric workload and
+  reference-observation contracts, the public local-controller backend, and an
+  optional TLS-only network backend; `tools/ravel_fabric_reference.py` runs the
+  bounded branching/ring matrix.
 - `src/ravel/policy.py` is the fail-closed frozen 0.6 policy loader; generated
   C constants carry its threshold identity.
 - `src/ravel/matched_compute.py` validates raw development comparator counts and
@@ -74,6 +80,10 @@ regenerating the frozen records.
 - `mncs-forge.toml` declares the Forge-governed development workflows;
   `src/ravel/mncs_bundles.py` delegates immutable execution-bundle operations
   to MNCS when that optional sibling is installed.
+- `config/ravel-fabric.example.toml` is a placeholder-only operator template;
+  `ravel_versions/0.6/ravel-0.6-fabric-observation.schema.json` and the family
+  compatibility lock version the public evidence boundary without making sibling
+  checkouts required for ordinary tests.
 - `tools/ravel_0_6_decompose.py` losslessly emits generated C component units
   and a unity wrapper; `ravel_versions/0.6/ravel_0_6/README.md` documents the
   current ABI boundary. `ravel_0_6_checkpoint.[ch]` and

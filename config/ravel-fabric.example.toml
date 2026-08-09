@@ -1,0 +1,26 @@
+# Operator-only example.  This file contains placeholders, not credentials.
+# Fabric network execution is optional and requires pre-staged bundle material.
+
+controller_id = "ravel-development-controller"
+state_path = "build/fabric-network/controller.jsonl"
+pre_staged_bundle_identity = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[[workers]]
+worker_id = "ravel-development-worker-a"
+host = "worker-a.example.invalid"
+port = 4433
+capabilities = ["os:linux", "python", "compiler:gcc"]
+ca_file = "operator-secrets/ca.pem"
+client_cert = "operator-secrets/controller.pem"
+client_key = "operator-secrets/controller-key.pem"
+trust_store = "operator-secrets/trust.json"
+
+[[workers]]
+worker_id = "ravel-development-worker-b"
+host = "worker-b.example.invalid"
+port = 4433
+capabilities = ["os:linux", "python", "compiler:clang"]
+ca_file = "operator-secrets/ca.pem"
+client_cert = "operator-secrets/controller.pem"
+client_key = "operator-secrets/controller-key.pem"
+trust_store = "operator-secrets/trust.json"

@@ -178,6 +178,32 @@ These modules are tested scaffolding and are not claims that RAVEL 0.6 has been
 evaluated, selected, independently evaluated, certified, promoted, or made
 production-safe.
 
+## Forge and Fabric development path
+
+RAVEL now has a bounded, optional MNCS Fabric integration for development
+evidence. RAVEL creates a versioned semantic `FabricWorkload`; it is not a
+Fabric `JobPlan` and it cannot expose selection or final material. Forge remains
+the declared workflow/control boundary, and the RAVEL adapter translates the
+workload into Fabric's public `LocalController`/`LocalWorker` APIs. Fabric then
+owns manifest admission, bounded execution, raw process observations, receipts,
+challenge/replay handling, worker identity, and reconciliation.
+
+The local reference path executes the branching and ring provider parity matrix
+on two logical workers in one process. Its reconciliation result is retained as
+`PASS` when the immutable records agree, but the report explicitly records
+`scope=local-in-process-replication` and `independence=UNKNOWN`. Fabric status is
+not an RAVEL evaluator result. RAVEL memory retains references to workload,
+worker, record, receipt, bundle, and replay identities and stores the resulting
+experience as advisory `UNKNOWN` until a RAVEL evaluator answers its own
+question.
+
+The optional network adapter is TLS-only and requires operator-provided trust
+material, worker capabilities, and an exact pre-staged Fabric manifest identity.
+It does not add SSH, plaintext fallback, bundle transfer, sandbox claims, or
+protected custody. Native Fabric bundle transfer remains unclaimed, so the
+reference report distinguishes `bundle verified`, `pre_staged`, and
+`executed=UNKNOWN`.
+
 ## Current modular evidence boundary
 
 The generated C candidate has two separately compiled development contracts:

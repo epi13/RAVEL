@@ -64,6 +64,14 @@ implementation and local development observations only; no selection or final
 material has been consumed. See `RAVEL_0_6_IMPLEMENTATION_STATUS.md` for the
 exact boundary.
 
+The project now also exposes `ravel-fabric-workload/0.1` and
+`ravel-fabric-observation/0.1`. Forge invokes a bounded local Fabric reference
+matrix for branching and ring provider parity, two logical-worker
+reconciliation, challenge/replay negatives, capability mismatch, and receipt /
+bundle binding probes. Fabric records and MNCS identities are retained by
+reference; local replication is not independent evaluation, and archive
+execution remains `UNKNOWN` while native Fabric bundle transfer is unavailable.
+
 ### Queue disposition after the current iteration
 
 - **R6-01:** provenance/build foundation complete; generated component and
@@ -77,14 +85,17 @@ exact boundary.
 - **R6-04:** checkpoint and world/provider boundaries are separately compiled
   and parity-tested against unity for both branching and ring. Transition,
   planning, adaptation, and driver surfaces remain unity units. The next safe
-  ABI candidate is observation/reporting, after dependency review.
+  ABI candidate is observation/reporting, after dependency review. Fabric is
+  now a real optional development execution substrate behind Forge, with a
+  TLS-only network boundary that is unavailable without operator staging.
 - **R6-05:** ledger infrastructure is hardened and exercised only with
   development fixtures. Candidate-001 remains unfrozen because further
   implementation changes are still expected.
 - **R6-06:** external custody and evaluation remain unavailable/`UNKNOWN`.
 
 The next logical implementation task is to review and, if independently
-falsifiable, promote the observation/reporting boundary. Do not freeze
+falsifiable, promote the observation/reporting boundary while aligning its raw
+record identity with the Fabric observation contract. Do not freeze
 candidate-001 or consume selection partitions until further implementation,
 policy parity, and the full development trial matrix are stable.
 

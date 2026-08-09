@@ -32,3 +32,15 @@
   `UNKNOWN`. A structurally valid receipt is not assurance or conformance. A
   verifier disposition does not establish runner process facts, and the local
   Forge runner is not a sandbox or automatic execution-bundle consumer.
+- Fabric local reference execution is bounded process execution, not a hostile
+  code sandbox. Logical worker replication shares one controller process and
+  host, so independence and protected custody remain `UNKNOWN`. Network Fabric
+  execution is optional, TLS-only, operator-configured, and currently requires
+  pre-staged matching manifest material because native bundle transfer is not
+  claimed. Fabric `PASS` is not RAVEL `PASS`, and no selection/final material is
+  dispatched by the RAVEL workload contract.
+- The local adapter records a receipt/archive binding probe as `FAIL` because
+  the current Fabric receipt binds its artifact manifest while the official
+  MNCS archive has a distinct bundle manifest identity. The actual
+  archive-executed binding remains `UNKNOWN`; this is retained as an integration
+  boundary, not hidden or promoted to `PASS`.

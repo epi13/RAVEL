@@ -16,7 +16,11 @@
     "package",
     "live-family-compat",
     "lifecycle",
-    "bundle"
+    "bundle",
+    "fabric-capabilities",
+    "fabric-reference",
+    "fabric-negative",
+    "family-compatibility-lock"
   ],
   "selection_data": "not-used",
   "promotion_authority": "external-and-unknown"
