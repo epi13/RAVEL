@@ -19,6 +19,13 @@ except ImportError:  # direct execution from a source checkout before install
 TRANSACTION_SURFACE = (
     policy_c_header()
     + r'''
+#ifdef RAVEL06_SEPARATE_CHECKPOINT
+#include "ravel_0_6_checkpoint.h"
+#define RAVEL06_BYTES_EQUAL ravel06_checkpoint_bytes_equal
+#else
+#define RAVEL06_BYTES_EQUAL bytes_equal
+#endif
+
 /* RAVEL 0.6 transaction surface: raw observations plus bounded commit. */
 typedef struct {
     uint32_t objective_before_q20;
@@ -252,7 +259,7 @@ static int adapt_model_transaction(
         serialize_checkpoint(&previous, &before_bytes) &&
         serialize_checkpoint(model, &after_bytes) &&
         before_bytes.len == after_bytes.len &&
-        bytes_equal(before_bytes.data, after_bytes.data, before_bytes.len);
+        RAVEL06_BYTES_EQUAL(before_bytes.data, after_bytes.data, before_bytes.len);
     return 0;
 }
 

@@ -195,10 +195,11 @@ def build_candidate_source(source_bytes: bytes) -> str:
     )
 
     old_trial_identity = r'''           "  \"trial_id\":\"%s\",\"regime\":\"%s\","'''
-    new_trial_identity = r'''           "  \"environment_provider_id\":\"%s\",\n"
-           "  \"trial_id\":\"%s\",\"regime\":\"%s\","'''
     if source.count(old_trial_identity) != 1:
         raise SeedError("provider surface: expected trial identity output")
+    new_trial_identity = r'''           "  \"candidate_id\":\"ravel-0.6-candidate-001\",\n"
+           "  \"environment_provider_id\":\"%s\",\n"
+           "  \"trial_id\":\"%s\",\"regime\":\"%s\","'''
     source = source.replace(old_trial_identity, new_trial_identity, 1)
     old_trial_args = "           spec->trial_id, spec->regime, spec->seed,"
     new_trial_args = "           RAVEL06_PROVIDER_ID, spec->trial_id, spec->regime, spec->seed,"

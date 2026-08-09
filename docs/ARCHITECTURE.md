@@ -161,8 +161,18 @@ observation, rollback, matched-compute, and provider surface around the
 existing adaptation primitive. `tools/ravel_0_6_decompose.py` losslessly emits
 ten provenance-bound component include units and a deterministic unity wrapper;
 the wrapper preserves static linkage and byte-identical behavior to the
-monolithic generated source. This is a physical source decomposition, not a
-claim that independently compiled C ABI contracts or evaluator authority exist.
+monolithic generated source. The checkpoint byte-comparison operation is the
+first promoted separately compiled contract (`ravel-0.6-checkpoint-abi/1`),
+with object/header identities and unity-vs-separate parity recorded by the
+development build. The remaining surfaces are still unity units; no claim of
+independent evaluation or authority is made.
+
+`ravel.providers.ForgeCliProvider` is an optional subprocess bridge to the
+current Forge JSON CLI. `ravel.development_evaluator` independently derives
+development gate results from raw observations, and `ravel.mncs_receipts`
+delegates structural receipt work to optional MNCS sibling packages. These
+bridges preserve Forge/MNCS authority boundaries and fail closed when a
+capability, lifecycle state, or validator is unavailable.
 
 These modules are tested scaffolding and are not claims that RAVEL 0.6 has been
 evaluated, selected, independently evaluated, certified, promoted, or made
