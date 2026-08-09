@@ -82,6 +82,15 @@ This is a development status record, not RAVEL 0.6 evaluation evidence.
   executions remain `UNKNOWN` until governed disposition exists; rejected and
   unavailable outcomes remain negative and deterministic retrieval includes
   them.
+- **Fabric development substrate:** `ravel.fabric` now defines the
+  `ravel-fabric-workload/0.1` and `ravel-fabric-observation/0.1` boundaries,
+  executes a bounded branching/ring provider-parity matrix through Fabric's
+  public local controller/worker service, retains Fabric record/receipt/bundle
+  identities, exercises challenge/replay and conflicting-request handling, and
+  imports observations into advisory negative/`UNKNOWN` memory. Reconciliation
+  is explicitly local in-process replication; it is not independence or final
+  evaluation. The TLS-only network adapter is implemented but unavailable
+  without operator trust material and pre-staged bundles.
 
 ## Not yet implemented or externally unavailable
 
@@ -92,7 +101,11 @@ This is a development status record, not RAVEL 0.6 evaluation evidence.
 - Additional separately compiled C ABI contracts, full cross-project evaluator
   lifecycle integration, and an absolute compute budget remain incomplete or
   are not declared by the frozen contract. Forge/RAVEL lifecycle mapping is
-  reference-only and does not collapse the two state machines.
+  reference-only and does not collapse the two state machines. Observation /
+  reporting remains the next safe C extraction candidate after dependency review.
+- The project-local Forge configuration now declares Fabric capability,
+  reference, negative-matrix, and family-compatibility-lock workflows. The
+  local Fabric path is optional for package import and ordinary CI.
 - R6-05 selection evaluation and promotion logic have not been consumed. The
   ledger is infrastructure only; no candidate is frozen or selected by it.
 - R6-06 external final custody/evaluation remains unavailable and `UNKNOWN`.

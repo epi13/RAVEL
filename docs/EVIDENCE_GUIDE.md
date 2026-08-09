@@ -152,6 +152,23 @@ separate evaluator programs cannot by themselves establish:
 Those claims require external facts and actors, not stronger wording around
 local files.
 
+## Fabric-backed development evidence
+
+Fabric records raw execution observations; they are immutable evidence by
+reference, not RAVEL verdicts. A RAVEL workload binds the development candidate,
+question, provider, bundle, Fabric manifest, capability requirements, resource
+budget, Forge workflow, and development partition. The resulting experience
+retains workload, worker, request, record, receipt, bundle, challenge, replay,
+result, and resource identities without copying the raw Fabric record.
+
+The local reference report distinguishes `bundle verified`, `pre_staged`, and
+`executed=UNKNOWN` because current native Fabric bundle transfer is not claimed.
+Two logical workers in one local process are `local-in-process-replication`, not
+independent evaluation, protected custody, or R6-06 evidence. Fabric
+reconciliation `PASS` answers only the Fabric reconciliation question; the
+RAVEL development evaluator remains separate and normally records the imported
+observation as `UNKNOWN`.
+
 ## Review checklist
 
 Before accepting a RAVEL result or modifying the directory, verify:

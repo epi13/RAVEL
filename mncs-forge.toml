@@ -9,7 +9,7 @@ root = "."
 [paths]
 candidates = []
 generated = ["build"]
-contracts = ["ravel_versions/0.4", "ravel_versions/0.5", "ravel_versions/0.6/ravel-0.6-preregistration.json", "ravel_versions/0.6/ravel-0.6-preregistration.schema.json"]
+contracts = ["ravel_versions/0.4", "ravel_versions/0.5", "ravel_versions/0.6/ravel-0.6-preregistration.json", "ravel_versions/0.6/ravel-0.6-preregistration.schema.json", "ravel_versions/0.6/ravel-0.6-fabric-observation.schema.json", "ravel_versions/0.6/ravel-0.6-family-compatibility-lock.json"]
 references = ["docs", "README.md"]
 evaluators = ["src/ravel/development_evaluator.py"]
 acceptance_policies = ["ravel_versions/0.6/ravel-0.6-forge-development-policy.json", "ravel_versions/0.6/ravel-0.6-preregistration.json"]
@@ -149,6 +149,42 @@ name = "bundle"
 category = "mncs_bundle_validation"
 mode = "development"
 command = ["python3", "tools/ravel_bundle_check.py"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "fabric-capabilities"
+category = "inspection"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "fabric-capabilities"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "fabric-reference"
+category = "differential_behavior"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "fabric-reference"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "fabric-negative"
+category = "mutation"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "fabric-negative"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "family-compatibility-lock"
+category = "inspection"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "family-compatibility-lock"]
 provider_protocol = false
 subject = "project"
 disclosure = "compact"

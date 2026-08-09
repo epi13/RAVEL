@@ -11,6 +11,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
+FABRIC_LOCK = ROOT / "ravel_versions/0.6/ravel-0.6-family-compatibility-lock.json"
 
 
 def _run(module: str, *tests: str) -> tuple[str, str]:
@@ -81,6 +82,80 @@ def check(name: str) -> tuple[str, str]:
                 if separate != unity or record["component_contracts"]["world"]["abi_version"] != "ravel-0.6-world-abi/1":
                     return "FAIL", f"{provider} unity/separate facts differ"
         return "PASS", "branching and ring unity/separate raw trials matched"
+    if name == "fabric-capabilities":
+        try:
+            from ravel.fabric import FabricLocalBackend
+
+            with tempfile.TemporaryDirectory(prefix="ravel-forge-fabric-capabilities-") as directory:
+                backend = FabricLocalBackend(Path(directory))
+                if not backend.available:
+                    return "UNKNOWN", backend.unavailable_reason or "Fabric unavailable"
+                capabilities = backend.capabilities("local-reference-worker")
+                return "PASS", json.dumps({"backend": backend.backend_identity, "capabilities": capabilities}, sort_keys=True)
+        except ImportError as error:
+            return "UNKNOWN", f"Fabric capability unavailable: {type(error).__name__}"
+    if name == "fabric-reference":
+        result = subprocess.run(
+            ["python3", "tools/ravel_fabric_reference.py", "--workspace", "build/forge-fabric-reference"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        detail = result.stdout[-12000:] or result.stderr[-2000:]
+        if result.returncode not in {0}:
+            return "FAIL", detail
+        try:
+            report = json.loads(result.stdout)
+        except json.JSONDecodeError:
+            return "FAIL", "Fabric reference did not emit JSON"
+        return str(report.get("status", "UNKNOWN")), detail
+    if name == "fabric-negative":
+        return _run(name, "tests/test_ravel_fabric.py")
+    if name == "family-compatibility-lock":
+        if not FABRIC_LOCK.is_file():
+            return "FAIL", "RAVEL family compatibility lock is missing"
+        lock = json.loads(FABRIC_LOCK.read_text(encoding="utf-8"))
+        missing: list[str] = []
+        drifted: dict[str, dict[str, str]] = {}
+        unresolved: dict[str, str] = {}
+        for name_, entry in lock.get("contracts", {}).items():
+            candidates = {
+                "mncs-fabric": ROOT.parent / "mncs-fabric",
+                "mncs-forge-mcp": ROOT.parent / "mncs-forge-mcp",
+                "machine-native-complexity-standard": ROOT.parent / "machine-native-complexity-standard",
+                "Machine-Native-Experimental-Learning": ROOT.parent / "Machine-Native-Experimental-Learning",
+                "MNCS-Commons": ROOT.parent / "MNCS-Commons",
+                "mncs-language": ROOT.parent / "mncs-language",
+            }
+            path = candidates[name_]
+            if not path.is_dir():
+                missing.append(name_)
+                continue
+            current = subprocess.run(
+                ["git", "-C", str(path), "rev-parse", "HEAD"],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            actual = current.stdout.strip()
+            expected = str(entry.get("commit"))
+            if current.returncode != 0 or actual != expected:
+                drifted[name_] = {"expected": expected, "actual": actual or "UNKNOWN"}
+                continue
+            dirty = subprocess.run(
+                ["git", "-C", str(path), "status", "--porcelain"],
+                text=True,
+                capture_output=True,
+                check=False,
+            ).stdout.strip()
+            if dirty:
+                unresolved[name_] = "checkout has uncommitted changes"
+        if drifted:
+            return "FAIL", json.dumps({"status": "DRIFTED", "contracts": drifted}, sort_keys=True)
+        if missing or unresolved:
+            return "UNKNOWN", json.dumps({"status": "UNKNOWN", "missing": missing, "unresolved": unresolved}, sort_keys=True)
+        return "PASS", json.dumps({"status": "COMPATIBLE", "contracts": sorted(lock["contracts"])}, sort_keys=True)
     if name == "package":
         return _run(name, "tests/test_frozen_identities.py", "tests/test_lifecycle_experience.py")
     if name == "live-family-compat":

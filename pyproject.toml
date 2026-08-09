@@ -20,6 +20,8 @@ where = ["src"]
   "ravel_versions/0.6/ravel-0.6-preregistration.schema.json",
   "ravel_versions/0.6/ravel-0.6-transaction.schema.json",
   "ravel_versions/0.6/ravel-0.6-matched-compute.schema.json",
+  "ravel_versions/0.6/ravel-0.6-fabric-observation.schema.json",
+  "ravel_versions/0.6/ravel-0.6-family-compatibility-lock.json",
 ]
 
 [tool.pytest.ini_options]

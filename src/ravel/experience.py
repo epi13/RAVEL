@@ -83,6 +83,78 @@ class ExperienceRecord:
             execution_identity=execution_identity,
         )
 
+    @classmethod
+    def from_fabric_observation(
+        cls,
+        observation: Mapping[str, Any],
+        *,
+        partition_identity: str = "ravel-0.6-development-adaptation-v1",
+    ) -> "ExperienceRecord":
+        """Retain a Fabric observation by reference, never as evaluator authority.
+
+        Fabric owns the immutable execution record and receipt.  RAVEL stores only
+        their identities and a scoped diagnostic interpretation; a Fabric PASS is
+        deliberately represented as ``UNKNOWN`` here until a RAVEL evaluator
+        answers the question it owns.
+        """
+
+        required = ("candidate_identity", "workload_identity", "fabric_outcome")
+        if any(not isinstance(observation.get(key), str) for key in required):
+            raise ValueError("Fabric observation identity or outcome is malformed")
+        candidate_id = str(observation["candidate_identity"])
+        workload_identity = str(observation["workload_identity"])
+        provider_id = str(observation.get("provider_identity") or "unknown-provider")
+        references = {
+            key: value
+            for key in (
+                "workload_identity",
+                "candidate_binding_identity",
+                "request_identity",
+                "worker_identity",
+                "fabric_record_identity",
+                "receipt_identity",
+                "bundle_identity",
+                "bundle_archive_identity",
+                "fabric_manifest_identity",
+                "challenge_identity",
+                "replay_identity",
+            )
+            if isinstance(value := observation.get(key), str)
+        }
+        raw_result = {
+            "fabric_reference": references,
+            "fabric_outcome": observation["fabric_outcome"],
+            "reason_codes": list(observation.get("reason_codes", ())),
+            "semantics": "development observation; not evaluator authority",
+        }
+        return cls(
+            candidate_id=candidate_id,
+            context_identity=workload_identity,
+            task_environment="mncs-fabric",
+            requested_strategy="fabric-development-execution",
+            provider_id=provider_id,
+            verifier_id="fabric-execution-observation",
+            raw_result=raw_result,
+            formal_disposition="UNKNOWN",
+            resource_observations=dict(observation.get("resource_observations", {})),
+            provenance={
+                "fabric_record_identity": references.get("fabric_record_identity", ""),
+                "receipt_identity": references.get("receipt_identity", ""),
+                "bundle_identity": references.get("bundle_identity", ""),
+            },
+            applicability_scope={
+                "partition": partition_identity,
+                "visibility": "development-visible",
+                "authority": "development-only",
+                "worker": references.get("worker_identity", "unknown"),
+            },
+            execution_identity=(
+                references.get("receipt_identity")
+                or references.get("fabric_record_identity")
+                or workload_identity
+            ),
+        )
+
     def to_memory_record(self, *, created_at: str) -> MemoryRecord:
         scope = dict(self.applicability_scope)
         scope.update({"candidate": self.candidate_id, "context": self.context_identity})

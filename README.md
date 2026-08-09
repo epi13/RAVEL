@@ -6,7 +6,7 @@ RAVEL — the **Recursive Adaptive Vector Execution Lattice** — is an experime
 
 RAVEL operates beneath the technical authority of the Machine-Native Complexity Standard (MNCS) and the Machine-Native Complexity Development Standard (MNCDS). It is not intended to replace a language model, compiler, static analyzer, test framework, or the MNCS Forge. Its role is to decide what evidence should be gathered, what action should follow, and what experience should be retained for later use without redefining the governing status of that evidence.
 
-> **Project status:** RAVEL is research software. Historical RAVEL 0.4 and 0.5 results remain development `FAIL`; RAVEL 0.6 candidate-001 now has digest-bound policy/evaluator surfaces, separately compiled checkpoint and world/provider contracts, branching/ring unity parity, a Forge-governed development configuration, official MNCS bundle/receipt adapters, and lifecycle/memory integration. It remains unfrozen and has not been selection-evaluated, independently evaluated, or promoted. Formal MNCS/MNCDS conformance, independent attestation, protected custody, production safety, and general recursive self-improvement remain `UNKNOWN`.
+> **Project status:** RAVEL is research software. Historical RAVEL 0.4 and 0.5 results remain development `FAIL`; RAVEL 0.6 candidate-001 now has digest-bound policy/evaluator surfaces, separately compiled checkpoint and world/provider contracts, branching/ring unity parity, a Forge-governed development configuration, official MNCS bundle/receipt adapters, a bounded local Fabric development path, and lifecycle/memory integration. It remains unfrozen and has not been selection-evaluated, independently evaluated, or promoted. Formal MNCS/MNCDS conformance, independent attestation, protected custody, production safety, and general recursive self-improvement remain `UNKNOWN`.
 
 ## Place in the MNCS ecosystem
 
@@ -113,6 +113,10 @@ algorithmic superiority. The bounded component surfaces in `src/ravel/world.py`,
 `src/ravel/transition.py`, `src/ravel/planning.py`, `src/ravel/checkpoint.py`,
 and `src/ravel/mechanism_state.py` provide deterministic provider substitution
 and checkpoint fixtures; they do not replace the historical 0.5 source.
+`src/ravel/fabric.py` adds the optional public Fabric local-controller path;
+`tools/ravel_fabric_reference.py` runs branching/ring parity, replication,
+reconciliation, bundle, and replay/negative checks without dispatching selection
+or final material.
 
 ## Non-goals
 
