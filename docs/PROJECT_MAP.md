@@ -53,6 +53,14 @@ regenerating the frozen records.
 - `src/ravel/adaptation.py` provides the tested retention-transaction boundary.
 - `src/ravel/providers.py` and `src/ravel/resources.py` provide optional,
   replaceable Forge/runtime protocols without heavy ML dependencies.
+- `src/ravel/world.py`, `src/ravel/transition.py`, and `src/ravel/planning.py`
+  provide deterministic provider/compiler/planner surfaces with two toy worlds.
+- `src/ravel/mechanism_state.py` and `src/ravel/checkpoint.py` define the
+  evaluator-free state and canonical checkpoint boundary.
+- `src/ravel/lifecycle.py` provides development-only append-only candidate
+  freeze/selection infrastructure; it has not consumed selection data.
+- `src/ravel/experience.py` binds scoped execution outcomes to advisory memory,
+  retaining negative and `UNKNOWN` outcomes.
 - [`MIGRATION.md`](MIGRATION.md) records the standalone extraction provenance.
 
 ## Build and verification entry points

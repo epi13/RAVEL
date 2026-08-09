@@ -40,19 +40,22 @@ identity and requires every transformation to match exactly once. Tests verify
 source identity, transformation semantics, deterministic output, read-only
 checking, and strict C11 compilation.
 
-These corrections produce development source only. Candidate 001 has not been
-integrated into the 0.6 evidence pipeline, selected, frozen, or evaluated.
+These corrections produce development source only. Candidate 001 is now
+integrated into a local development trial path, but remains unselected,
+unfrozen, and unevaluated for preregistered selection/final purposes.
 
 ## Current bounded implementation status
 
 Candidate-001 is now integrated as a reproducible temporary development build
-by `tools/ravel_0_6_build.py`. A compiled behavioral harness verifies both
-corrections and fails against frozen 0.5 behavior and bounded reverted
-mutations. A separate Python transaction foundation tests all declared hard
-constraint classes with byte-identical rollback. These are implementation and
-mutation observations only; the C candidate is not yet a complete 0.6 trial
-evaluator, and no selection or final material has been consumed. See
-`RAVEL_0_6_IMPLEMENTATION_STATUS.md` for the exact boundary.
+by `tools/ravel_0_6_build.py`. Its trial path wraps the existing adaptation
+primitive in an all-hard-gates copy/observe/commit transaction and emits raw
+structured observations with stable rejection reasons. A compiled behavioral
+harness verifies both corrections and fails against frozen 0.5 behavior and
+bounded reverted mutations. Python component surfaces provide two independent
+toy providers, deterministic planning, canonical checkpoints, and an
+append-only development candidate ledger. These are implementation and local
+development observations only; no selection or final material has been
+consumed. See `RAVEL_0_6_IMPLEMENTATION_STATUS.md` for the exact boundary.
 
 ## Codex next steps
 

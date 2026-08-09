@@ -32,3 +32,11 @@ status, evidence quality, and verifier outcome before any strategy reuse.
 Standalone RAVEL tests use fake providers and resource backends. Forge is not a
 mandatory dependency for the core package, and lack of a GPU does not make the
 normal test suite fail.
+
+The local Forge checkout was inspected for this iteration. Its current CLI
+exposes typed project, provider, verifier, candidate, and lifecycle operations;
+the available provider listing reports the project micro-verifier provider and
+the precedence `FAIL > UNKNOWN > PASS`. RAVEL does not invoke that checkout as
+a mandatory test dependency. `src/ravel/providers.py` remains the narrow
+dependency-injected adapter boundary, so a missing or malformed Forge result
+remains `UNKNOWN` rather than being synthesized as `PASS`.

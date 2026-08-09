@@ -1,6 +1,8 @@
 # RAVEL 0.6 preregistration limitations
 
-- No RAVEL 0.6 candidate has been implemented, frozen, selected, or evaluated.
+- Candidate-001 has a reproducible development implementation and a local
+  development trial path, but it has not been frozen, selection-evaluated,
+  independently evaluated, or promoted.
 - Development and selection seeds are repository-visible operator-controlled
   material, not protected evidence.
 - Future final seed material does not yet exist in this checkout.

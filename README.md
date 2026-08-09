@@ -6,7 +6,7 @@ RAVEL — the **Recursive Adaptive Vector Execution Lattice** — is an experime
 
 RAVEL operates beneath the technical authority of the Machine-Native Complexity Standard (MNCS) and the Machine-Native Complexity Development Standard (MNCDS). It is not intended to replace a language model, compiler, static analyzer, test framework, or the MNCS Forge. Its role is to decide what evidence should be gathered, what action should follow, and what experience should be retained for later use without redefining the governing status of that evidence.
 
-> **Project status:** RAVEL is research software. Historical RAVEL 0.4 and 0.5 results remain development `FAIL`; RAVEL 0.6 candidate-001 now has a reproducible development build and behavioral harness, but has not been evaluated, frozen, selected, or promoted. Formal MNCS/MNCDS conformance, independent attestation, protected custody, production safety, and general recursive self-improvement remain `UNKNOWN`.
+> **Project status:** RAVEL is research software. Historical RAVEL 0.4 and 0.5 results remain development `FAIL`; RAVEL 0.6 candidate-001 now has a reproducible build, an integrated development transaction path, behavioral fixtures, modular Python surfaces, and lifecycle scaffolding. It has not been frozen, selection-evaluated, independently evaluated, or promoted. Formal MNCS/MNCDS conformance, independent attestation, protected custody, production safety, and general recursive self-improvement remain `UNKNOWN`.
 
 ## Place in the MNCS ecosystem
 
@@ -106,7 +106,10 @@ The current 0.6 implementation status is recorded in
 [`ravel_versions/0.6/RAVEL_0_6_IMPLEMENTATION_STATUS.md`](ravel_versions/0.6/RAVEL_0_6_IMPLEMENTATION_STATUS.md).
 Optional provider/resource protocols in `src/ravel/providers.py` and
 `src/ravel/resources.py` record scoped execution observations without claiming
-algorithmic superiority.
+algorithmic superiority. The bounded component surfaces in `src/ravel/world.py`,
+`src/ravel/transition.py`, `src/ravel/planning.py`, `src/ravel/checkpoint.py`,
+and `src/ravel/mechanism_state.py` provide deterministic provider substitution
+and checkpoint fixtures; they do not replace the historical 0.5 source.
 
 ## Non-goals
 

@@ -21,6 +21,11 @@ import hashlib
 import sys
 from pathlib import Path
 
+try:
+    from .ravel_0_6_transaction_surface import TRANSACTION_SURFACE
+except ImportError:  # direct script execution from the tools directory
+    from ravel_0_6_transaction_surface import TRANSACTION_SURFACE  # type: ignore[no-redef]
+
 RAVEL_DIR = Path(__file__).resolve().parents[1]
 FROZEN_SOURCE = RAVEL_DIR / "ravel_versions/0.5/ravel_0_5.c"
 FROZEN_SOURCE_SHA256 = "1a8466ea1805811873c461fb891aaeaec18f6c9e7491b5ea7bd09bf698be102d"
@@ -137,6 +142,47 @@ def build_candidate_source(source_bytes: bytes) -> str:
         if count != 1:
             raise SeedError(f"{name}: expected one source match, found {count}")
         source = source.replace(old, new, 1)
+
+    observation_marker = "typedef struct {\n    Model model;\n"
+    if source.count(observation_marker) != 1:
+        raise SeedError("transaction surface: expected one observation boundary")
+    source = source.replace(
+        observation_marker, TRANSACTION_SURFACE + "\n" + observation_marker, 1
+    )
+
+    old_observation_type = "    int adaptation_ok;\n} VariantObservation;"
+    new_observation_type = (
+        "    int adaptation_ok;\n"
+        "    AdaptationTransaction transaction;\n"
+        "} VariantObservation;"
+    )
+    if source.count(old_observation_type) != 1:
+        raise SeedError("transaction surface: expected one variant observation type")
+    source = source.replace(old_observation_type, new_observation_type, 1)
+
+    old_observation_call = """        adapt_model(&out->model, base_train, adapt_train, config,
+                    &out->adaptation_metric, &out->replay_metric, &out->topology);"""
+    new_observation_call = """        adapt_model_transaction(&out->model, base_train, adapt_train,
+                                retention, RETENTION_N, config,
+                                &out->adaptation_metric, &out->replay_metric,
+                                &out->topology, &out->transaction);"""
+    if source.count(old_observation_call) != 1:
+        raise SeedError("transaction surface: expected one trial adaptation call")
+    source = source.replace(old_observation_call, new_observation_call, 1)
+
+    old_candidate_output = (
+        '    printf(",\\"topology\\":");\n'
+        '    print_topology_json(&candidate.topology, &candidate.adaptation_metric);'
+    )
+    new_candidate_output = (
+        '    printf(",\\"topology\\":");\n'
+        '    print_topology_json(&candidate.topology, &candidate.adaptation_metric);\n'
+        '    printf(",\\"adaptation_transaction\\":");\n'
+        '    print_adaptation_transaction_json(&candidate.transaction);'
+    )
+    if source.count(old_candidate_output) != 1:
+        raise SeedError("transaction surface: expected one candidate JSON boundary")
+    source = source.replace(old_candidate_output, new_candidate_output, 1)
 
     return source
 
