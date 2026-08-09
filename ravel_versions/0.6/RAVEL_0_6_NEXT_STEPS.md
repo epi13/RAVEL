@@ -49,13 +49,40 @@ unfrozen, and unevaluated for preregistered selection/final purposes.
 Candidate-001 is now integrated as a reproducible temporary development build
 by `tools/ravel_0_6_build.py`. Its trial path wraps the existing adaptation
 primitive in an all-hard-gates copy/observe/commit transaction and emits raw
-structured observations with stable rejection reasons. A compiled behavioral
-harness verifies both corrections and fails against frozen 0.5 behavior and
-bounded reverted mutations. Python component surfaces provide two independent
-toy providers, deterministic planning, canonical checkpoints, and an
-append-only development candidate ledger. These are implementation and local
-development observations only; no selection or final material has been
-consumed. See `RAVEL_0_6_IMPLEMENTATION_STATUS.md` for the exact boundary.
+structured observations with stable rejection reasons. The frozen policy is
+loaded once at generation time, and matched-compute work is emitted as a
+separate raw development record. A compiled behavioral harness verifies both
+corrections and fails against frozen 0.5 behavior and bounded reverted
+mutations. Python component surfaces and the generated C unity extraction
+provide two independent providers, deterministic planning, canonical
+checkpoints, and an append-only development candidate ledger. These are
+implementation and local development observations only; no selection or final
+material has been consumed. See `RAVEL_0_6_IMPLEMENTATION_STATUS.md` for the
+exact boundary.
+
+### Queue disposition after the current iteration
+
+- **R6-01:** provenance/build foundation complete; generated component and
+  policy identities are now included in temporary build records.
+- **R6-02:** integrated for the local development transaction and matched raw
+  comparator; the frozen contract has no numeric absolute compute cap, so that
+  separate gate remains undeclared rather than invented.
+- **R6-03:** behavioral and C/Python negative fixtures complete for declared
+  constraints; source-constant mutations are intentionally distinguished from
+  Python frozen-policy mutations and remain manifest-detectable.
+- **R6-04:** physical source extraction and C provider substitution are
+  implemented as a behavior-preserving unity build. Independently compiled C
+  ABI contracts remain the next architectural step.
+- **R6-05:** ledger infrastructure is hardened and exercised only with
+  development fixtures. Candidate-001 remains unfrozen because further
+  implementation changes are still expected.
+- **R6-06:** external custody and evaluation remain unavailable/`UNKNOWN`.
+
+The next logical implementation task is to promote one extracted C boundary at
+a time to separately compiled units with explicit headers, retaining the unity
+wrapper as a parity oracle. Do not freeze candidate-001 or consume selection
+partitions until that work, policy parity, and the full development trial
+matrix are stable.
 
 ## Codex next steps
 

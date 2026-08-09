@@ -5,6 +5,8 @@ import unittest
 
 from ravel.experience import ExperienceRecord
 from ravel.lifecycle import CandidateLedger, CandidateState, LedgerError
+from ravel.memory import MemoryClass
+from ravel.memory.store import SQLiteMemoryStore
 
 
 class LifecycleTests(unittest.TestCase):
@@ -63,6 +65,41 @@ class LifecycleTests(unittest.TestCase):
             with self.assertRaises(LedgerError):
                 ledger.get(candidate.candidate_id)
 
+    def test_candidate_number_gap_is_detected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            ledger = CandidateLedger(f"{directory}/candidates.jsonl", maximum_candidates=8)
+            first = ledger.create(development_partition="dev", created_at="t0")
+            ledger._append(
+                "ravel-0.6-candidate-003",
+                CandidateState.CREATED,
+                {"number": 3, "development_partition": "dev", "created_at": "t2"},
+            )
+            with self.assertRaises(LedgerError):
+                ledger.get(first.candidate_id)
+
+    def test_contamination_flag_and_rejection_are_retained(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            ledger = CandidateLedger(f"{directory}/candidates.jsonl")
+            candidate = ledger.create(development_partition="dev", created_at="t0")
+            ledger.begin_development(candidate.candidate_id)
+            ledger.freeze(
+                candidate.candidate_id,
+                source_identity="sha256:source",
+                evaluator_identity="sha256:evaluator",
+                threshold_identity="sha256:threshold",
+                selection_partition="selection",
+            )
+            ledger.start_selection(candidate.candidate_id)
+            result = ledger.record_selection(
+                candidate.candidate_id,
+                selected=False,
+                result_ref="selection-result",
+                rejection_reasons=("UNKNOWN",),
+                contamination_flag=True,
+            )
+            self.assertTrue(result.contamination_flag)
+            self.assertEqual(result.rejection_reasons, ("UNKNOWN",))
+
 
 class ExperienceTests(unittest.TestCase):
     def test_unknown_and_rejected_experience_becomes_negative_memory(self) -> None:
@@ -83,6 +120,39 @@ class ExperienceTests(unittest.TestCase):
         self.assertEqual(record.memory_class.value, "negative")
         self.assertEqual(record.experience_identity, experience.record_id)
         self.assertIn("UNKNOWN", record.statement)
+
+    def test_real_development_outcomes_remain_scoped_negative_memory(self) -> None:
+        accepted = ExperienceRecord.from_development_transaction(
+            candidate_id="ravel-0.6-candidate-001",
+            context_identity="transaction-accepted",
+            task_environment="ravel-toy-branching-c/1",
+            provider_id="ravel-candidate",
+            transaction={"committed": True, "rejection_reason": "none"},
+            matched_compute={"reference_available": True},
+        )
+        rejected = ExperienceRecord.from_development_transaction(
+            candidate_id="ravel-0.6-candidate-001",
+            context_identity="transaction-rejected",
+            task_environment="ravel-toy-branching-c/1",
+            provider_id="ravel-candidate",
+            transaction={"committed": False, "rejection_reason": "retention_loss_floor"},
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            with SQLiteMemoryStore(f"{directory}/memory.sqlite") as store:
+                store.insert_records_atomic(
+                    (
+                        accepted.to_memory_record(created_at="2026-08-08T00:00:00Z"),
+                        rejected.to_memory_record(created_at="2026-08-08T00:00:01Z"),
+                    )
+                )
+                first = store.search_records("retention constrained adaptation")
+                second = store.search_records("retention constrained adaptation")
+                self.assertEqual(first, second)
+                self.assertEqual(len(first), 2)
+                self.assertTrue(all(record.memory_class is MemoryClass.NEGATIVE for record, _ in first))
+                self.assertEqual(
+                    store.search_records("retention", include_negative=False), ()
+                )
 
 
 if __name__ == "__main__":

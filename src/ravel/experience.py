@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import hashlib
+import json
 from typing import Any, Mapping
 
 from .memory import MemoryClass, MemoryRecord
@@ -25,6 +27,7 @@ class ExperienceRecord:
     resource_observations: Mapping[str, Any] = field(default_factory=dict)
     provenance: Mapping[str, str] = field(default_factory=dict)
     applicability_scope: Mapping[str, str] = field(default_factory=dict)
+    execution_identity: str | None = None
 
     def __post_init__(self) -> None:
         if not self.candidate_id or not self.context_identity or not self.task_environment:
@@ -38,7 +41,47 @@ class ExperienceRecord:
 
     @property
     def record_id(self) -> str:
-        return f"experience:{self.candidate_id}:{self.context_identity}"
+        suffix = f":{self.execution_identity}" if self.execution_identity else ""
+        return f"experience:{self.candidate_id}:{self.context_identity}{suffix}"
+
+    @classmethod
+    def from_development_transaction(
+        cls,
+        *,
+        candidate_id: str,
+        context_identity: str,
+        task_environment: str,
+        provider_id: str,
+        transaction: Mapping[str, Any],
+        matched_compute: Mapping[str, Any] | None = None,
+        partition_identity: str = "ravel-0.6-development-adaptation-v1",
+        provenance: Mapping[str, str] | None = None,
+    ) -> "ExperienceRecord":
+        """Convert raw C development output into advisory, fail-closed memory."""
+
+        committed = transaction.get("committed")
+        if not isinstance(committed, bool):
+            raise ValueError("development transaction committed flag is malformed")
+        raw_result: dict[str, Any] = {"transaction": dict(transaction)}
+        if matched_compute is not None:
+            raw_result["matched_compute"] = dict(matched_compute)
+        material = json.dumps(raw_result, sort_keys=True, separators=(",", ":")).encode()
+        execution_identity = hashlib.sha256(material).hexdigest()[:24]
+        return cls(
+            candidate_id=candidate_id,
+            context_identity=context_identity,
+            task_environment=task_environment,
+            requested_strategy="retention-constrained-adaptation",
+            provider_id=provider_id,
+            verifier_id="development-raw-observation",
+            raw_result=raw_result,
+            formal_disposition="UNKNOWN",
+            adaptation_decision="accepted" if committed else "rejected",
+            rejection_reason=transaction.get("rejection_reason") if not committed else None,
+            provenance=dict(provenance or {}),
+            applicability_scope={"partition": partition_identity},
+            execution_identity=execution_identity,
+        )
 
     def to_memory_record(self, *, created_at: str) -> MemoryRecord:
         scope = dict(self.applicability_scope)

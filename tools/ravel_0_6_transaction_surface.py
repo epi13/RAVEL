@@ -6,13 +6,28 @@ the behavior baseline; the trial path adds a copy, raw-observation, and
 all-hard-gates commit boundary.
 """
 
-TRANSACTION_SURFACE = r'''
+try:
+    from ravel.policy import policy_c_header
+except ImportError:  # direct execution from a source checkout before install
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from ravel.policy import policy_c_header  # type: ignore[no-redef]
+
+
+TRANSACTION_SURFACE = (
+    policy_c_header()
+    + r'''
 /* RAVEL 0.6 transaction surface: raw observations plus bounded commit. */
 typedef struct {
     uint32_t objective_before_q20;
     uint32_t objective_after_q20;
     uint64_t base_accuracy_before_q20;
     uint64_t base_accuracy_after_q20;
+    uint64_t retention_accuracy_before_q20;
+    uint64_t retention_accuracy_after_q20;
+    int64_t retention_accuracy_delta_q20;
     uint64_t representation_before_q20;
     uint64_t representation_after_q20;
     uint64_t prediction_rmse_before_q20;
@@ -33,6 +48,17 @@ typedef struct {
     const char *rejection_reason;
 } AdaptationTransaction;
 
+typedef struct {
+    uint64_t candidate_training_evaluations;
+    uint64_t matched_training_evaluations;
+    uint64_t ratio_q20;
+    uint64_t maximum_ratio_q20;
+    uint8_t reference_available;
+    const char *threshold_identity;
+    const char *comparator_identity;
+    const char *partition_identity;
+} MatchedComputeObservation;
+
 enum {
     RAVEL06_FAIL_MECHANISM = 1u << 0,
     RAVEL06_FAIL_OBJECTIVE = 1u << 1,
@@ -45,13 +71,10 @@ enum {
     RAVEL06_FAIL_RETIREMENT_BUDGET = 1u << 8,
     RAVEL06_FAIL_REPLAY_BUDGET = 1u << 9,
     RAVEL06_FAIL_UPDATE_BUDGET = 1u << 10,
-    RAVEL06_FAIL_COMPUTE_BUDGET = 1u << 11
+    RAVEL06_FAIL_COMPUTE_BUDGET = 1u << 11,
+    RAVEL06_FAIL_RETENTION_ACCURACY = 1u << 12,
+    RAVEL06_FAIL_RETENTION_LOSS = 1u << 13
 };
-
-#define RAVEL06_BASE_ACCURACY_FLOOR_Q20 UINT64_C(891290)
-#define RAVEL06_PREDICTION_DEGRADATION_BOUND_Q20 UINT64_C(1048576)
-#define RAVEL06_MAX_UPDATE_PASSES 4u
-#define RAVEL06_MAX_COMPUTE_EVALUATIONS UINT64_C(2000000)
 
 static uint64_t ravel06_accuracy_q20(const Eval *evaluation) {
     if (evaluation->samples == 0u) return 0u;
@@ -109,6 +132,8 @@ static const char *ravel06_rejection_reason(uint32_t mask) {
     if (mask & RAVEL06_FAIL_MECHANISM) return "adaptation_mechanism_failed";
     if (mask & RAVEL06_FAIL_OBJECTIVE) return "adaptation_improvement_below_epsilon";
     if (mask & RAVEL06_FAIL_BASE_ACCURACY) return "base_accuracy_floor";
+    if (mask & RAVEL06_FAIL_RETENTION_ACCURACY) return "retention_accuracy_floor";
+    if (mask & RAVEL06_FAIL_RETENTION_LOSS) return "retention_loss_floor";
     if (mask & RAVEL06_FAIL_REPRESENTATION) return "representation_floor";
     if (mask & RAVEL06_FAIL_PREDICTION) return "original_prediction_degradation_bound";
     if (mask & RAVEL06_FAIL_TRANSITION_SUPPORT) return "transition_support_preservation";
@@ -123,13 +148,14 @@ static const char *ravel06_rejection_reason(uint32_t mask) {
 
 static int adapt_model_transaction(
     Model *model, const Event *base_train, const Event *adapt_train,
+    const Event *base_holdout, uint32_t base_holdout_count,
     const Event *retention, uint32_t retention_count, const VariantConfig *config,
     TrainMetric *metric, ReplayMetric *replay, TopologyTrace *topology,
     AdaptationTransaction *transaction) {
     Model previous = *model;
     Model proposed = *model;
     memset(transaction, 0, sizeof *transaction);
-    transaction->threshold_identity = "ravel-0.6-retention-gates/0.1";
+    transaction->threshold_identity = RAVEL06_THRESHOLD_IDENTITY;
     int mechanism_ok = adapt_model(&proposed, base_train, adapt_train, config,
                                    metric, replay, topology);
     canonicalize_model(&proposed);
@@ -141,17 +167,24 @@ static int adapt_model_transaction(
     transaction->births = metric->births;
     transaction->retirements = metric->retired;
     transaction->replay_records = replay->selected;
-    transaction->update_passes = config->matched_work ? 4u : 2u;
+    transaction->update_passes = 2u;
     transaction->compute_evaluations = metric->expert_evaluations;
     transaction->matched_compute_evaluations = 0u;
     transaction->matched_compute_reference_available = 0u;
 
-    const Event *gate_data = retention != NULL ? retention : base_train;
-    uint32_t gate_count = retention != NULL ? retention_count : BASE_TRAIN_N;
-    Eval previous_eval = evaluate(&previous, gate_data, gate_count, config->routed);
-    Eval proposed_eval = evaluate(&proposed, gate_data, gate_count, config->routed);
-    transaction->base_accuracy_before_q20 = ravel06_accuracy_q20(&previous_eval);
-    transaction->base_accuracy_after_q20 = ravel06_accuracy_q20(&proposed_eval);
+    Eval previous_base_eval = evaluate(&previous, base_holdout, base_holdout_count, config->routed);
+    Eval proposed_base_eval = evaluate(&proposed, base_holdout, base_holdout_count, config->routed);
+    const Event *retention_data = retention != NULL ? retention : base_train;
+    uint32_t retention_count_for_gate = retention != NULL ? retention_count : BASE_TRAIN_N;
+    Eval previous_eval = evaluate(&previous, retention_data, retention_count_for_gate, config->routed);
+    Eval proposed_eval = evaluate(&proposed, retention_data, retention_count_for_gate, config->routed);
+    transaction->base_accuracy_before_q20 = ravel06_accuracy_q20(&previous_base_eval);
+    transaction->base_accuracy_after_q20 = ravel06_accuracy_q20(&proposed_base_eval);
+    transaction->retention_accuracy_before_q20 = ravel06_accuracy_q20(&previous_eval);
+    transaction->retention_accuracy_after_q20 = ravel06_accuracy_q20(&proposed_eval);
+    transaction->retention_accuracy_delta_q20 =
+        (int64_t)transaction->retention_accuracy_after_q20 -
+        (int64_t)transaction->retention_accuracy_before_q20;
     transaction->representation_before_q20 =
         ravel06_representation_q20(&previous_eval);
     transaction->representation_after_q20 =
@@ -163,12 +196,19 @@ static int adapt_model_transaction(
 
     uint32_t failed = 0u;
     if (!mechanism_ok) failed |= RAVEL06_FAIL_MECHANISM;
-    if (transaction->objective_after_q20 <
-        transaction->objective_before_q20 + TOPOLOGY_OBJECTIVE_MIN_Q20) {
+    if (transaction->objective_after_q20 <= transaction->objective_before_q20 ||
+        transaction->objective_after_q20 - transaction->objective_before_q20 <
+            RAVEL06_OBJECTIVE_EPSILON_Q20) {
         failed |= RAVEL06_FAIL_OBJECTIVE;
     }
     if (transaction->base_accuracy_after_q20 < RAVEL06_BASE_ACCURACY_FLOOR_Q20) {
         failed |= RAVEL06_FAIL_BASE_ACCURACY;
+    }
+    if (transaction->retention_accuracy_after_q20 < RAVEL06_RETENTION_ACCURACY_FLOOR_Q20) {
+        failed |= RAVEL06_FAIL_RETENTION_ACCURACY;
+    }
+    if (transaction->retention_accuracy_delta_q20 < RAVEL06_RETENTION_LOSS_FLOOR_Q20) {
+        failed |= RAVEL06_FAIL_RETENTION_LOSS;
     }
     if (transaction->representation_after_q20 >
         transaction->representation_before_q20) {
@@ -181,19 +221,21 @@ static int adapt_model_transaction(
                 RAVEL06_PREDICTION_DEGRADATION_BOUND_Q20) {
         failed |= RAVEL06_FAIL_PREDICTION;
     }
-    if (transaction->transition_support_losses != 0u) {
+    if (transaction->transition_support_losses >
+        RAVEL06_MAX_TRANSITION_SUPPORT_LOSSES) {
         failed |= RAVEL06_FAIL_TRANSITION_SUPPORT;
     }
-    if (transaction->expert_count > MAXE) failed |= RAVEL06_FAIL_EXPERT_BUDGET;
-    if (transaction->births > MAX_ADAPT_BIRTHS) failed |= RAVEL06_FAIL_BIRTH_BUDGET;
-    if (transaction->retirements > MAX_ADAPT_RETIREMENTS) {
+    if (transaction->expert_count > RAVEL06_MAX_EXPERTS) failed |= RAVEL06_FAIL_EXPERT_BUDGET;
+    if (transaction->births > RAVEL06_MAX_BIRTHS) failed |= RAVEL06_FAIL_BIRTH_BUDGET;
+    if (transaction->retirements > RAVEL06_MAX_RETIREMENTS) {
         failed |= RAVEL06_FAIL_RETIREMENT_BUDGET;
     }
-    if (transaction->replay_records > REPLAY_N) failed |= RAVEL06_FAIL_REPLAY_BUDGET;
+    if (transaction->replay_records != RAVEL06_REPLAY_RECORDS) failed |= RAVEL06_FAIL_REPLAY_BUDGET;
     if (transaction->update_passes > RAVEL06_MAX_UPDATE_PASSES) {
         failed |= RAVEL06_FAIL_UPDATE_BUDGET;
     }
-    if (transaction->compute_evaluations > RAVEL06_MAX_COMPUTE_EVALUATIONS) {
+    if (RAVEL06_MAX_COMPUTE_EVALUATIONS != UINT64_MAX &&
+        transaction->compute_evaluations > RAVEL06_MAX_COMPUTE_EVALUATIONS) {
         failed |= RAVEL06_FAIL_COMPUTE_BUDGET;
     }
     transaction->failed_constraint_mask = failed;
@@ -222,6 +264,9 @@ static void print_adaptation_transaction_json(
            "\"raw\":{\"objective_before_q20\":%u,"
            "\"objective_after_q20\":%u,\"base_accuracy_before_q20\":%" PRIu64
            ",\"base_accuracy_after_q20\":%" PRIu64
+           ",\"retention_accuracy_before_q20\":%" PRIu64
+           ",\"retention_accuracy_after_q20\":%" PRIu64
+           ",\"retention_accuracy_delta_q20\":%" PRId64
            ",\"representation_before_q20\":%" PRIu64
            ",\"representation_after_q20\":%" PRIu64
            ",\"prediction_rmse_before_q20\":%" PRIu64
@@ -239,6 +284,9 @@ static void print_adaptation_transaction_json(
            transaction->objective_before_q20, transaction->objective_after_q20,
            transaction->base_accuracy_before_q20,
            transaction->base_accuracy_after_q20,
+           transaction->retention_accuracy_before_q20,
+           transaction->retention_accuracy_after_q20,
+           transaction->retention_accuracy_delta_q20,
            transaction->representation_before_q20,
            transaction->representation_after_q20,
            transaction->prediction_rmse_before_q20,
@@ -250,4 +298,24 @@ static void print_adaptation_transaction_json(
            transaction->matched_compute_evaluations,
            transaction->matched_compute_reference_available ? "true" : "false");
 }
+
+static void print_matched_compute_json(
+    const MatchedComputeObservation *observation) {
+    printf("{\"candidate_training_evaluations\":%" PRIu64
+           ",\"matched_training_evaluations\":%" PRIu64
+           ",\"ratio_q20\":%" PRIu64
+           ",\"maximum_ratio_q20\":%" PRIu64
+           ",\"reference_available\":%s"
+           ",\"threshold_identity\":\"%s\""
+           ",\"comparator_identity\":\"%s\""
+           ",\"partition_identity\":\"%s\"}",
+           observation->candidate_training_evaluations,
+           observation->matched_training_evaluations,
+           observation->ratio_q20, observation->maximum_ratio_q20,
+           observation->reference_available ? "true" : "false",
+           observation->threshold_identity,
+           observation->comparator_identity,
+           observation->partition_identity);
+}
 '''
+)

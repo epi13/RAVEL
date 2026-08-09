@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ravel.dev/schema/ravel-0.6-matched-compute/0.1",
+  "title": "RAVEL 0.6 development matched-compute observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["candidate_training_evaluations", "matched_training_evaluations", "ratio_q20", "maximum_ratio_q20", "reference_available", "threshold_identity", "comparator_identity", "partition_identity"],
+  "properties": {
+    "candidate_training_evaluations": {"type": "integer", "minimum": 0},
+    "matched_training_evaluations": {"type": "integer", "minimum": 0},
+    "ratio_q20": {"type": "integer", "minimum": 0},
+    "maximum_ratio_q20": {"type": "integer", "minimum": 0},
+    "reference_available": {"type": "boolean"},
+    "threshold_identity": {"type": "string", "minLength": 1},
+    "comparator_identity": {"type": "string", "minLength": 1},
+    "partition_identity": {"type": "string", "minLength": 1}
+  }
+}

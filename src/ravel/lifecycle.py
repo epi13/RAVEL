@@ -113,6 +113,10 @@ class CandidateLedger:
                 rejection_reasons=tuple(payload.get("rejection_reasons", record.rejection_reasons if record else ())),
                 contamination_flag=bool(payload.get("contamination_flag", record.contamination_flag if record else False)),
             )
+        ordered = sorted(current.values(), key=lambda item: item.number)
+        for expected, record in enumerate(ordered, start=1):
+            if record.number != expected or record.candidate_id != candidate_id(expected):
+                raise LedgerError("candidate numbering has a gap or identity mutation")
         return current
 
     def records(self) -> tuple[CandidateRecord, ...]:

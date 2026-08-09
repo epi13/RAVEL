@@ -104,6 +104,40 @@ NEW_PLANNER_CONTEXT = """\
             for (uint32_t k = 0; k < TRANSITION_TOP_K; ++k) {
 """
 
+PROVIDER_SURFACE = """\
+#ifndef RAVEL06_PROVIDER_RING
+#define RAVEL06_PROVIDER_ID "ravel-toy-branching-c/1"
+#else
+#define RAVEL06_PROVIDER_ID "ravel-toy-ring-c/1"
+#endif
+
+void make_ring_world(World *w, const TrialSpec *spec) {
+    memset(w, 0, sizeof *w);
+    for (uint32_t s = 0; s < STATES; ++s) {
+        for (uint32_t d = 0; d < D; ++d) {
+            int sign = ((s + 3u * d + (s >> 2u)) & 1u) ? 1 : -1;
+            w->center[s][d] = (int16_t)(sign * (spec->amplitude - (int)(d % 3u)));
+        }
+        w->label[s] = (uint8_t)((s * 7u + (s >> 3u)) & 7u);
+        for (uint32_t a = 0; a < ACTIONS; ++a) {
+            w->base_next[s][a] = (uint8_t)((s + a + 1u) & 63u);
+            w->drift_next[s][a] = w->base_next[s][a];
+        }
+        if (spec->transition_drift && s < 24u) {
+            w->drift_next[s][1] = (uint8_t)((s + 5u) & 63u);
+        }
+    }
+}
+
+static void make_world(World *w, const TrialSpec *spec) {
+#ifdef RAVEL06_PROVIDER_RING
+    make_ring_world(w, spec);
+#else
+    make_branching_world(w, spec);
+#endif
+}
+"""
+
 SOURCE_MARKER = " * It emits observations and integrity facts, never development verdicts.\n"
 CANDIDATE_MARKER = (
     SOURCE_MARKER
@@ -143,6 +177,56 @@ def build_candidate_source(source_bytes: bytes) -> str:
             raise SeedError(f"{name}: expected one source match, found {count}")
         source = source.replace(old, new, 1)
 
+    old_world_start = "static void make_world(World *w, const TrialSpec *spec) {"
+    if source.count(old_world_start) != 1:
+        raise SeedError("provider surface: expected one synthetic world provider")
+    source = source.replace(
+        old_world_start,
+        "void make_branching_world(World *w, const TrialSpec *spec) {",
+        1,
+    )
+    provider_boundary = "\n}\n\nstatic void make_observation"
+    if source.count(provider_boundary) != 1:
+        raise SeedError("provider surface: expected world provider boundary")
+    source = source.replace(
+        provider_boundary,
+        "\n}\n\n" + PROVIDER_SURFACE + "\nstatic void make_observation",
+        1,
+    )
+
+    old_trial_identity = r'''           "  \"trial_id\":\"%s\",\"regime\":\"%s\","'''
+    new_trial_identity = r'''           "  \"environment_provider_id\":\"%s\",\n"
+           "  \"trial_id\":\"%s\",\"regime\":\"%s\","'''
+    if source.count(old_trial_identity) != 1:
+        raise SeedError("provider surface: expected trial identity output")
+    source = source.replace(old_trial_identity, new_trial_identity, 1)
+    old_trial_args = "           spec->trial_id, spec->regime, spec->seed,"
+    new_trial_args = "           RAVEL06_PROVIDER_ID, spec->trial_id, spec->regime, spec->seed,"
+    if source.count(old_trial_args) != 1:
+        raise SeedError("provider surface: expected trial identity arguments")
+    source = source.replace(old_trial_args, new_trial_args, 1)
+
+    old_observe_signature = (
+        "    VariantObservation *out, const Model *base, const Event *base_train,\n"
+        "    const Event *adapt_train, const Event *drift_hold, const Event *retention,"
+    )
+    new_observe_signature = (
+        "    VariantObservation *out, const Model *base, const Event *base_train,\n"
+        "    const Event *base_hold, const Event *adapt_train,\n"
+        "    const Event *drift_hold, const Event *retention,"
+    )
+    if source.count(old_observe_signature) != 1:
+        raise SeedError("transaction surface: expected one variant observation signature")
+    source = source.replace(old_observe_signature, new_observe_signature, 1)
+    old_observe_call = "&candidate, &base, base_train, adapt_train,"
+    if source.count(old_observe_call) != 1:
+        raise SeedError("transaction surface: expected candidate observation call")
+    source = source.replace(old_observe_call, "&candidate, &base, base_train, base_hold, adapt_train,", 1)
+    old_variant_call = "&observation, &base, base_train, adapt_train,"
+    if source.count(old_variant_call) != 2:
+        raise SeedError("transaction surface: expected two comparator observation calls")
+    source = source.replace(old_variant_call, "&observation, &base, base_train, base_hold, adapt_train,", 2)
+
     observation_marker = "typedef struct {\n    Model model;\n"
     if source.count(observation_marker) != 1:
         raise SeedError("transaction surface: expected one observation boundary")
@@ -163,6 +247,7 @@ def build_candidate_source(source_bytes: bytes) -> str:
     old_observation_call = """        adapt_model(&out->model, base_train, adapt_train, config,
                     &out->adaptation_metric, &out->replay_metric, &out->topology);"""
     new_observation_call = """        adapt_model_transaction(&out->model, base_train, adapt_train,
+                                base_hold, BASE_HOLD_N,
                                 retention, RETENTION_N, config,
                                 &out->adaptation_metric, &out->replay_metric,
                                 &out->topology, &out->transaction);"""
@@ -184,6 +269,53 @@ def build_candidate_source(source_bytes: bytes) -> str:
         raise SeedError("transaction surface: expected one candidate JSON boundary")
     source = source.replace(old_candidate_output, new_candidate_output, 1)
 
+    old_comparison_boundary = '    printf("  \\\"comparisons\\\":{\\n");'
+    if source.count(old_comparison_boundary) != 1:
+        raise SeedError("matched compute: expected one comparison boundary")
+    source = source.replace(
+        old_comparison_boundary,
+        old_comparison_boundary + "\n    MatchedComputeObservation matched_compute = {0};",
+        1,
+    )
+    old_matched_metrics = (
+        "        observation.planning =\n"
+        "            evaluate_planning(&observation.model, &world, &spec,\n"
+        "                              planning_seed, 1);\n"
+        "        BEGIN_VARIANT();"
+    )
+    new_matched_metrics = (
+        "        observation.planning =\n"
+        "            evaluate_planning(&observation.model, &world, &spec,\n"
+        "                              planning_seed, 1);\n"
+        "        matched_compute.candidate_training_evaluations =\n"
+        "            base_metric.expert_evaluations + candidate.adaptation_metric.expert_evaluations;\n"
+        "        matched_compute.matched_training_evaluations =\n"
+        "            base_metric.expert_evaluations + observation.adaptation_metric.expert_evaluations;\n"
+        "        matched_compute.reference_available =\n"
+        "            matched_compute.matched_training_evaluations > 0u;\n"
+        "        matched_compute.ratio_q20 = matched_compute.reference_available\n"
+        "            ? (matched_compute.candidate_training_evaluations * UINT64_C(1048576)) /\n"
+        "              matched_compute.matched_training_evaluations\n"
+        "            : 0u;\n"
+        "        matched_compute.maximum_ratio_q20 = RAVEL06_MAX_COMPUTE_RATIO_Q20;\n"
+        "        matched_compute.threshold_identity = RAVEL06_THRESHOLD_IDENTITY;\n"
+        "        matched_compute.comparator_identity =\n"
+        "            \"fixed-topology-64-expert-routed/matched-development-work-v1\";\n"
+        "        matched_compute.partition_identity = \"ravel-0.6-development-adaptation-v1\";\n"
+        "        BEGIN_VARIANT();"
+    )
+    if source.count(old_matched_metrics) != 1:
+        raise SeedError("matched compute: expected one comparator observation boundary")
+    source = source.replace(old_matched_metrics, new_matched_metrics, 1)
+    old_trial_close = '    printf("\\n  }\\n}\\n");'
+    new_trial_close = (
+        '    printf("\\n  },\\n  \\"matched_compute\\":");\n'
+        '    print_matched_compute_json(&matched_compute);\n'
+        '    printf("\\n}\\n");'
+    )
+    if source.count(old_trial_close) != 1:
+        raise SeedError("matched compute: expected one trial JSON close")
+    source = source.replace(old_trial_close, new_trial_close, 1)
     return source
 
 

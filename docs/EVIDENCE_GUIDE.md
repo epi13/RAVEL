@@ -92,6 +92,13 @@ Wall-clock timing is host-specific and non-normative. Deterministic expert,
 operation, or evaluation counts are the canonical work measures unless a
 separate protocol explicitly defines cross-host performance evidence.
 
+For RAVEL 0.6 development, `ravel.policy` binds the machine-readable
+preregistration digest (and the explicitly inherited frozen 0.5 objective
+constant) into the generated C threshold identity. The matched-compute record
+contains raw candidate/comparator work counts and an integer ratio; the
+candidate does not emit a formal compute PASS. The Python parser independently
+reconstructs the ratio, and an absent comparator remains `UNKNOWN`.
+
 ## Distinct result questions
 
 RAVEL reports several different questions that must not be collapsed:

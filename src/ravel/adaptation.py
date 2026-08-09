@@ -47,6 +47,8 @@ class RawObservation:
     update_passes: int
     compute_evaluations: int
     matched_compute_evaluations: int
+    retention_accuracy: float | None = None
+    retention_accuracy_delta_from_base: float | None = None
 
     def __post_init__(self) -> None:
         for name in (
@@ -56,6 +58,10 @@ class RawObservation:
             "original_prediction_degradation",
         ):
             _finite(getattr(self, name), name)
+        for name in ("retention_accuracy", "retention_accuracy_delta_from_base"):
+            value = getattr(self, name)
+            if value is not None:
+                _finite(value, name)
         for name in (
             "transition_support_losses",
             "expert_count",
@@ -86,8 +92,11 @@ class RetentionConstraintPolicy:
     maximum_retirements: int
     maximum_replay_records: int
     maximum_update_passes: int
-    maximum_compute_evaluations: int
+    maximum_compute_evaluations: int | None
     maximum_compute_ratio: float
+    retention_accuracy_floor: float | None = None
+    retention_loss_floor: float | None = None
+    exact_replay_records: int | None = None
 
     def __post_init__(self) -> None:
         for name in (
@@ -107,9 +116,19 @@ class RetentionConstraintPolicy:
             "maximum_retirements",
             "maximum_replay_records",
             "maximum_update_passes",
-            "maximum_compute_evaluations",
         ):
             _nonnegative(getattr(self, name), name)
+        if self.maximum_compute_evaluations is not None:
+            _nonnegative(self.maximum_compute_evaluations, "maximum_compute_evaluations")
+        for name in ("retention_accuracy_floor", "retention_loss_floor", "exact_replay_records"):
+            value = getattr(self, name)
+            if value is not None:
+                if name == "exact_replay_records":
+                    _nonnegative(value, name)
+                else:
+                    _finite(value, name)
+                    if name == "retention_accuracy_floor" and value < 0:
+                        raise AdaptationInputError(f"{name} must be non-negative")
 
 
 @dataclass(frozen=True, slots=True)
@@ -142,6 +161,18 @@ def evaluate_constraints(
         reasons.append("representation_floor")
     if proposed.original_prediction_degradation > policy.original_prediction_degradation_bound:
         reasons.append("original_prediction_degradation_bound")
+    if (
+        policy.retention_accuracy_floor is not None
+        and proposed.retention_accuracy is not None
+        and proposed.retention_accuracy < policy.retention_accuracy_floor
+    ):
+        reasons.append("retention_accuracy_floor")
+    if (
+        policy.retention_loss_floor is not None
+        and proposed.retention_accuracy_delta_from_base is not None
+        and proposed.retention_accuracy_delta_from_base < policy.retention_loss_floor
+    ):
+        reasons.append("retention_loss_floor")
     if proposed.transition_support_losses > policy.maximum_transition_support_losses:
         reasons.append("transition_support_preservation")
     if proposed.expert_count > policy.maximum_experts:
@@ -150,11 +181,16 @@ def evaluate_constraints(
         reasons.append("birth_budget")
     if proposed.retirements > policy.maximum_retirements:
         reasons.append("retirement_budget")
-    if proposed.replay_records > policy.maximum_replay_records:
+    if policy.exact_replay_records is not None and proposed.replay_records != policy.exact_replay_records:
+        reasons.append("replay_budget")
+    elif proposed.replay_records > policy.maximum_replay_records:
         reasons.append("replay_budget")
     if proposed.update_passes > policy.maximum_update_passes:
         reasons.append("update_pass_budget")
-    if proposed.compute_evaluations > policy.maximum_compute_evaluations:
+    if (
+        policy.maximum_compute_evaluations is not None
+        and proposed.compute_evaluations > policy.maximum_compute_evaluations
+    ):
         reasons.append("compute_budget")
     if proposed.matched_compute_evaluations == 0:
         reasons.append("matched_compute_reference_unavailable")
