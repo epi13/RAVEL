@@ -2,7 +2,12 @@
 
 ## Status
 
-This document specifies a development prototype. It does not establish MNCS or MNCDS conformance, protected custody, production safety, or validated recursive self-improvement.
+This document specifies a development prototype. The prototype now has named
+scope-compatibility contracts, versioned evidence/experience identity fields,
+deterministic source full-text retrieval, append-only proposal lifecycle events,
+atomic source batches, and rebuildable relation projections. It does not
+establish MNCS or MNCDS conformance, protected custody, production safety, or
+validated recursive self-improvement.
 
 ## Motivation
 
@@ -58,7 +63,9 @@ The source store remains authoritative. Consolidation proposals and layout plans
 
 ### 1. Candidate partitioning
 
-Records are first partitioned by memory class and exact declared scope. The prototype does not infer that two scopes are compatible. Future scope adapters may implement version-aware compatibility rules, but those rules must be explicit and testable.
+Records are first partitioned by memory class and a named scope-compatibility
+contract. The default contract remains exact scope equality; an alternate
+contract may be used only when its compatibility rule is explicit and tested.
 
 ### 2. Similarity grouping
 
@@ -159,11 +166,8 @@ A faster result is not sufficient if it hides negative evidence, increases false
 
 ## Next steps
 
-1. Bind records to the versioned RAVEL evidence and experience schemas.
-2. Add explicit scope-compatibility contracts instead of exact scope equality.
-3. Add full-text retrieval and a benchmark corpus before embeddings.
-4. Record query events in the experience store with privacy and retention controls.
-5. Implement proposal review, acceptance, challenge, and supersession records.
-6. Add graph projection rebuilds from the append-only source stream.
+1. Bind records to the complete versioned RAVEL evidence and experience schemas.
+2. Record query events in the experience store with privacy and retention controls.
+3. Add benchmark corpus measurements for retrieval quality, negative recall, and cost.
 7. Benchmark physical page, cache, and shard layouts on the planned local and distributed RAVEL environments.
 8. Add embedding-assisted candidate generation only after the deterministic baseline is measured.

@@ -3,11 +3,19 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
+import re
 import sqlite3
 from typing import Iterable
 
-from .models import ConsolidationProposal, MemoryClass, MemoryRecord, canonical_json
+from .models import (
+    ConsolidationProposal,
+    MemoryClass,
+    MemoryRecord,
+    ProposalLifecycleEvent,
+    canonical_json,
+)
 
 
 class ImmutableRecordError(RuntimeError):
@@ -66,6 +74,19 @@ class SQLiteMemoryStore:
                         REFERENCES source_records(record_id)
                 );
 
+                CREATE TABLE IF NOT EXISTS proposal_lifecycle_events (
+                    sequence INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_id TEXT NOT NULL UNIQUE,
+                    proposal_id TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    reason TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    digest TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    FOREIGN KEY (proposal_id)
+                        REFERENCES consolidation_proposals(proposal_id)
+                );
+
                 CREATE INDEX IF NOT EXISTS source_records_class_idx
                     ON source_records(memory_class, sequence);
                 CREATE INDEX IF NOT EXISTS proposal_status_idx
@@ -74,35 +95,44 @@ class SQLiteMemoryStore:
             )
 
     def insert_record(self, record: MemoryRecord) -> None:
-        payload = canonical_json(record.to_dict())
-        existing = self._connection.execute(
-            "SELECT digest FROM source_records WHERE record_id = ?", (record.record_id,)
-        ).fetchone()
-        if existing is not None:
-            if existing["digest"] == record.digest:
-                return
-            raise ImmutableRecordError(
-                f"record {record.record_id!r} already exists with different content"
-            )
+        self.insert_records_atomic((record,))
+
+    def insert_records_atomic(self, records: Iterable[MemoryRecord]) -> None:
+        """Insert a batch in one SQLite transaction or insert none of it."""
+
+        ordered = tuple(records)
+        payloads: list[tuple[MemoryRecord, str]] = [
+            (record, canonical_json(record.to_dict())) for record in ordered
+        ]
         with self._connection:
-            self._connection.execute(
-                """
-                INSERT INTO source_records
-                    (record_id, digest, memory_class, payload_json, created_at)
-                VALUES (?, ?, ?, ?, ?)
-                """,
-                (
-                    record.record_id,
-                    record.digest,
-                    record.memory_class.value,
-                    payload,
-                    record.created_at,
-                ),
-            )
+            for record, payload in payloads:
+                existing = self._connection.execute(
+                    "SELECT digest FROM source_records WHERE record_id = ?",
+                    (record.record_id,),
+                ).fetchone()
+                if existing is not None:
+                    if existing["digest"] == record.digest:
+                        continue
+                    raise ImmutableRecordError(
+                        f"record {record.record_id!r} already exists with different content"
+                    )
+                self._connection.execute(
+                    """
+                    INSERT INTO source_records
+                        (record_id, digest, memory_class, payload_json, created_at)
+                    VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (
+                        record.record_id,
+                        record.digest,
+                        record.memory_class.value,
+                        payload,
+                        record.created_at,
+                    ),
+                )
 
     def insert_records(self, records: Iterable[MemoryRecord]) -> None:
-        for record in records:
-            self.insert_record(record)
+        self.insert_records_atomic(records)
 
     def get_record(self, record_id: str) -> MemoryRecord | None:
         row = self._connection.execute(
@@ -188,6 +218,127 @@ class SQLiteMemoryStore:
                 relations,
             )
 
+    def insert_proposal_lifecycle(self, event: ProposalLifecycleEvent) -> None:
+        """Append one governed review event without mutating the proposal row."""
+
+        proposal = self._connection.execute(
+            "SELECT status FROM consolidation_proposals WHERE proposal_id = ?",
+            (event.proposal_id,),
+        ).fetchone()
+        if proposal is None:
+            raise ValueError(f"proposal does not exist: {event.proposal_id}")
+        previous = proposal["status"]
+        latest = self._connection.execute(
+            """
+            SELECT status FROM proposal_lifecycle_events
+            WHERE proposal_id = ? ORDER BY sequence DESC LIMIT 1
+            """,
+            (event.proposal_id,),
+        ).fetchone()
+        if latest is not None:
+            previous = latest["status"]
+        allowed = {
+            "proposed": {"reviewed", "challenged", "superseded"},
+            "reviewed": {"accepted", "challenged", "superseded"},
+            "accepted": {"challenged", "superseded"},
+            "challenged": {"reviewed", "accepted", "superseded"},
+            "superseded": set(),
+        }
+        if event.status not in allowed.get(previous, set()):
+            raise ValueError(f"invalid proposal lifecycle transition: {previous}->{event.status}")
+        payload = canonical_json(
+            {
+                "event_id": event.event_id,
+                "proposal_id": event.proposal_id,
+                "status": event.status,
+                "created_at": event.created_at,
+                "reason": event.reason,
+            }
+        )
+        digest = "sha256:" + hashlib.sha256(payload.encode()).hexdigest()
+        with self._connection:
+            existing = self._connection.execute(
+                "SELECT digest FROM proposal_lifecycle_events WHERE event_id = ?",
+                (event.event_id,),
+            ).fetchone()
+            if existing is not None:
+                if existing["digest"] == digest:
+                    return
+                raise ImmutableRecordError(
+                    f"lifecycle event {event.event_id!r} already exists with different content"
+                )
+            self._connection.execute(
+                """
+                INSERT INTO proposal_lifecycle_events
+                    (event_id, proposal_id, status, reason, created_at, digest, payload_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    event.event_id,
+                    event.proposal_id,
+                    event.status,
+                    event.reason,
+                    event.created_at,
+                    digest,
+                    payload,
+                ),
+            )
+
+    def proposal_lifecycle(self, proposal_id: str) -> tuple[ProposalLifecycleEvent, ...]:
+        rows = self._connection.execute(
+            """
+            SELECT event_id, proposal_id, status, created_at, reason
+            FROM proposal_lifecycle_events WHERE proposal_id = ? ORDER BY sequence
+            """,
+            (proposal_id,),
+        ).fetchall()
+        return tuple(
+            ProposalLifecycleEvent(
+                event_id=row["event_id"],
+                proposal_id=row["proposal_id"],
+                status=row["status"],
+                created_at=row["created_at"],
+                reason=row["reason"],
+            )
+            for row in rows
+        )
+
+    def search_records(
+        self,
+        query: str,
+        *,
+        memory_class: MemoryClass | None = None,
+        include_negative: bool = True,
+    ) -> tuple[tuple[MemoryRecord, int], ...]:
+        """Deterministic source retrieval; negative records are included by default."""
+
+        terms = tuple(sorted(set(re.findall(r"[a-z0-9][a-z0-9_-]*", query.casefold()))))
+        if not terms:
+            return ()
+        matches: list[tuple[MemoryRecord, int]] = []
+        for record in self.iter_records(memory_class):
+            if not include_negative and record.memory_class is MemoryClass.NEGATIVE:
+                continue
+            haystack = " ".join((record.statement, *record.tags)).casefold()
+            score = sum(haystack.count(term) for term in terms)
+            if score:
+                matches.append((record, score))
+        return tuple(sorted(matches, key=lambda item: (-item[1], item[0].record_id)))
+
+    def relation_projection(self) -> tuple[tuple[str, str, str], ...]:
+        """Rebuild a disposable graph projection from append-only records."""
+
+        edges: set[tuple[str, str, str]] = set()
+        for record in self.iter_records():
+            for relation, targets in record.relations.items():
+                for target in targets:
+                    edges.add((record.record_id, relation, target))
+        for row in self._connection.execute(
+            "SELECT proposal_id, record_id, relation FROM consolidation_members"
+        ):
+            edges.add((row["proposal_id"], row["relation"], row["record_id"]))
+        return tuple(sorted(edges))
+
     def export_jsonl(self) -> str:
         """Return a deterministic source-first replay stream."""
 
@@ -198,6 +349,10 @@ class SQLiteMemoryStore:
             lines.append(row["payload_json"])
         for row in self._connection.execute(
             "SELECT payload_json FROM consolidation_proposals ORDER BY sequence"
+        ):
+            lines.append(row["payload_json"])
+        for row in self._connection.execute(
+            "SELECT payload_json FROM proposal_lifecycle_events ORDER BY sequence"
         ):
             lines.append(row["payload_json"])
         return "\n".join(lines) + ("\n" if lines else "")
@@ -221,4 +376,7 @@ class SQLiteMemoryStore:
                 for key, values in payload.get("relations", {}).items()
             },
             metadata=payload.get("metadata", {}),
+            schema_version=payload.get("schema_version", "ravel-memory-record/0.1"),
+            evidence_identity=payload.get("evidence_identity"),
+            experience_identity=payload.get("experience_identity"),
         )

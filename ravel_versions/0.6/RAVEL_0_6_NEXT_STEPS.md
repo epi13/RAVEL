@@ -43,6 +43,17 @@ checking, and strict C11 compilation.
 These corrections produce development source only. Candidate 001 has not been
 integrated into the 0.6 evidence pipeline, selected, frozen, or evaluated.
 
+## Current bounded implementation status
+
+Candidate-001 is now integrated as a reproducible temporary development build
+by `tools/ravel_0_6_build.py`. A compiled behavioral harness verifies both
+corrections and fails against frozen 0.5 behavior and bounded reverted
+mutations. A separate Python transaction foundation tests all declared hard
+constraint classes with byte-identical rollback. These are implementation and
+mutation observations only; the C candidate is not yet a complete 0.6 trial
+evaluator, and no selection or final material has been consumed. See
+`RAVEL_0_6_IMPLEMENTATION_STATUS.md` for the exact boundary.
+
 ## Codex next steps
 
 Perform the following tasks in order. Treat each material post-evaluation change

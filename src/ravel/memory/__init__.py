@@ -10,7 +10,9 @@ from .models import (
     ConsolidationProposal,
     MemoryClass,
     MemoryRecord,
+    ProposalLifecycleEvent,
     RetrievalBucket,
+    ScopeCompatibility,
 )
 from .store import ImmutableRecordError, SQLiteMemoryStore
 
@@ -22,7 +24,9 @@ __all__ = [
     "MemoryClass",
     "MemoryConsolidator",
     "MemoryRecord",
+    "ProposalLifecycleEvent",
     "RetrievalBucket",
     "RetrievalLayoutPlanner",
+    "ScopeCompatibility",
     "SQLiteMemoryStore",
 ]

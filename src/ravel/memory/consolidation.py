@@ -18,6 +18,7 @@ from .models import (
     ConsolidationProposal,
     MemoryRecord,
     RetrievalBucket,
+    ScopeCompatibility,
     utc_now,
 )
 
@@ -106,6 +107,7 @@ class ConsolidationPolicy:
     maximum_cluster_size: int = 64
     retrieval_key_count: int = 8
     method_version: str = "ravel-semantic-consolidation/0.1"
+    scope_compatibility: ScopeCompatibility = ScopeCompatibility()
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.similarity_threshold <= 1.0:
@@ -138,13 +140,23 @@ class MemoryConsolidator:
         if len(record_by_id) != len(ordered):
             raise ValueError("record_id values must be unique")
 
-        groups: dict[tuple[object, ...], list[MemoryRecord]] = defaultdict(list)
+        groups: list[list[MemoryRecord]] = []
         for record in ordered:
-            groups[(record.memory_class, record.scope_signature)].append(record)
+            for group in groups:
+                if (
+                    group[0].memory_class == record.memory_class
+                    and self.policy.scope_compatibility.compatible(
+                        group[0].scope, record.scope
+                    )
+                ):
+                    group.append(record)
+                    break
+            else:
+                groups.append([record])
 
         proposals: list[ConsolidationProposal] = []
         timestamp = created_at or utc_now()
-        for scoped_records in groups.values():
+        for scoped_records in groups:
             proposals.extend(
                 self._propose_group(scoped_records, record_by_id, created_at=timestamp)
             )
@@ -232,6 +244,7 @@ class MemoryConsolidator:
             superseded_ids=superseded_ids,
             retrieval_keys=keys,
             clustering_confidence=round(confidence, 6),
+            scope_contract_id=self.policy.scope_compatibility.contract_id,
         )
 
     @staticmethod

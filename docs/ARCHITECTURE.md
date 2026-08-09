@@ -125,6 +125,28 @@ A bounded RAVEL episode should follow this sequence:
 11. **Extract provisional knowledge.** Create principles or strategies only when attribution and scope support them.
 12. **Test transfer.** Reuse remains restricted until separate contexts support the declared scope.
 
+## Implemented reusable foundations
+
+The repository now contains small, dependency-free foundations beneath the
+0.6 experiment:
+
+- `ravel.adaptation` performs copy-before-evaluate retention transactions and
+  emits stable rejection reason codes without treating raw observations as
+  authority.
+- `ravel.providers` defines a narrow Forge boundary with capability discovery,
+  immutable raw evidence, and fail-closed `UNKNOWN` receipts. It is an adapter,
+  not a Forge reimplementation.
+- `ravel.resources` separates future provider placement policy from the
+  preregistered 0.6 mechanism. Fake backends exercise CPU fallback, CUDA kernel
+  probes, VRAM headroom, sequential offload, and bounded OOM recovery.
+- `ravel.memory` retains versioned source identities, explicit scope contracts,
+  negative-aware full-text retrieval, append-only proposal lifecycle events,
+  atomic batches, and rebuildable relation projections.
+
+These modules are tested scaffolding and are not claims that RAVEL 0.6 has been
+evaluated, selected, independently evaluated, certified, promoted, or made
+production-safe.
+
 ## Separation of statuses
 
 RAVEL must not collapse different state spaces into one score.

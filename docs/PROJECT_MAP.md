@@ -15,6 +15,11 @@ remain unchanged and are resolved by the versioned compatibility runners.
 | 0.5 | `ravel_versions/0.5/ravel_0_5.c` | `ravel_versions/0.5/RAVEL_0_5_CONTRACT.md` |
 | 0.6 | Candidate source is derived by `tools/ravel_0_6_seed_candidate.py` | `ravel_versions/0.6/RAVEL_0_6_SCOPE.md` and preregistration |
 
+Candidate-001 development builds are orchestrated by
+`tools/ravel_0_6_build.py`; generated source and binaries are temporary
+development material, not maintained source or final evidence. Behavioral
+facts are produced by `tools/ravel_0_6_behavioral_fixtures.py`.
+
 Build binaries are local outputs and are removed by `make clean`.
 
 ## Protocol, evidence, and identity
@@ -45,6 +50,9 @@ regenerating the frozen records.
 - [Architecture gaps](ARCHITECTURE_GAPS.md) records the early design gaps.
 - [`../tools/README.md`](../tools/README.md) documents evaluators, digest tools,
   mutation checks, runtime capture, and 0.6 candidate derivation.
+- `src/ravel/adaptation.py` provides the tested retention-transaction boundary.
+- `src/ravel/providers.py` and `src/ravel/resources.py` provide optional,
+  replaceable Forge/runtime protocols without heavy ML dependencies.
 - [`MIGRATION.md`](MIGRATION.md) records the standalone extraction provenance.
 
 ## Build and verification entry points
