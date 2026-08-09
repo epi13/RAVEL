@@ -18,6 +18,7 @@
     "retrieval_keys",
     "clustering_confidence",
     "status",
+    "scope_contract_id",
     "limitations"
   ],
   "properties": {
@@ -68,6 +69,7 @@
       "maximum": 1
     },
     "status": {"const": "proposed"},
+    "scope_contract_id": {"type": "string", "minLength": 1},
     "limitations": {
       "type": "array",
       "minItems": 1,

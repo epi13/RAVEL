@@ -21,6 +21,8 @@ modules or historical logical paths.
 | `ravel_0_5_evidence.py` | Orchestrate 0.5 generation, verification, mutation tests, development gates, manifest tests, and runtime capture |
 | `ravel_0_5_source_digest.py` | Verify 0.5 source and execution identity |
 | `ravel_0_6_seed_candidate.py` | Derive bounded 0.6 candidate-001 development source from an exact SHA-256-bound 0.5 input |
+| `ravel_0_6_build.py` | Generate and compile candidate-001 in a temporary directory with provenance-bound raw build output |
+| `ravel_0_6_behavioral_fixtures.py` | Run compiled slot-one planning and birth-support fixtures plus bounded reverted-correction mutations |
 
 Other support modules in this directory should follow the same separation:
 mechanism execution emits facts; evaluators derive results; digest tools bind
@@ -97,6 +99,17 @@ separation alone is not organizational independence or protected evaluation.
 The current candidate-001 corrections expand planning traversal to all declared
 transition slots and remove inherited empirical support from adaptation births.
 See `../ravel_versions/0.6/RAVEL_0_6_NEXT_STEPS.md` for the remaining lifecycle and evidence work.
+
+The corresponding read-only development checks are:
+
+```bash
+make -f ravel_versions/0.6/Makefile build
+make -f ravel_versions/0.6/Makefile behavioral-test
+```
+
+Both produce development observations only. They do not consume selection or
+future-final partitions, freeze a candidate, or create evidence of independent
+evaluation or promotion.
 
 ## Adding or changing a tool
 

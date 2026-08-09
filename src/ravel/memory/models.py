@@ -43,6 +43,22 @@ class MemoryClass(str, Enum):
 
 
 @dataclass(frozen=True, slots=True)
+class ScopeCompatibility:
+    """Named, testable policy for deciding whether two scopes may be grouped."""
+
+    contract_id: str = "ravel-scope-exact/1"
+    equal_fields: tuple[str, ...] = ()
+    allow_extra_fields: bool = False
+
+    def compatible(self, left: Mapping[str, str], right: Mapping[str, str]) -> bool:
+        if self.equal_fields:
+            if any(left.get(field) != right.get(field) for field in self.equal_fields):
+                return False
+            return self.allow_extra_fields or set(left) == set(right)
+        return dict(left) == dict(right)
+
+
+@dataclass(frozen=True, slots=True)
 class MemoryRecord:
     """An immutable source memory record.
 
@@ -64,6 +80,9 @@ class MemoryRecord:
     source_ids: tuple[str, ...] = ()
     relations: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     metadata: Mapping[str, Any] = field(default_factory=dict)
+    schema_version: str = "ravel-memory-record/0.1"
+    evidence_identity: str | None = None
+    experience_identity: str | None = None
 
     def __post_init__(self) -> None:
         if not self.record_id.strip():
@@ -74,6 +93,8 @@ class MemoryRecord:
             raise ValueError("scope must declare at least one boundary")
         if not self.producer_id.strip():
             raise ValueError("producer_id must not be empty")
+        if not self.schema_version.strip():
+            raise ValueError("schema_version must not be empty")
 
     def to_dict(self) -> dict[str, Any]:
         payload = asdict(self)
@@ -113,6 +134,7 @@ class ConsolidationProposal:
     retrieval_keys: tuple[str, ...]
     clustering_confidence: float
     status: str = "proposed"
+    scope_contract_id: str = "ravel-scope-exact/1"
     limitations: tuple[str, ...] = (
         "Derived projection only; does not alter source status or authority.",
     )
@@ -154,3 +176,24 @@ class RetrievalBucket:
     member_ids: tuple[str, ...]
     weighted_edges: tuple[tuple[str, str, int], ...]
     reason: str = "frequent-co-access"
+
+
+@dataclass(frozen=True, slots=True)
+class ProposalLifecycleEvent:
+    """Append-only review state transition for a consolidation proposal."""
+
+    event_id: str
+    proposal_id: str
+    status: str
+    created_at: str
+    reason: str
+
+    ALLOWED_STATUSES = frozenset(
+        {"proposed", "reviewed", "accepted", "challenged", "superseded"}
+    )
+
+    def __post_init__(self) -> None:
+        if self.status not in self.ALLOWED_STATUSES:
+            raise ValueError(f"unsupported proposal lifecycle status: {self.status}")
+        if not self.event_id or not self.proposal_id or not self.reason:
+            raise ValueError("proposal lifecycle identity and reason are required")
