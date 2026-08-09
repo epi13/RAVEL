@@ -55,7 +55,11 @@ separate raw development record. A compiled behavioral harness verifies both
 corrections and fails against frozen 0.5 behavior and bounded reverted
 mutations. Python component surfaces and the generated C unity extraction
 provide two independent providers, deterministic planning, canonical
-checkpoints, and an append-only development candidate ledger. These are
+checkpoints, and an append-only development candidate ledger. The checkpoint
+byte-comparison operation is separately compiled under
+`ravel-0.6-checkpoint-abi/1`; the unity binary remains a parity oracle. An
+optional concrete Forge CLI adapter and delegated MNCS receipt validation
+preserve external boundaries. These are
 implementation and local development observations only; no selection or final
 material has been consumed. See `RAVEL_0_6_IMPLEMENTATION_STATUS.md` for the
 exact boundary.
@@ -70,19 +74,20 @@ exact boundary.
 - **R6-03:** behavioral and C/Python negative fixtures complete for declared
   constraints; source-constant mutations are intentionally distinguished from
   Python frozen-policy mutations and remain manifest-detectable.
-- **R6-04:** physical source extraction and C provider substitution are
-  implemented as a behavior-preserving unity build. Independently compiled C
-  ABI contracts remain the next architectural step.
+- **R6-04:** the first checkpoint boundary is separately compiled and parity
+  tested against unity; provider/world, transition, planning, adaptation, and
+  driver surfaces remain unity units. Further reviewed C ABI extraction is the
+  next step.
 - **R6-05:** ledger infrastructure is hardened and exercised only with
   development fixtures. Candidate-001 remains unfrozen because further
   implementation changes are still expected.
 - **R6-06:** external custody and evaluation remain unavailable/`UNKNOWN`.
 
-The next logical implementation task is to promote one extracted C boundary at
-a time to separately compiled units with explicit headers, retaining the unity
-wrapper as a parity oracle. Do not freeze candidate-001 or consume selection
-partitions until that work, policy parity, and the full development trial
-matrix are stable.
+The next logical implementation task is to promote the world/provider boundary
+to a separately compiled C contract and compare both providers through the
+same unity/separate parity oracle. Do not freeze candidate-001 or consume
+selection partitions until that work, policy parity, and the full development
+trial matrix are stable.
 
 ## Codex next steps
 

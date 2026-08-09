@@ -65,9 +65,16 @@ regenerating the frozen records.
   C constants carry its threshold identity.
 - `src/ravel/matched_compute.py` validates raw development comparator counts and
   ratios without producing formal authority.
+- `src/ravel/development_evaluator.py` derives a development-only disposition
+  independently from raw trial observations and checks candidate/provider/
+  threshold/partition bindings.
+- `src/ravel/providers.py` includes an optional subprocess adapter for the
+  current Forge JSON CLI; `src/ravel/mncs_receipts.py` delegates optional
+  receipt construction/validation to sibling MNCS packages.
 - `tools/ravel_0_6_decompose.py` losslessly emits generated C component units
   and a unity wrapper; `ravel_versions/0.6/ravel_0_6/README.md` documents the
-  current unity-build limitation.
+  current unity-build limitation. `ravel_0_6_checkpoint.[ch]` is the first
+  separately compiled C contract and is included in object/binary provenance.
 - [`MIGRATION.md`](MIGRATION.md) records the standalone extraction provenance.
 
 ## Build and verification entry points

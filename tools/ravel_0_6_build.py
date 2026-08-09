@@ -50,6 +50,8 @@ COMPONENT_FILES = (
     "src/ravel/lifecycle.py",
     "src/ravel/experience.py",
 )
+C_CHECKPOINT_HEADER = ROOT / "ravel_versions/0.6/ravel_0_6/ravel_0_6_checkpoint.h"
+C_CHECKPOINT_IMPLEMENTATION = ROOT / "ravel_versions/0.6/ravel_0_6/ravel_0_6_checkpoint.c"
 CANDIDATE_ID = "ravel-0.6-candidate-001"
 ENVIRONMENT_KEYS = (
     "CC",
@@ -59,6 +61,7 @@ ENVIRONMENT_KEYS = (
     "LC_ALL",
     "LANG",
     "RAVEL06_PROVIDER",
+    "RAVEL06_EXTRA_CFLAGS",
 )
 CANONICAL_FLAGS = ("-std=c11", "-O3", "-Wall", "-Wextra", "-Werror", "-pedantic")
 
@@ -110,6 +113,14 @@ def provider_configuration() -> tuple[str, list[str]]:
     raise BuildError("RAVEL06_PROVIDER must be branching or ring")
 
 
+def extra_compile_flags() -> list[str]:
+    value = os.environ.get("RAVEL06_EXTRA_CFLAGS", "")
+    try:
+        return shlex.split(value)
+    except ValueError as error:
+        raise BuildError("RAVEL06_EXTRA_CFLAGS is malformed") from error
+
+
 def run_capture(argv: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(argv, cwd=ROOT, text=True, capture_output=True, check=False)
 
@@ -127,11 +138,22 @@ def build(output_dir: Path, *, require_clean_worktree: bool = False) -> dict[str
     source_path = output_dir / "ravel_0_6_candidate_001.c"
     monolithic_source_path = output_dir / "ravel_0_6_candidate_001.generated.c"
     binary_path = output_dir / "ravel_0_6_candidate_001"
+    unity_binary_path = output_dir / "ravel_0_6_candidate_001.unity"
+    candidate_object_path = output_dir / "ravel_0_6_candidate_001.o"
+    checkpoint_object_path = output_dir / "ravel_0_6_checkpoint.o"
     record_path = output_dir / "ravel-0.6-candidate-001-build.json"
 
     existing = [
         path
-        for path in (source_path, monolithic_source_path, binary_path, record_path)
+        for path in (
+            source_path,
+            monolithic_source_path,
+            binary_path,
+            unity_binary_path,
+            candidate_object_path,
+            checkpoint_object_path,
+            record_path,
+        )
         if path.exists()
     ]
     if existing:
@@ -152,13 +174,50 @@ def build(output_dir: Path, *, require_clean_worktree: bool = False) -> dict[str
     )
     compiler = compiler_command()
     version = run_capture(compiler + ["--version"])
-    argv = compiler + list(CANONICAL_FLAGS) + provider_flags + [
+    include_flags = ["-I", str(C_CHECKPOINT_HEADER.parent)]
+    extra_flags = extra_compile_flags()
+    compile_flags = list(CANONICAL_FLAGS) + extra_flags
+    unity_argv = compiler + compile_flags + provider_flags + [
+        str(monolithic_source_path),
+        "-lm",
+        "-o",
+        str(unity_binary_path),
+    ]
+    checkpoint_compile_argv = compiler + compile_flags + include_flags + [
+        "-DRAVEL06_SEPARATE_CHECKPOINT",
+        "-c",
+        str(C_CHECKPOINT_IMPLEMENTATION),
+        "-o",
+        str(checkpoint_object_path),
+    ]
+    candidate_compile_argv = compiler + compile_flags + provider_flags + include_flags + [
+        "-DRAVEL06_SEPARATE_CHECKPOINT",
+        "-c",
         str(source_path),
+        "-o",
+        str(candidate_object_path),
+    ]
+    link_argv = compiler + extra_flags + [
+        str(candidate_object_path),
+        str(checkpoint_object_path),
         "-lm",
         "-o",
         str(binary_path),
     ]
-    result = run_capture(argv)
+    unity_result = run_capture(unity_argv)
+    checkpoint_result = run_capture(checkpoint_compile_argv)
+    candidate_result = run_capture(candidate_compile_argv)
+    link_result = run_capture(link_argv)
+    argv = candidate_compile_argv + ["<link>"] + link_argv
+    result = link_result
+    if unity_result.returncode != 0:
+        result = unity_result
+    elif checkpoint_result.returncode != 0:
+        result = checkpoint_result
+    elif candidate_result.returncode != 0:
+        result = candidate_result
+    elif link_result.returncode != 0:
+        result = link_result
     record: dict[str, Any] = {
         "schema": "ravel-0.6-development-build/0.1",
         "candidate_id": CANDIDATE_ID,
@@ -181,6 +240,15 @@ def build(output_dir: Path, *, require_clean_worktree: bool = False) -> dict[str
                 "path": str(POLICY_FILE.relative_to(ROOT)),
                 "sha256": sha256_file(POLICY_FILE),
             },
+        },
+        "component_contracts": {
+            "checkpoint": {
+                "abi_version": "ravel-0.6-checkpoint-abi/1",
+                "header_path": str(C_CHECKPOINT_HEADER.relative_to(ROOT)),
+                "header_sha256": sha256_file(C_CHECKPOINT_HEADER),
+                "implementation_path": str(C_CHECKPOINT_IMPLEMENTATION.relative_to(ROOT)),
+                "implementation_sha256": sha256_file(C_CHECKPOINT_IMPLEMENTATION),
+            }
         },
         "policy": {
             "preregistration_path": str(FROZEN_PREREGISTRATION.relative_to(ROOT)),
@@ -216,8 +284,11 @@ def build(output_dir: Path, *, require_clean_worktree: bool = False) -> dict[str
             "version_stderr": version.stderr,
             "version_exit_status": version.returncode,
             "argv": argv,
+            "unity_argv": unity_argv,
+            "checkpoint_compile_argv": checkpoint_compile_argv,
+            "candidate_compile_argv": candidate_compile_argv,
+            "link_argv": link_argv,
         },
-        "environment_keys": environment_identities(),
         "worktree": {
             "required_clean": require_clean_worktree,
             "status": worktree_status(),
@@ -227,6 +298,9 @@ def build(output_dir: Path, *, require_clean_worktree: bool = False) -> dict[str
             "stderr": result.stderr,
             "exit_status": result.returncode,
             "binary_sha256": sha256_file(binary_path) if result.returncode == 0 else None,
+            "unity_binary_sha256": sha256_file(unity_binary_path) if unity_result.returncode == 0 else None,
+            "candidate_object_sha256": sha256_file(candidate_object_path) if candidate_result.returncode == 0 else None,
+            "checkpoint_object_sha256": sha256_file(checkpoint_object_path) if checkpoint_result.returncode == 0 else None,
         },
         "execution": {
             "argv": None,

@@ -42,8 +42,19 @@ This is a development status record, not RAVEL 0.6 evaluation evidence.
   interfaces with two independently defined toy providers. These surfaces
   reproduce the tested slot-one/unknown-route behaviors and detect checkpoint
   corruption. The generated C candidate now has an explicit transaction and
-  observation surface. The extraction is a reviewed unity-build boundary;
-  independently compiled C ABI contracts are not claimed.
+  observation surface. The checkpoint byte-comparison boundary is now compiled
+  as a separate object under `ravel-0.6-checkpoint-abi/1`; unity and separate
+  binaries are parity-tested. The remaining surfaces are still unity include
+  units, so full independent C decomposition is not claimed.
+- **Forge boundary and evaluator:** `ravel.providers.ForgeCliProvider` invokes
+  the installed Forge JSON CLI when configured, preserving raw responses and
+  returning `UNKNOWN` for lifecycle/provider failures. A separately maintained
+  `ravel.development_evaluator` derives development gate results from raw C and
+  matched-compute observations without trusting executable verdict fields.
+- **MNCS receipt delegation:** `ravel.mncs_receipts` delegates receipt building
+  and validation to optional MNCS Fabric/validator packages. Local sibling
+  validation was exercised; receipt structural validity remains distinct from
+  assurance, conformance, custody, or promotion.
 - **R6-05 lifecycle infrastructure:** `ravel.lifecycle.CandidateLedger` is an
   append-only, hash-chained, gap-resistant development ledger with the
   preregistered candidate limit, freeze identities, partition separation,
@@ -65,9 +76,9 @@ This is a development status record, not RAVEL 0.6 evaluation evidence.
   JSON record and shared reason vocabulary, with accepted and negative-path
   cross-checks. The parser/evaluator remains advisory and does not create
   formal evidence status; missing external disposition remains `UNKNOWN`.
-- Separately compiled C ABI contracts, full evaluator integration, and an
-  absolute compute budget remain incomplete or are not declared by the frozen
-  contract.
+- Additional separately compiled C ABI contracts, full cross-project evaluator
+  lifecycle integration, and an absolute compute budget remain incomplete or
+  are not declared by the frozen contract.
 - R6-05 selection evaluation and promotion logic have not been consumed. The
   ledger is infrastructure only; no candidate is frozen or selected by it.
 - R6-06 external final custody/evaluation remains unavailable and `UNKNOWN`.

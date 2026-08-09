@@ -7,6 +7,7 @@ import tempfile
 import unittest
 
 from ravel.c_observations import CTransactionObservation
+from ravel.development_evaluator import evaluate_trial
 from ravel.matched_compute import MatchedComputeObservation
 from ravel.policy import load_frozen_policy
 from tools.ravel_0_6_seed_candidate import FROZEN_SOURCE, build_candidate_source
@@ -66,6 +67,11 @@ class CandidateTransactionTests(unittest.TestCase):
         matched = MatchedComputeObservation.from_json(payload["matched_compute"])
         self.assertTrue(matched.evaluate().passed)
         self.assertTrue(parsed.evaluate(matched).passed)
+        development = evaluate_trial(
+            payload,
+            expected_provider_id="ravel-toy-branching-c/1",
+        )
+        self.assertEqual((development.status, development.reason_codes), ("PASS", ()))
         try:
             import jsonschema
         except ImportError:
@@ -93,6 +99,16 @@ class CandidateTransactionTests(unittest.TestCase):
         self.assertEqual(transaction["rejection_reason"], "base_accuracy_floor")
         self.assertTrue(transaction["rollback_byte_identical"])
         self.assertNotEqual(transaction["failed_constraint_mask"], 0)
+
+    def test_development_evaluator_rejects_identity_substitution(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            payload = build_and_trial(
+                build_candidate_source(FROZEN_SOURCE.read_bytes()), Path(directory)
+            )
+        payload["candidate_id"] = "ravel-0.6-candidate-002"
+        evaluation = evaluate_trial(payload, expected_provider_id="ravel-toy-branching-c/1")
+        self.assertEqual(evaluation.status, "FAIL")
+        self.assertIn("candidate_identity_mismatch", evaluation.reason_codes)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 CC ?= cc
 CFLAGS ?= -std=c11 -O3 -Wall -Wextra -Werror -pedantic
 
-.PHONY: build behavioral-test transaction-test component-test policy-test decomposition-test negative-test provider-test compiler-matrix sanitizers
+.PHONY: build behavioral-test transaction-test component-test policy-test decomposition-test negative-test provider-test evaluator-test forge-test receipt-test compiler-matrix sanitizers
 
 build:
 	@set -e; out=$$(mktemp -d); python3 tools/ravel_0_6_build.py build --output-dir "$$out"; \
@@ -28,6 +28,15 @@ negative-test:
 provider-test:
 	RAVEL06_PROVIDER=branching python3 -m unittest tests/test_ravel_0_6_decomposition.py
 
+evaluator-test:
+	python3 -m unittest tests/test_ravel_0_6_transaction.py
+
+forge-test:
+	python3 -m unittest tests/test_providers_resources.py tests/test_forge_integration.py
+
+receipt-test:
+	python3 -m unittest tests/test_mncs_receipts.py
+
 compiler-matrix:
 	@set -eu; for compiler in gcc clang; do \
 		if command -v "$$compiler" >/dev/null 2>&1; then \
@@ -40,8 +49,7 @@ compiler-matrix:
 
 sanitizers:
 	@set -eu; if command -v clang >/dev/null 2>&1; then \
-		out=$$(mktemp -d); python3 tools/ravel_0_6_seed_candidate.py --output "$$out/candidate.c" >/dev/null; \
-		clang -std=c11 -O1 -g -Wall -Wextra -Werror -pedantic -fsanitize=address,undefined "$$out/candidate.c" -lm -o "$$out/candidate"; \
-		ASAN_OPTIONS=detect_leaks=0 "$$out/candidate" --self-test >/dev/null; \
+		out=$$(mktemp -d); RAVEL06_EXTRA_CFLAGS='-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer' CC=clang python3 tools/ravel_0_6_build.py build --output-dir "$$out" >/dev/null; \
+		ASAN_OPTIONS=detect_leaks=0 UBSAN_OPTIONS=halt_on_error=1 "$$out/ravel_0_6_candidate_001" --self-test >/dev/null; \
 		find "$$out" -type f -delete; rmdir "$$out"; printf 'clang ASAN/UBSAN: PASS\n'; \
 	else printf 'clang ASAN/UBSAN: UNAVAILABLE\n'; fi

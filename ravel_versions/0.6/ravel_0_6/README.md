@@ -13,10 +13,10 @@ then losslessly splits the generated text into bounded include units:
 - reporting;
 - trial driver.
 
-The current extraction compiles these pieces through a deterministic unity
-wrapper. This preserves the generated candidate's static linkage and behavior
-while making every component byte-addressable in the build manifest. It is a
-physical source decomposition, not a claim that independently compiled C ABI
-contracts or evaluator authority already exist. Promoting a component to a
-separately compiled unit requires a separately reviewed header contract and a
-new parity fixture.
+The current extraction retains a deterministic unity wrapper as a parity
+oracle. The checkpoint byte-comparison operation is now promoted to the first
+separately compiled unit under `ravel-0.6-checkpoint-abi/1`; the candidate
+object links against `ravel_0_6_checkpoint.o` while the unity binary remains
+available. The remaining mechanism surfaces are still include units and are
+not claimed to have independent C ABI contracts. This is local development
+execution, not independent evaluation or authority.

@@ -17,12 +17,25 @@ from decimal import Decimal, ROUND_HALF_UP
 import hashlib
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[2]
-PREREGISTRATION = ROOT / "ravel_versions/0.6/ravel-0.6-preregistration.json"
-FROZEN_0_5_PREREGISTRATION = ROOT / "ravel_versions/0.5/ravel-0.5-preregistration.json"
+
+
+def _repository_or_installed(relative: str) -> Path:
+    repository_path = ROOT / relative
+    if repository_path.is_file():
+        return repository_path
+    installed_path = Path(sys.prefix) / "share" / "ravel" / relative
+    return installed_path
+
+
+PREREGISTRATION = _repository_or_installed("ravel_versions/0.6/ravel-0.6-preregistration.json")
+FROZEN_0_5_PREREGISTRATION = _repository_or_installed(
+    "ravel_versions/0.5/ravel-0.5-preregistration.json"
+)
 EXPECTED_PREREGISTRATION_SHA256 = (
     "26ae0b001355c978dbb2bda57fd7bcd74a3b3d4e46f45fa0b9658d88fcc885a3"
 )

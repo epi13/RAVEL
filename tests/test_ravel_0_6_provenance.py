@@ -6,6 +6,7 @@ from pathlib import Path
 
 from tools.ravel_0_6_build import BuildError, build, derive
 from tools.ravel_0_6_seed_candidate import FROZEN_SOURCE, SeedError, build_candidate_source
+from tools.ravel_0_6_build import C_CHECKPOINT_HEADER, C_CHECKPOINT_IMPLEMENTATION, sha256_bytes
 
 
 class CandidateProvenanceTests(unittest.TestCase):
@@ -44,6 +45,9 @@ class CandidateProvenanceTests(unittest.TestCase):
             self.assertTrue(record["generator"]["policy_source"]["sha256"])
             self.assertEqual(record["policy"]["preregistration_sha256"], "26ae0b001355c978dbb2bda57fd7bcd74a3b3d4e46f45fa0b9658d88fcc885a3")
             self.assertEqual(record["environment_provider"]["provider_id"], "ravel-toy-branching-c/1")
+            checkpoint = record["component_contracts"]["checkpoint"]
+            self.assertEqual(checkpoint["header_sha256"], sha256_bytes(C_CHECKPOINT_HEADER.read_bytes()))
+            self.assertEqual(checkpoint["implementation_sha256"], sha256_bytes(C_CHECKPOINT_IMPLEMENTATION.read_bytes()))
             self.assertEqual(len(record["generated_components"]), 10)
             self.assertTrue(record["mechanism_components"])
             self.assertTrue(record["compiler"]["argv"])

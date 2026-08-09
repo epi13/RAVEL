@@ -40,6 +40,19 @@ def compile_and_run(
     return json.loads(result.stdout)
 
 
+def run_binary(binary: Path) -> dict[str, object]:
+    result = subprocess.run(
+        [str(binary), "--trial", "decomposition", "--regime", "separated_state", "--seed", "0x1234"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise AssertionError(result.stderr)
+    return json.loads(result.stdout)
+
+
 class DecompositionTests(unittest.TestCase):
     def test_split_is_lossless_and_unity_wrapper_preserves_behavior(self) -> None:
         source = build_candidate_source(FROZEN_SOURCE.read_bytes())
@@ -57,12 +70,18 @@ class DecompositionTests(unittest.TestCase):
             split = compile_and_run(
                 root / "split" / "ravel_0_6_candidate_001.c", split_binary
             )
+            separate = run_binary(split_binary)
+            unity = run_binary(root / "split" / "ravel_0_6_candidate_001.unity")
         self.assertEqual(direct, split)
+        self.assertEqual(unity, separate)
         self.assertEqual(
             record["generated_source"]["monolithic_sha256"],
             hashlib.sha256(source.encode()).hexdigest(),
         )
         self.assertEqual(len(record["generated_components"]), len(pieces))
+        self.assertEqual(record["component_contracts"]["checkpoint"]["abi_version"], "ravel-0.6-checkpoint-abi/1")
+        self.assertTrue(record["build"]["candidate_object_sha256"])
+        self.assertTrue(record["build"]["checkpoint_object_sha256"])
 
     def test_real_c_provider_substitution_is_explicit_and_observable(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -84,14 +103,8 @@ class DecompositionTests(unittest.TestCase):
                 branching_record["environment_provider"]["provider_id"],
                 ring_record["environment_provider"]["provider_id"],
             )
-            branching = compile_and_run(
-                branching_dir / "ravel_0_6_candidate_001.c",
-                branching_dir / "run",
-            )
-            ring = compile_and_run(
-                ring_dir / "ravel_0_6_candidate_001.c", ring_dir / "run",
-                ("-DRAVEL06_PROVIDER_RING",),
-            )
+            branching = run_binary(branching_dir / "ravel_0_6_candidate_001")
+            ring = run_binary(ring_dir / "ravel_0_6_candidate_001")
         self.assertNotEqual(branching["environment_provider_id"], ring["environment_provider_id"])
         self.assertNotEqual(branching["candidate"]["model_identity"], ring["candidate"]["model_identity"])
 

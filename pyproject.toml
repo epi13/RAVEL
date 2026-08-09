@@ -13,5 +13,14 @@ dependencies = []
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.data-files]
+"share/ravel/ravel_versions/0.5" = ["ravel_versions/0.5/ravel-0.5-preregistration.json"]
+"share/ravel/ravel_versions/0.6" = [
+  "ravel_versions/0.6/ravel-0.6-preregistration.json",
+  "ravel_versions/0.6/ravel-0.6-preregistration.schema.json",
+  "ravel_versions/0.6/ravel-0.6-transaction.schema.json",
+  "ravel_versions/0.6/ravel-0.6-matched-compute.schema.json",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

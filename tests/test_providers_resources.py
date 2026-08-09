@@ -1,8 +1,15 @@
 from __future__ import annotations
 
 import unittest
+import json
 
-from ravel.providers import EvidenceRequest, ForgeAdapter, ProviderCapability, RawEvidence
+from ravel.providers import (
+    EvidenceRequest,
+    ForgeAdapter,
+    ForgeCliProvider,
+    ProviderCapability,
+    RawEvidence,
+)
 from ravel.resources import (
     CudaOutOfMemory,
     DevicePolicy,
@@ -53,6 +60,46 @@ class ProviderTests(unittest.TestCase):
     def test_missing_capability_is_unknown(self) -> None:
         receipt = ForgeAdapter(()).request(REQUEST)
         self.assertEqual((receipt.status, receipt.reason_code), ("UNKNOWN", "capability_unavailable"))
+
+    def test_cli_adapter_preserves_forge_status_and_identity(self) -> None:
+        class Completed:
+            returncode = 0
+            stdout = json.dumps(
+                {
+                    "verifiers": [
+                        {
+                            "verifier_id": "compile",
+                            "provider_id": "provider-v1",
+                            "version": "1",
+                        }
+                    ]
+                }
+            )
+            stderr = ""
+
+        class Runner:
+            def __call__(self, argv, **kwargs):
+                if "run" in argv:
+                    Completed.stdout = json.dumps(
+                        {"status": "FAIL", "output_identity": "sha256:witness"}
+                    )
+                return Completed()
+
+        provider = ForgeCliProvider(executable="forge-test", runner=Runner())
+        receipt = ForgeAdapter((provider,)).request(REQUEST)
+        self.assertEqual(receipt.status, "FAIL")
+        self.assertEqual(receipt.raw.provider_id, provider.provider_id)
+        self.assertEqual(receipt.raw.witness_digest, "sha256:witness")
+
+    def test_cli_adapter_malformed_or_unavailable_fails_closed(self) -> None:
+        class Completed:
+            returncode = 0
+            stdout = "not-json"
+            stderr = "bad response"
+
+        provider = ForgeCliProvider(executable="forge-test", runner=lambda *args, **kwargs: Completed())
+        receipt = ForgeAdapter((provider,)).request(REQUEST)
+        self.assertEqual(receipt.status, "UNKNOWN")
 
 
 SNAPSHOT = ResourceSnapshot(True, True, 8_000, 12_000, 64_000, True, 1_000)
