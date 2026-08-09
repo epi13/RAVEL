@@ -152,12 +152,17 @@ The repository now contains small, dependency-free foundations beneath the
 - `ravel.lifecycle` records development candidate state transitions in an
   append-only hash chain. `ravel.experience` turns scoped raw execution into
   advisory episodic or negative memory without promoting status.
+- `ravel.policy` validates frozen 0.6 policy inputs and derives a digest-bound
+  C policy header; `ravel.matched_compute` independently evaluates raw
+  development comparator counts.
 
 The generated candidate-001 C source now has an explicit copy, hard-gate, raw
-observation, and rollback surface around the existing adaptation primitive. The
-historical monolithic C translation unit has not yet been physically extracted
-into separate C translation units; the Python surfaces are the first tested
-decomposition boundary, not a claim of completed R6-04 C decomposition.
+observation, rollback, matched-compute, and provider surface around the
+existing adaptation primitive. `tools/ravel_0_6_decompose.py` losslessly emits
+ten provenance-bound component include units and a deterministic unity wrapper;
+the wrapper preserves static linkage and byte-identical behavior to the
+monolithic generated source. This is a physical source decomposition, not a
+claim that independently compiled C ABI contracts or evaluator authority exist.
 
 These modules are tested scaffolding and are not claims that RAVEL 0.6 has been
 evaluated, selected, independently evaluated, certified, promoted, or made

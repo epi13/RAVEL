@@ -61,6 +61,13 @@ regenerating the frozen records.
   freeze/selection infrastructure; it has not consumed selection data.
 - `src/ravel/experience.py` binds scoped execution outcomes to advisory memory,
   retaining negative and `UNKNOWN` outcomes.
+- `src/ravel/policy.py` is the fail-closed frozen 0.6 policy loader; generated
+  C constants carry its threshold identity.
+- `src/ravel/matched_compute.py` validates raw development comparator counts and
+  ratios without producing formal authority.
+- `tools/ravel_0_6_decompose.py` losslessly emits generated C component units
+  and a unity wrapper; `ravel_versions/0.6/ravel_0_6/README.md` documents the
+  current unity-build limitation.
 - [`MIGRATION.md`](MIGRATION.md) records the standalone extraction provenance.
 
 ## Build and verification entry points

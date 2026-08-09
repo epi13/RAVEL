@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Mapping
 
 from .adaptation import (
@@ -11,6 +11,8 @@ from .adaptation import (
     RetentionConstraintPolicy,
     evaluate_constraints,
 )
+from .policy import load_frozen_policy
+from .matched_compute import MatchedComputeObservation
 
 
 Q20 = 1_048_576.0
@@ -49,6 +51,11 @@ class CTransactionObservation:
         after_representation = q20("representation_after_q20")
         previous_representation_score = 1.0 / (1.0 + before_representation)
         proposed_representation_score = 1.0 / (1.0 + after_representation)
+        retention_before = q20("retention_accuracy_before_q20")
+        retention_after = q20("retention_accuracy_after_q20")
+        retention_delta = raw.get("retention_accuracy_delta_q20")
+        if not isinstance(retention_delta, int):
+            raise ValueError("retention_accuracy_delta_q20 is malformed")
         previous = RawObservation(
             adaptation_objective=q20("objective_before_q20"),
             base_accuracy=q20("base_accuracy_before_q20"),
@@ -62,6 +69,8 @@ class CTransactionObservation:
             update_passes=0,
             compute_evaluations=0,
             matched_compute_evaluations=0,
+            retention_accuracy=retention_before,
+            retention_accuracy_delta_from_base=0.0,
         )
         before_prediction = q20("prediction_rmse_before_q20")
         after_prediction = q20("prediction_rmse_after_q20")
@@ -78,6 +87,8 @@ class CTransactionObservation:
             update_passes=count("update_passes"),
             compute_evaluations=count("compute_evaluations"),
             matched_compute_evaluations=count("matched_compute_evaluations"),
+            retention_accuracy=retention_after,
+            retention_accuracy_delta_from_base=retention_delta / Q20,
         )
         committed = value.get("committed")
         rollback = value.get("rollback_byte_identical")
@@ -104,21 +115,36 @@ class CTransactionObservation:
             rollback,
         )
 
-    def evaluate(self) -> ConstraintReport:
+    def evaluate(
+        self, matched_compute: MatchedComputeObservation | None = None
+    ) -> ConstraintReport:
         """Apply the existing Python evaluator to the C observation pair."""
 
+        frozen = load_frozen_policy()
+        if self.threshold_identity != frozen.threshold_identity:
+            return ConstraintReport(False, ("threshold_identity_mismatch",))
         policy = RetentionConstraintPolicy(
-            adaptation_improvement_epsilon=105.0 / Q20,
-            base_accuracy_floor=891290.0 / Q20,
+            adaptation_improvement_epsilon=frozen.adaptation_epsilon_q20 / Q20,
+            base_accuracy_floor=frozen.base_accuracy_floor_q20 / Q20,
             representation_floor=self.previous.representation_score,
-            original_prediction_degradation_bound=1.0,
-            maximum_transition_support_losses=0,
-            maximum_experts=80,
-            maximum_births=16,
-            maximum_retirements=4,
-            maximum_replay_records=256,
-            maximum_update_passes=4,
-            maximum_compute_evaluations=2_000_000,
-            maximum_compute_ratio=1.0,
+            original_prediction_degradation_bound=frozen.prediction_degradation_bound_q20 / Q20,
+            maximum_transition_support_losses=frozen.maximum_transition_support_losses,
+            maximum_experts=frozen.maximum_experts,
+            maximum_births=frozen.maximum_births,
+            maximum_retirements=frozen.maximum_retirements,
+            maximum_replay_records=frozen.replay_records,
+            maximum_update_passes=frozen.maximum_update_passes,
+            maximum_compute_evaluations=frozen.maximum_compute_evaluations,
+            maximum_compute_ratio=frozen.maximum_compute_ratio_q20 / Q20,
+            retention_accuracy_floor=frozen.retention_accuracy_floor_q20 / Q20,
+            retention_loss_floor=frozen.retention_loss_floor_q20 / Q20,
+            exact_replay_records=frozen.replay_records,
         )
-        return evaluate_constraints(self.previous, self.proposed, policy)
+        proposed = self.proposed
+        if matched_compute is not None:
+            proposed = replace(
+                proposed,
+                compute_evaluations=matched_compute.candidate_training_evaluations,
+                matched_compute_evaluations=matched_compute.matched_training_evaluations,
+            )
+        return evaluate_constraints(self.previous, proposed, policy)

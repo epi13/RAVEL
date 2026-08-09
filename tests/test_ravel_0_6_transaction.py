@@ -7,6 +7,8 @@ import tempfile
 import unittest
 
 from ravel.c_observations import CTransactionObservation
+from ravel.matched_compute import MatchedComputeObservation
+from ravel.policy import load_frozen_policy
 from tools.ravel_0_6_seed_candidate import FROZEN_SOURCE, build_candidate_source
 
 
@@ -47,7 +49,7 @@ class CandidateTransactionTests(unittest.TestCase):
         transaction = payload["candidate"]["adaptation_transaction"]
         self.assertTrue(transaction["committed"])
         self.assertFalse(transaction["rollback_byte_identical"])
-        self.assertEqual(transaction["threshold_identity"], "ravel-0.6-retention-gates/0.1")
+        self.assertEqual(transaction["threshold_identity"], load_frozen_policy().threshold_identity)
         self.assertEqual(transaction["failed_constraint_mask"], 0)
         self.assertEqual(transaction["rejection_reason"], "none")
         self.assertEqual(transaction["raw"]["transition_support_losses"], 0)
@@ -61,6 +63,9 @@ class CandidateTransactionTests(unittest.TestCase):
             parsed.evaluate().rejection_reasons,
             ("matched_compute_reference_unavailable",),
         )
+        matched = MatchedComputeObservation.from_json(payload["matched_compute"])
+        self.assertTrue(matched.evaluate().passed)
+        self.assertTrue(parsed.evaluate(matched).passed)
         try:
             import jsonschema
         except ImportError:
@@ -69,6 +74,10 @@ class CandidateTransactionTests(unittest.TestCase):
             (ROOT / "ravel_versions/0.6/ravel-0.6-transaction.schema.json").read_text()
         )
         jsonschema.validate(transaction, schema)
+        matched_schema = json.loads(
+            (ROOT / "ravel_versions/0.6/ravel-0.6-matched-compute.schema.json").read_text()
+        )
+        jsonschema.validate(payload["matched_compute"], matched_schema)
 
     def test_mutated_hard_gate_rejects_and_rolls_back(self) -> None:
         source = build_candidate_source(FROZEN_SOURCE.read_bytes())

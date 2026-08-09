@@ -14,12 +14,15 @@
     "raw": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["objective_before_q20", "objective_after_q20", "base_accuracy_before_q20", "base_accuracy_after_q20", "representation_before_q20", "representation_after_q20", "prediction_rmse_before_q20", "prediction_rmse_after_q20", "transition_support_losses", "expert_count", "births", "retirements", "replay_records", "update_passes", "compute_evaluations", "matched_compute_evaluations", "matched_compute_reference_available"],
+      "required": ["objective_before_q20", "objective_after_q20", "base_accuracy_before_q20", "base_accuracy_after_q20", "retention_accuracy_before_q20", "retention_accuracy_after_q20", "retention_accuracy_delta_q20", "representation_before_q20", "representation_after_q20", "prediction_rmse_before_q20", "prediction_rmse_after_q20", "transition_support_losses", "expert_count", "births", "retirements", "replay_records", "update_passes", "compute_evaluations", "matched_compute_evaluations", "matched_compute_reference_available"],
       "properties": {
         "objective_before_q20": {"type": "integer", "minimum": 0},
         "objective_after_q20": {"type": "integer", "minimum": 0},
         "base_accuracy_before_q20": {"type": "integer", "minimum": 0},
         "base_accuracy_after_q20": {"type": "integer", "minimum": 0},
+        "retention_accuracy_before_q20": {"type": "integer", "minimum": 0},
+        "retention_accuracy_after_q20": {"type": "integer", "minimum": 0},
+        "retention_accuracy_delta_q20": {"type": "integer"},
         "representation_before_q20": {"type": "integer", "minimum": 0},
         "representation_after_q20": {"type": "integer", "minimum": 0},
         "prediction_rmse_before_q20": {"type": "integer", "minimum": 0},

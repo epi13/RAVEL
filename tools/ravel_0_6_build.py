@@ -26,16 +26,21 @@ try:
         FROZEN_SOURCE_SHA256,
         build_candidate_source,
     )
+    from .ravel_0_6_decompose import write_decomposed_candidate
 except ImportError:  # direct script execution from the tools directory
     from ravel_0_6_seed_candidate import (  # type: ignore[no-redef]
         FROZEN_SOURCE,
         FROZEN_SOURCE_SHA256,
         build_candidate_source,
     )
+    from ravel_0_6_decompose import write_decomposed_candidate  # type: ignore[no-redef]
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERATOR = Path(__file__).resolve()
 TRANSACTION_SURFACE = ROOT / "tools/ravel_0_6_transaction_surface.py"
+POLICY_FILE = ROOT / "src/ravel/policy.py"
+FROZEN_PREREGISTRATION = ROOT / "ravel_versions/0.6/ravel-0.6-preregistration.json"
+INHERITED_05_PREREGISTRATION = ROOT / "ravel_versions/0.5/ravel-0.5-preregistration.json"
 COMPONENT_FILES = (
     "src/ravel/mechanism_state.py",
     "src/ravel/world.py",
@@ -46,7 +51,15 @@ COMPONENT_FILES = (
     "src/ravel/experience.py",
 )
 CANDIDATE_ID = "ravel-0.6-candidate-001"
-ENVIRONMENT_KEYS = ("CC", "CFLAGS", "CPPFLAGS", "LDFLAGS", "LC_ALL", "LANG")
+ENVIRONMENT_KEYS = (
+    "CC",
+    "CFLAGS",
+    "CPPFLAGS",
+    "LDFLAGS",
+    "LC_ALL",
+    "LANG",
+    "RAVEL06_PROVIDER",
+)
 CANONICAL_FLAGS = ("-std=c11", "-O3", "-Wall", "-Wextra", "-Werror", "-pedantic")
 
 
@@ -88,6 +101,15 @@ def compiler_command() -> list[str]:
     return [executable]
 
 
+def provider_configuration() -> tuple[str, list[str]]:
+    provider = os.environ.get("RAVEL06_PROVIDER", "branching")
+    if provider == "branching":
+        return "ravel-toy-branching-c/1", []
+    if provider == "ring":
+        return "ravel-toy-ring-c/1", ["-DRAVEL06_PROVIDER_RING"]
+    raise BuildError("RAVEL06_PROVIDER must be branching or ring")
+
+
 def run_capture(argv: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(argv, cwd=ROOT, text=True, capture_output=True, check=False)
 
@@ -103,10 +125,15 @@ def build(output_dir: Path, *, require_clean_worktree: bool = False) -> dict[str
     output_dir = output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     source_path = output_dir / "ravel_0_6_candidate_001.c"
+    monolithic_source_path = output_dir / "ravel_0_6_candidate_001.generated.c"
     binary_path = output_dir / "ravel_0_6_candidate_001"
     record_path = output_dir / "ravel-0.6-candidate-001-build.json"
 
-    existing = [path for path in (source_path, binary_path, record_path) if path.exists()]
+    existing = [
+        path
+        for path in (source_path, monolithic_source_path, binary_path, record_path)
+        if path.exists()
+    ]
     if existing:
         raise BuildError(
             "stale generated output exists; use a new empty output directory: "
@@ -118,10 +145,19 @@ def build(output_dir: Path, *, require_clean_worktree: bool = False) -> dict[str
             raise BuildError("clean-worktree check failed: " + " | ".join(status))
 
     source = build_candidate_source(FROZEN_SOURCE.read_bytes()).encode("utf-8")
-    source_path.write_bytes(source)
+    provider_id, provider_flags = provider_configuration()
+    monolithic_source_path.write_bytes(source)
+    source_path, component_paths = write_decomposed_candidate(
+        source.decode("utf-8"), output_dir
+    )
     compiler = compiler_command()
     version = run_capture(compiler + ["--version"])
-    argv = compiler + list(CANONICAL_FLAGS) + [str(source_path), "-lm", "-o", str(binary_path)]
+    argv = compiler + list(CANONICAL_FLAGS) + provider_flags + [
+        str(source_path),
+        "-lm",
+        "-o",
+        str(binary_path),
+    ]
     result = run_capture(argv)
     record: dict[str, Any] = {
         "schema": "ravel-0.6-development-build/0.1",
@@ -141,17 +177,38 @@ def build(output_dir: Path, *, require_clean_worktree: bool = False) -> dict[str
                 "path": str(TRANSACTION_SURFACE.relative_to(ROOT)),
                 "sha256": sha256_file(TRANSACTION_SURFACE),
             },
+            "policy_source": {
+                "path": str(POLICY_FILE.relative_to(ROOT)),
+                "sha256": sha256_file(POLICY_FILE),
+            },
+        },
+        "policy": {
+            "preregistration_path": str(FROZEN_PREREGISTRATION.relative_to(ROOT)),
+            "preregistration_sha256": sha256_file(FROZEN_PREREGISTRATION),
+            "inherited_05_preregistration_path": str(INHERITED_05_PREREGISTRATION.relative_to(ROOT)),
+            "inherited_05_preregistration_sha256": sha256_file(INHERITED_05_PREREGISTRATION),
+        },
+        "environment_provider": {
+            "provider_id": provider_id,
+            "compile_flags": provider_flags,
         },
         "mechanism_components": [
             {"path": path, "sha256": sha256_file(ROOT / path)}
             for path in COMPONENT_FILES
         ],
         "generated_source": {
-            "path": str(source_path),
-            "sha256": sha256_bytes(source),
-            "bytes": len(source),
+            "path": source_path.name,
+            "monolithic_path": monolithic_source_path.name,
+            "sha256": sha256_file(source_path),
+            "bytes": source_path.stat().st_size,
+            "monolithic_sha256": sha256_bytes(source),
+            "monolithic_bytes": len(source),
             "development_only": True,
         },
+        "generated_components": [
+            {"path": path.name, "sha256": sha256_file(path), "bytes": path.stat().st_size}
+            for path in component_paths
+        ],
         "compiler": {
             "executable": compiler[0],
             "version_argv": compiler + ["--version"],
