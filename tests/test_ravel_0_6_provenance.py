@@ -48,6 +48,15 @@ class CandidateProvenanceTests(unittest.TestCase):
             checkpoint = record["component_contracts"]["checkpoint"]
             self.assertEqual(checkpoint["header_sha256"], sha256_bytes(C_CHECKPOINT_HEADER.read_bytes()))
             self.assertEqual(checkpoint["implementation_sha256"], sha256_bytes(C_CHECKPOINT_IMPLEMENTATION.read_bytes()))
+            world = record["component_contracts"]["world"]
+            self.assertEqual(world["abi_version"], "ravel-0.6-world-abi/1")
+            self.assertTrue(world["header_sha256"])
+            self.assertTrue(world["implementation_sha256"])
+            self.assertTrue(world["object_sha256"])
+            self.assertTrue(world["compile_argv"])
+            self.assertTrue(world["compiler_identity"])
+            self.assertIn("ravel_0_6_world.h", world["declared_dependencies"][0])
+            self.assertEqual(record["build"]["separate_binary_sha256"], record["build"]["binary_sha256"])
             self.assertEqual(len(record["generated_components"]), 10)
             self.assertTrue(record["mechanism_components"])
             self.assertTrue(record["compiler"]["argv"])

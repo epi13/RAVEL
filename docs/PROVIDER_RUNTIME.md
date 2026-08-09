@@ -35,8 +35,12 @@ normal test suite fail.
 
 The local Forge `0.1.0a2` checkout was inspected and exercised for this
 iteration. Its current CLI exposes typed project, provider, verifier, candidate,
-and lifecycle operations; the available provider listing reports the project
-micro-verifier provider and the precedence `FAIL > UNKNOWN > PASS`.
+workflow, bundle, and lifecycle operations; RAVEL's project-local configuration
+declares 13 development workflows in a fresh local Forge ledger; twelve
+bounded workflows passed and live family compatibility remained
+`UNKNOWN` for unavailable sibling producer checkouts. The project-scoped Forge readiness policy is separate from the frozen
+RAVEL preregistration and does not consume selection data. The precedence is
+`FAIL > UNKNOWN > PASS`.
 `ForgeCliProvider` invokes that JSON interface when explicitly configured and
 preserves lifecycle rejection as raw `UNKNOWN`. Forge remains optional for the
 core package and is not reimplemented by RAVEL.

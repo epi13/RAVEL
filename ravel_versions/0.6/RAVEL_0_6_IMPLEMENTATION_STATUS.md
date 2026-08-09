@@ -34,9 +34,10 @@ This is a development status record, not RAVEL 0.6 evaluation evidence.
   fixture also forces a retention gate failure and observes rollback.
 - **R6-04 physical extraction and providers:** the generated source is
   losslessly emitted as ten component units plus a deterministic unity wrapper.
-  The C mechanism has explicit branching and ring providers selected by a
-  recorded compile flag; provider identity and evidence change while core
-  source remains unchanged.
+  The world/provider surface is now separately compiled under
+  `ravel-0.6-world-abi/1`; branching and ring implement the same fixed-size
+  init/reset/observe/transition contract. Provider selection is a linked object
+  choice, not a mechanism source macro.
 - **R6-04 bounded surfaces:** `world`, `transition`, `planning`,
   `mechanism_state`, and `checkpoint` provide dependency-free, deterministic
   interfaces with two independently defined toy providers. These surfaces
@@ -44,17 +45,29 @@ This is a development status record, not RAVEL 0.6 evaluation evidence.
   corruption. The generated C candidate now has an explicit transaction and
   observation surface. The checkpoint byte-comparison boundary is now compiled
   as a separate object under `ravel-0.6-checkpoint-abi/1`; unity and separate
-  binaries are parity-tested. The remaining surfaces are still unity include
-  units, so full independent C decomposition is not claimed.
-- **Forge boundary and evaluator:** `ravel.providers.ForgeCliProvider` invokes
-  the installed Forge JSON CLI when configured, preserving raw responses and
-  returning `UNKNOWN` for lifecycle/provider failures. A separately maintained
-  `ravel.development_evaluator` derives development gate results from raw C and
-  matched-compute observations without trusting executable verdict fields.
-- **MNCS receipt delegation:** `ravel.mncs_receipts` delegates receipt building
-  and validation to optional MNCS Fabric/validator packages. Local sibling
-  validation was exercised; receipt structural validity remains distinct from
-  assurance, conformance, custody, or promotion.
+  binaries are parity-tested. Build records now retain contract header,
+  implementation/provider source, object, compile argv, compiler, dependency,
+  unity-source, separate-binary, and unity-binary identities. Transition,
+  planning, adaptation, and driver surfaces remain unity units.
+- **Forge boundary and evaluator:** the project-local `mncs-forge.toml`
+  declares bounded build, behavior, transaction, negative-matrix, parity,
+  evaluator, bundle, package, lifecycle, and family-compatibility workflows.
+  Its separate `ravel-0.6-forge-development-policy.json` is a project-scoped
+  readiness plan only; it explicitly does not consume selection data.
+  Forge 0.1.0a2 executed all declared workflows in a fresh local development
+  ledger. Twelve bounded workflows were `PASS`; live family compatibility was
+  `UNKNOWN` because sibling producer checkouts were unavailable. `ravel.development_evaluator` now reports
+  mechanism, execution-integrity, matched-compute, evidence-completeness,
+  provider, receipt, bundle, and aggregate statuses. Identity drift, malformed
+  evidence, and missing required observations remain `UNKNOWN`; genuine hard
+  mechanism failures remain `FAIL`.
+- **MNCS evidence delegation:** `ravel.mncs_receipts` delegates receipt building
+  and validation to optional MNCS Fabric/validator packages and carries only an
+  explicitly observed execution record. Verifier `PASS`/`FAIL` never supplies
+  exit code, argv, termination, streams, enforcement, or bundle-use facts.
+  `ravel.mncs_bundles` delegates immutable bundle construction, archive
+  validation, and receipt binding to MNCS; the local Forge runner is not claimed
+  to have executed from a bundle unless it actually reports that fact.
 - **R6-05 lifecycle infrastructure:** `ravel.lifecycle.CandidateLedger` is an
   append-only, hash-chained, gap-resistant development ledger with the
   preregistered candidate limit, freeze identities, partition separation,
@@ -78,7 +91,8 @@ This is a development status record, not RAVEL 0.6 evaluation evidence.
   formal evidence status; missing external disposition remains `UNKNOWN`.
 - Additional separately compiled C ABI contracts, full cross-project evaluator
   lifecycle integration, and an absolute compute budget remain incomplete or
-  are not declared by the frozen contract.
+  are not declared by the frozen contract. Forge/RAVEL lifecycle mapping is
+  reference-only and does not collapse the two state machines.
 - R6-05 selection evaluation and promotion logic have not been consumed. The
   ledger is infrastructure only; no candidate is frozen or selected by it.
 - R6-06 external final custody/evaluation remains unavailable and `UNKNOWN`.

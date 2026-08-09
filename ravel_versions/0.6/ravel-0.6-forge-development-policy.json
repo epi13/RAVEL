@@ -1,0 +1,23 @@
+{
+  "schema": "ravel-forge-development-policy/1",
+  "policy_id": "ravel-0.6-forge-development-workflows/1",
+  "scope": "project",
+  "authority": "development-only",
+  "required_workflows": [
+    "frozen-identities",
+    "policy",
+    "build",
+    "behavior",
+    "transactions",
+    "negative-matrix",
+    "world-provider-parity",
+    "component-parity",
+    "development-evaluator",
+    "package",
+    "live-family-compat",
+    "lifecycle",
+    "bundle"
+  ],
+  "selection_data": "not-used",
+  "promotion_authority": "external-and-unknown"
+}

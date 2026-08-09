@@ -22,6 +22,11 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e .
       - run: python -m unittest discover -s tests -v
+      - run: python -m pip install build
+      - run: python -m build --wheel --outdir /tmp/ravel-wheel
+      - run: python -m pip install --force-reinstall /tmp/ravel-wheel/*.whl
+      - run: python -m pip check
+      - run: cd /tmp && python -c "import ravel; assert 'site-packages' in ravel.__file__; from ravel.policy import load_frozen_policy; print(load_frozen_policy().threshold_identity)"
 
   ravel-06-c:
     runs-on: ubuntu-latest
@@ -35,4 +40,4 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e .
       - run: make -f ravel_versions/0.6/Makefile policy-test
-      - run: make -f ravel_versions/0.6/Makefile build behavioral-test transaction-test component-test decomposition-test negative-test provider-test evaluator-test forge-test receipt-test compiler-matrix sanitizers
+      - run: make -f ravel_versions/0.6/Makefile build behavioral-test transaction-test component-test decomposition-test negative-test provider-test evaluator-test forge-test receipt-test abi-test compiler-matrix sanitizers

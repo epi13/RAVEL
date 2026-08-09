@@ -1,0 +1,154 @@
+version = 1
+environment_allowlist = ["PATH", "LANG", "LC_ALL", "PYTHONPATH", "CC", "RAVEL06_PROVIDER"]
+
+[project]
+name = "RAVEL 0.6 development"
+identity = "ravel-0.6-development-forge-v1"
+root = "."
+
+[paths]
+candidates = []
+generated = ["build"]
+contracts = ["ravel_versions/0.4", "ravel_versions/0.5", "ravel_versions/0.6/ravel-0.6-preregistration.json", "ravel_versions/0.6/ravel-0.6-preregistration.schema.json"]
+references = ["docs", "README.md"]
+evaluators = ["src/ravel/development_evaluator.py"]
+acceptance_policies = ["ravel_versions/0.6/ravel-0.6-forge-development-policy.json", "ravel_versions/0.6/ravel-0.6-preregistration.json"]
+development_evidence = ["ravel_versions/0.6/ravel-0.6-development-record.json"]
+protected = ["ravel_versions/0.6/ravel_0_6"]
+outputs = ["build"]
+
+[limits]
+timeout_seconds = 180
+output_bytes = 2097152
+
+[authority.development]
+may_write_candidates = true
+may_write_generated = true
+may_run_providers = true
+
+[authority.evaluator]
+candidate_read_only = true
+authority_read_only = true
+require_frozen_identities = true
+withhold_repair_feedback = true
+
+[policies]
+selection = "ravel_versions/0.6/ravel-0.6-forge-development-policy.json"
+useful_benefit_objective = "ravel_versions/0.6/ravel-0.6-preregistration.json"
+
+[[workflows]]
+name = "frozen-identities"
+category = "inspection"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "frozen-identities"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "policy"
+category = "inspection"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "policy"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "build"
+category = "build"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "build"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "behavior"
+category = "differential_behavior"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "behavior"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "transactions"
+category = "checkpoint_recovery"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "transactions"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "negative-matrix"
+category = "mutation"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "negative-matrix"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "world-provider-parity"
+category = "differential_behavior"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "world-provider-parity"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "component-parity"
+category = "differential_behavior"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "component-parity"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "development-evaluator"
+category = "inspection"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "development-evaluator"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "package"
+category = "mncs_bundle_validation"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "package"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "live-family-compat"
+category = "mncds_record_validation"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "live-family-compat"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "lifecycle"
+category = "inspection"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "lifecycle"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "bundle"
+category = "mncs_bundle_validation"
+mode = "development"
+command = ["python3", "tools/ravel_bundle_check.py"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"

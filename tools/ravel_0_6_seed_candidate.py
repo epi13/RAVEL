@@ -105,36 +105,11 @@ NEW_PLANNER_CONTEXT = """\
 """
 
 PROVIDER_SURFACE = """\
-#ifndef RAVEL06_PROVIDER_RING
-#define RAVEL06_PROVIDER_ID "ravel-toy-branching-c/1"
-#else
-#define RAVEL06_PROVIDER_ID "ravel-toy-ring-c/1"
-#endif
-
-void make_ring_world(World *w, const TrialSpec *spec) {
-    memset(w, 0, sizeof *w);
-    for (uint32_t s = 0; s < STATES; ++s) {
-        for (uint32_t d = 0; d < D; ++d) {
-            int sign = ((s + 3u * d + (s >> 2u)) & 1u) ? 1 : -1;
-            w->center[s][d] = (int16_t)(sign * (spec->amplitude - (int)(d % 3u)));
-        }
-        w->label[s] = (uint8_t)((s * 7u + (s >> 3u)) & 7u);
-        for (uint32_t a = 0; a < ACTIONS; ++a) {
-            w->base_next[s][a] = (uint8_t)((s + a + 1u) & 63u);
-            w->drift_next[s][a] = w->base_next[s][a];
-        }
-        if (spec->transition_drift && s < 24u) {
-            w->drift_next[s][1] = (uint8_t)((s + 5u) & 63u);
-        }
-    }
-}
-
 static void make_world(World *w, const TrialSpec *spec) {
-#ifdef RAVEL06_PROVIDER_RING
-    make_ring_world(w, spec);
-#else
-    make_branching_world(w, spec);
-#endif
+    Ravel06WorldConfig config = {
+        spec->amplitude, spec->transition_drift, spec->ambiguous
+    };
+    if (!ravel06_world_init(w, &config)) memset(w, 0, sizeof *w);
 }
 """
 
@@ -182,7 +157,7 @@ def build_candidate_source(source_bytes: bytes) -> str:
         raise SeedError("provider surface: expected one synthetic world provider")
     source = source.replace(
         old_world_start,
-        "void make_branching_world(World *w, const TrialSpec *spec) {",
+        "void make_legacy_world(World *w, const TrialSpec *spec) {",
         1,
     )
     provider_boundary = "\n}\n\nstatic void make_observation"
@@ -194,6 +169,19 @@ def build_candidate_source(source_bytes: bytes) -> str:
         1,
     )
 
+    old_world_type = """typedef struct {
+    int16_t center[STATES][D];
+    uint8_t label[STATES];
+    uint8_t base_next[STATES][ACTIONS];
+    uint8_t drift_next[STATES][ACTIONS];
+} World;"""
+    new_world_type = """#include \"ravel_0_6_world.h\"
+_Static_assert(RAVEL06_WORLD_ABI_NUMERIC == 1u, "unsupported RAVEL world ABI");
+typedef Ravel06World World;"""
+    if source.count(old_world_type) != 1:
+        raise SeedError("world ABI: expected one internal world type")
+    source = source.replace(old_world_type, new_world_type, 1)
+
     old_trial_identity = r'''           "  \"trial_id\":\"%s\",\"regime\":\"%s\","'''
     if source.count(old_trial_identity) != 1:
         raise SeedError("provider surface: expected trial identity output")
@@ -202,7 +190,7 @@ def build_candidate_source(source_bytes: bytes) -> str:
            "  \"trial_id\":\"%s\",\"regime\":\"%s\","'''
     source = source.replace(old_trial_identity, new_trial_identity, 1)
     old_trial_args = "           spec->trial_id, spec->regime, spec->seed,"
-    new_trial_args = "           RAVEL06_PROVIDER_ID, spec->trial_id, spec->regime, spec->seed,"
+    new_trial_args = "           ravel06_world_provider_id(), spec->trial_id, spec->regime, spec->seed,"
     if source.count(old_trial_args) != 1:
         raise SeedError("provider surface: expected trial identity arguments")
     source = source.replace(old_trial_args, new_trial_args, 1)

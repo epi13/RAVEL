@@ -74,20 +74,19 @@ exact boundary.
 - **R6-03:** behavioral and C/Python negative fixtures complete for declared
   constraints; source-constant mutations are intentionally distinguished from
   Python frozen-policy mutations and remain manifest-detectable.
-- **R6-04:** the first checkpoint boundary is separately compiled and parity
-  tested against unity; provider/world, transition, planning, adaptation, and
-  driver surfaces remain unity units. Further reviewed C ABI extraction is the
-  next step.
+- **R6-04:** checkpoint and world/provider boundaries are separately compiled
+  and parity-tested against unity for both branching and ring. Transition,
+  planning, adaptation, and driver surfaces remain unity units. The next safe
+  ABI candidate is observation/reporting, after dependency review.
 - **R6-05:** ledger infrastructure is hardened and exercised only with
   development fixtures. Candidate-001 remains unfrozen because further
   implementation changes are still expected.
 - **R6-06:** external custody and evaluation remain unavailable/`UNKNOWN`.
 
-The next logical implementation task is to promote the world/provider boundary
-to a separately compiled C contract and compare both providers through the
-same unity/separate parity oracle. Do not freeze candidate-001 or consume
-selection partitions until that work, policy parity, and the full development
-trial matrix are stable.
+The next logical implementation task is to review and, if independently
+falsifiable, promote the observation/reporting boundary. Do not freeze
+candidate-001 or consume selection partitions until further implementation,
+policy parity, and the full development trial matrix are stable.
 
 ## Codex next steps
 

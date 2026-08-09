@@ -25,6 +25,7 @@ class ReceiptResult:
     validation_status: str
     reason_code: str
     limitations: tuple[str, ...]
+    bundle_binding_status: str = "UNKNOWN"
 
 
 def _optional_builder() -> ReceiptBuilder | None:
@@ -44,35 +45,31 @@ def _optional_validator() -> ReceiptValidator | None:
 
 
 def _execution_record(raw: RawEvidence) -> dict[str, Any]:
-    """Project immutable Forge observations into Fabric's input vocabulary."""
+    """Project only an explicitly observed runner record.
 
-    status = raw.raw_status
-    termination = {
-        "PASS": "COMPLETED",
-        "FAIL": "NONZERO_EXIT",
-        "UNKNOWN": "CAPABILITY_UNAVAILABLE",
-    }[status]
-    return {
-        "record_id": raw.request_id,
-        "job_identity": raw.request_id,
-        "candidate_identity": raw.artifact_digests[0] if raw.artifact_digests else None,
-        "artifact_manifest_identity": raw.artifact_digests[0] if raw.artifact_digests else None,
-        "declared_argv": ["mncs-forge", "verifier", "run"],
-        "declared_environment": {"environment_id": raw.environment_id},
-        "termination_reason": termination,
-        "exit_code": 0 if status == "PASS" else 1,
-        "outcome": status,
-        "results": [],
-        "stdout": {"bytes": 0, "captured_utf8": "", "truncated": False},
-        "stderr": {
-            "bytes": len(raw.diagnostics.encode("utf-8")),
-            "captured_utf8": raw.diagnostics,
-            "truncated": False,
-        },
-        "node": {"machine_label": raw.environment_id},
-        "policy_observations": {},
-        "resource_observations": dict(raw.resource_observations),
-    }
+    A verifier disposition is not a process outcome.  In particular, this
+    function must not infer an exit code, argv, stream contents, termination,
+    resource enforcement, or bundle use from ``raw_status``.
+    """
+
+    observations = raw.observations
+    nested = observations.get("execution_record") if isinstance(observations, Mapping) else None
+    if not isinstance(nested, Mapping) and isinstance(observations, Mapping):
+        nested = observations.get("execution")
+    record: dict[str, Any] = dict(nested) if isinstance(nested, Mapping) else {}
+    # The adapter record identity is known locally.  Every runner fact below
+    # remains absent unless Forge/Fabric actually supplied it.
+    record.setdefault("record_id", raw.request_id)
+    return record
+
+
+def _has_observed_runner_record(raw: RawEvidence) -> bool:
+    observations = raw.observations
+    if not isinstance(observations, Mapping):
+        return False
+    return isinstance(observations.get("execution_record"), Mapping) or isinstance(
+        observations.get("execution"), Mapping
+    )
 
 
 def build_validated_receipt(
@@ -80,6 +77,7 @@ def build_validated_receipt(
     *,
     builder: ReceiptBuilder | None = None,
     validator: ReceiptValidator | None = None,
+    bundle: Any | None = None,
 ) -> ReceiptResult:
     """Delegate receipt construction/validation, failing closed if unavailable."""
 
@@ -120,11 +118,35 @@ def build_validated_receipt(
             (f"Receipt validation failed with {type(error).__name__}.",),
         )
     if getattr(report, "valid", False) is True:
+        if not _has_observed_runner_record(raw):
+            return ReceiptResult(
+                receipt,
+                "UNKNOWN",
+                "mncs_receipt_runner_facts_not_observed",
+                (
+                    "The official builder produced a structural envelope, but Forge did not "
+                    "observe runner process facts for this verifier response.",
+                ),
+            )
+        bundle_binding_status = "UNKNOWN"
+        if bundle is not None:
+            from .mncs_bundles import bind_receipt_to_bundle
+
+            bundle_binding_status = bind_receipt_to_bundle(receipt, bundle)
+            if bundle_binding_status != "PASS":
+                return ReceiptResult(
+                    receipt,
+                    "UNKNOWN",
+                    "mncs_receipt_bundle_binding_unresolved",
+                    ("Receipt validation passed, but the supplied bundle binding did not pass.",),
+                    bundle_binding_status,
+                )
         return ReceiptResult(
             receipt,
             "PASS",
             "mncs_receipt_structurally_valid",
             ("Structural receipt validity is not assurance or conformance.",),
+            bundle_binding_status,
         )
     return ReceiptResult(
         receipt,

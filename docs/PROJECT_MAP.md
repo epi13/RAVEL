@@ -71,10 +71,15 @@ regenerating the frozen records.
 - `src/ravel/providers.py` includes an optional subprocess adapter for the
   current Forge JSON CLI; `src/ravel/mncs_receipts.py` delegates optional
   receipt construction/validation to sibling MNCS packages.
+- `mncs-forge.toml` declares the Forge-governed development workflows;
+  `src/ravel/mncs_bundles.py` delegates immutable execution-bundle operations
+  to MNCS when that optional sibling is installed.
 - `tools/ravel_0_6_decompose.py` losslessly emits generated C component units
   and a unity wrapper; `ravel_versions/0.6/ravel_0_6/README.md` documents the
-  current unity-build limitation. `ravel_0_6_checkpoint.[ch]` is the first
-  separately compiled C contract and is included in object/binary provenance.
+  current ABI boundary. `ravel_0_6_checkpoint.[ch]` and
+  `ravel_0_6_world.h` are separately compiled contracts and are included in
+  object/binary provenance; branching and ring providers implement the same
+  world ABI.
 - [`MIGRATION.md`](MIGRATION.md) records the standalone extraction provenance.
 
 ## Build and verification entry points
