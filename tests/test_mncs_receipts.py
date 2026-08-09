@@ -37,10 +37,11 @@ class MncsReceiptTests(unittest.TestCase):
             builder=builder,
             validator=lambda value, target: Report(),
         )
-        self.assertEqual(result.validation_status, "PASS")
-        self.assertEqual(result.reason_code, "mncs_receipt_structurally_valid")
-        self.assertEqual(observed["candidate_identity"], "sha256:" + "b" * 64)
-        self.assertIn("not assurance", result.limitations[0])
+        self.assertEqual(result.validation_status, "UNKNOWN")
+        self.assertEqual(result.reason_code, "mncs_receipt_runner_facts_not_observed")
+        self.assertNotIn("candidate_identity", observed)
+        self.assertNotIn("declared_argv", observed)
+        self.assertNotIn("exit_code", observed)
 
     def test_missing_optional_receipt_builder_is_unknown(self) -> None:
         result = build_validated_receipt(RAW, builder=lambda record: (_ for _ in ()).throw(RuntimeError()))
@@ -65,8 +66,32 @@ class MncsReceiptTests(unittest.TestCase):
             builder=build_execution_receipt,
             validator=validate_execution_receipt_value,
         )
+        self.assertEqual(result.validation_status, "UNKNOWN")
+        self.assertEqual(result.reason_code, "mncs_receipt_runner_facts_not_observed")
+
+    def test_explicit_execution_record_facts_are_carried_without_inference(self) -> None:
+        observed = {}
+
+        def builder(record):
+            observed.update(record)
+            return {"receipt": "official"}
+
+        class Report:
+            valid = True
+            issues = []
+
+        raw = RawEvidence(
+            "request", "forge", "PASS", {"execution_record": {
+                "job_identity": "job-observed",
+                "declared_argv": ["bounded-harness"],
+                "exit_code": 7,
+                "termination_reason": "NONZERO_EXIT",
+            }}, None, (), "env", {},
+        )
+        result = build_validated_receipt(raw, builder=builder, validator=lambda value, target: Report())
         self.assertEqual(result.validation_status, "PASS")
-        self.assertEqual(result.reason_code, "mncs_receipt_structurally_valid")
+        self.assertEqual(observed["exit_code"], 7)
+        self.assertEqual(observed["declared_argv"], ["bounded-harness"])
 
 
 if __name__ == "__main__":

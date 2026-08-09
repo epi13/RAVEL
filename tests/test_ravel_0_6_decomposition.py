@@ -20,7 +20,12 @@ def compile_and_run(
     source: Path, binary: Path, extra_flags: tuple[str, ...] = ()
 ) -> dict[str, object]:
     built = subprocess.run(
-        ["cc", "-std=c11", "-O0", "-Wall", "-Wextra", "-Werror", "-pedantic", *extra_flags, str(source), "-lm", "-o", str(binary)],
+        [
+            "cc", "-std=c11", "-O0", "-Wall", "-Wextra", "-Werror", "-pedantic",
+            "-I", str(ROOT / "ravel_versions/0.6/ravel_0_6"), *extra_flags,
+            str(source), str(ROOT / "ravel_versions/0.6/ravel_0_6/ravel_0_6_provider_branching.c"),
+            "-lm", "-o", str(binary),
+        ],
         cwd=ROOT,
         text=True,
         capture_output=True,
@@ -107,6 +112,42 @@ class DecompositionTests(unittest.TestCase):
             ring = run_binary(ring_dir / "ravel_0_6_candidate_001")
         self.assertNotEqual(branching["environment_provider_id"], ring["environment_provider_id"])
         self.assertNotEqual(branching["candidate"]["model_identity"], ring["candidate"]["model_identity"])
+
+    def test_world_abi_provider_objects_share_contract_and_wrong_header_fails_closed(self) -> None:
+        source = build_candidate_source(FROZEN_SOURCE.read_bytes())
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            candidate = root / "candidate.c"
+            candidate.write_text(source, encoding="utf-8")
+            for provider in ("branching", "ring"):
+                binary = root / provider
+                built = subprocess.run(
+                    [
+                        "cc", "-std=c11", "-O0", "-Wall", "-Wextra", "-Werror", "-pedantic",
+                        "-I", str(ROOT / "ravel_versions/0.6/ravel_0_6"), str(candidate),
+                        str(ROOT / "ravel_versions/0.6/ravel_0_6" / f"ravel_0_6_provider_{provider}.c"),
+                        "-lm", "-o", str(binary),
+                    ], cwd=ROOT, text=True, capture_output=True, check=False,
+                )
+                self.assertEqual(built.returncode, 0, built.stderr)
+                trial = run_binary(binary)
+                self.assertEqual(trial["environment_provider_id"], f"ravel-toy-{provider}-c/1")
+
+            wrong_include = root / "wrong-header"
+            wrong_include.mkdir()
+            header = (ROOT / "ravel_versions/0.6/ravel_0_6/ravel_0_6_world.h").read_text()
+            wrong_include.joinpath("ravel_0_6_world.h").write_text(
+                header.replace("RAVEL06_WORLD_ABI_NUMERIC 1u", "RAVEL06_WORLD_ABI_NUMERIC 2u"),
+                encoding="utf-8",
+            )
+            rejected = subprocess.run(
+                [
+                    "cc", "-std=c11", "-O0", "-Wall", "-Wextra", "-Werror", "-pedantic",
+                    "-I", str(wrong_include), "-I", str(ROOT / "ravel_versions/0.6/ravel_0_6"),
+                    "-c", str(candidate), "-o", str(root / "wrong.o"),
+                ], cwd=ROOT, text=True, capture_output=True, check=False,
+            )
+            self.assertNotEqual(rejected.returncode, 0)
 
 
 if __name__ == "__main__":

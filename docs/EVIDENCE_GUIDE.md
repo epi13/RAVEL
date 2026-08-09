@@ -115,6 +115,17 @@ RAVEL reports several different questions that must not be collapsed:
 
 A `PASS` in one row does not imply `PASS` in another.
 
+### Forge receipts and immutable bundles
+
+RAVEL delegates execution-receipt and experimental execution-bundle structure
+to the installed MNCS sibling packages. A Forge verifier result is not a raw
+process record: it cannot supply an exit code, termination category, argv,
+stdout/stderr state, resource enforcement, or bundle execution fact unless the
+provider actually observed and returned that field. Missing or malformed
+runner material is `UNKNOWN`. Bundle logical identity, archive identity,
+manifest validation, and receipt/bundle binding are retained as sibling-owned
+facts; RAVEL does not duplicate those validators.
+
 ## Preserved RAVEL outcomes
 
 - RAVEL 0.4: execution produced evidence, but zero of eight frozen trials passed

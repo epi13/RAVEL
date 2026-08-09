@@ -28,7 +28,12 @@ def run_mutated(replacement: tuple[str, str] | None) -> dict[str, object]:
         binary = root / "candidate"
         source_path.write_text(source, encoding="utf-8")
         built = subprocess.run(
-            ["cc", "-std=c11", "-O0", "-Wall", "-Wextra", "-Werror", "-pedantic", str(source_path), "-lm", "-o", str(binary)],
+            [
+                "cc", "-std=c11", "-O0", "-Wall", "-Wextra", "-Werror", "-pedantic",
+                "-I", str(ROOT / "ravel_versions/0.6/ravel_0_6"), str(source_path),
+                str(ROOT / "ravel_versions/0.6/ravel_0_6/ravel_0_6_provider_branching.c"),
+                "-lm", "-o", str(binary),
+            ],
             cwd=ROOT,
             text=True,
             capture_output=True,

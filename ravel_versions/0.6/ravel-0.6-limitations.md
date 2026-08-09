@@ -23,8 +23,12 @@
 - Formal MNCS status is `UNKNOWN`.
 - Formal MNCDS status is `UNKNOWN`.
 - Promotion is unauthorized.
-- Only the checkpoint byte-comparison surface is separately compiled in this
-  iteration. The remaining C mechanism surfaces use the unity extraction.
+- The checkpoint byte-comparison and world/provider surfaces are separately
+  compiled in this iteration. The remaining C mechanism surfaces use the unity
+  extraction. Unity/separate parity is a development check, not independent
+  evaluation.
 - Forge CLI and MNCS receipt adapters are optional local development bridges;
   lifecycle rejection, missing packages, and unsupported capabilities remain
-  `UNKNOWN`. A structurally valid receipt is not assurance or conformance.
+  `UNKNOWN`. A structurally valid receipt is not assurance or conformance. A
+  verifier disposition does not establish runner process facts, and the local
+  Forge runner is not a sandbox or automatic execution-bundle consumer.

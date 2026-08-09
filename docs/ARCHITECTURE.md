@@ -178,6 +178,21 @@ These modules are tested scaffolding and are not claims that RAVEL 0.6 has been
 evaluated, selected, independently evaluated, certified, promoted, or made
 production-safe.
 
+## Current modular evidence boundary
+
+The generated C candidate has two separately compiled development contracts:
+
+- `ravel-0.6-checkpoint-abi/1` for byte-identical checkpoint comparison; and
+- `ravel-0.6-world-abi/1` for bounded provider identity, init/reset,
+  observation, and transition facts.
+
+Branching and ring provider objects are substituted behind the same header and
+run through the same unity/separate parity matrix. Build provenance distinguishes
+source, contract/header, object, binary, and execution identities. The local
+Forge project configuration records this work as development workflows; Forge
+does not become RAVEL's evaluator and its normal process runner is not a
+sandbox.
+
 ## Separation of statuses
 
 RAVEL must not collapse different state spaces into one score.

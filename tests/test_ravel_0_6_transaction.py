@@ -21,7 +21,12 @@ def build_and_trial(source_text: str, directory: Path) -> dict[str, object]:
     binary = directory / "candidate"
     source.write_text(source_text, encoding="utf-8")
     built = subprocess.run(
-        ["cc", "-std=c11", "-O0", "-Wall", "-Wextra", "-Werror", "-pedantic", str(source), "-lm", "-o", str(binary)],
+        [
+            "cc", "-std=c11", "-O0", "-Wall", "-Wextra", "-Werror", "-pedantic",
+            "-I", str(ROOT / "ravel_versions/0.6/ravel_0_6"), str(source),
+            str(ROOT / "ravel_versions/0.6/ravel_0_6/ravel_0_6_provider_branching.c"),
+            "-lm", "-o", str(binary),
+        ],
         cwd=ROOT,
         text=True,
         capture_output=True,
@@ -107,8 +112,33 @@ class CandidateTransactionTests(unittest.TestCase):
             )
         payload["candidate_id"] = "ravel-0.6-candidate-002"
         evaluation = evaluate_trial(payload, expected_provider_id="ravel-toy-branching-c/1")
-        self.assertEqual(evaluation.status, "FAIL")
+        self.assertEqual(evaluation.status, "UNKNOWN")
         self.assertIn("candidate_identity_mismatch", evaluation.reason_codes)
+        self.assertEqual(evaluation.evidence_completeness_status, "UNKNOWN")
+
+    def test_evaluator_distinguishes_mechanism_failure_from_missing_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            payload = build_and_trial(
+                build_candidate_source(FROZEN_SOURCE.read_bytes()), Path(directory)
+            )
+        payload["candidate"]["adaptation_transaction"]["raw"]["base_accuracy_after_q20"] = 0
+        payload["candidate"]["adaptation_transaction"]["committed"] = False
+        payload["candidate"]["adaptation_transaction"]["failed_constraint_mask"] = 4
+        payload.pop("matched_compute")
+        evaluation = evaluate_trial(payload, expected_provider_id="ravel-toy-branching-c/1")
+        self.assertEqual(evaluation.mechanism_status, "FAIL")
+        self.assertEqual(evaluation.matched_compute_status, "UNKNOWN")
+        self.assertEqual(evaluation.status, "FAIL")
+
+    def test_evaluator_marks_malformed_required_evidence_unknown(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            payload = build_and_trial(
+                build_candidate_source(FROZEN_SOURCE.read_bytes()), Path(directory)
+            )
+        payload["candidate"]["adaptation_transaction"] = {"committed": True}
+        evaluation = evaluate_trial(payload, expected_provider_id="ravel-toy-branching-c/1")
+        self.assertEqual(evaluation.status, "UNKNOWN")
+        self.assertIn("malformed_required_observation", evaluation.reason_codes)
 
 
 if __name__ == "__main__":
