@@ -40,7 +40,10 @@ class CandidateProvenanceTests(unittest.TestCase):
             record = build(Path(directory))
             self.assertEqual(record["candidate_id"], "ravel-0.6-candidate-001")
             self.assertTrue(record["generator"]["sha256"])
+            self.assertTrue(record["generator"]["transaction_surface"]["sha256"])
+            self.assertTrue(record["mechanism_components"])
             self.assertTrue(record["compiler"]["argv"])
+            self.assertEqual(record["execution"]["status"], "NOT_RUN")
             self.assertEqual(record["build"]["exit_status"], 0)
             self.assertFalse(record["authoritative_evidence"])
 

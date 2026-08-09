@@ -142,6 +142,22 @@ The repository now contains small, dependency-free foundations beneath the
 - `ravel.memory` retains versioned source identities, explicit scope contracts,
   negative-aware full-text retrieval, append-only proposal lifecycle events,
   atomic batches, and rebuildable relation projections.
+- `ravel.world`, `ravel.transition`, and `ravel.planning` define replaceable
+  environment, deterministic transition-compilation, and bounded planning
+  surfaces. `ToyBranchingWorld` and `ToyRingWorld` are independent fixtures;
+  provider identity is carried into the compiled projection.
+- `ravel.mechanism_state` and `ravel.checkpoint` keep mechanism state separate
+  from evaluation and provide canonical round-trip identities with corruption
+  detection.
+- `ravel.lifecycle` records development candidate state transitions in an
+  append-only hash chain. `ravel.experience` turns scoped raw execution into
+  advisory episodic or negative memory without promoting status.
+
+The generated candidate-001 C source now has an explicit copy, hard-gate, raw
+observation, and rollback surface around the existing adaptation primitive. The
+historical monolithic C translation unit has not yet been physically extracted
+into separate C translation units; the Python surfaces are the first tested
+decomposition boundary, not a claim of completed R6-04 C decomposition.
 
 These modules are tested scaffolding and are not claims that RAVEL 0.6 has been
 evaluated, selected, independently evaluated, certified, promoted, or made
@@ -254,15 +270,15 @@ The architectural invariant is:
 
 > **RAVEL may remember any accurately typed experience, but only MNCS/MNCDS-governed evidence can establish the status and permitted use of that experience.**
 
-## Initial implementation order
+## Current implementation order
 
-1. Define versioned MNCS/MNCDS-governed evidence and experience schemas.
-2. Build an append-only local experience store.
-3. Add a small Forge adapter for a handful of micro-verifiers.
-4. Implement deterministic evidence-gap and verifier-selection rules.
-5. Add causal hypothesis and intervention records.
-6. Add negative-memory retrieval.
-7. Compare static and adaptive routing under equal budgets.
-8. Add transfer gates before broad strategy reuse.
-9. Add distributed scheduling only after local semantics are stable.
-10. Consider learned routing models only after the rule-based baseline is measurable.
+1. Physically extract the tested C transaction, provider, planner, checkpoint,
+   and observation surfaces without changing candidate behavior.
+2. Extend the tested `ravel.c_observations` cross-language adapter with a full
+   C/Python negative-reason matrix without making either side authoritative.
+3. Use the append-only candidate ledger for development-only candidate freezes;
+   do not consume selection partitions in this repository-local loop.
+4. Connect accepted and rejected execution records to the append-only memory
+   store and benchmark negative/contradiction retrieval.
+5. Use the inspected Forge CLI/provider boundary only through explicit,
+   dependency-injected adapters; unavailable capabilities remain `UNKNOWN`.

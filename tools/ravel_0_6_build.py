@@ -35,6 +35,16 @@ except ImportError:  # direct script execution from the tools directory
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERATOR = Path(__file__).resolve()
+TRANSACTION_SURFACE = ROOT / "tools/ravel_0_6_transaction_surface.py"
+COMPONENT_FILES = (
+    "src/ravel/mechanism_state.py",
+    "src/ravel/world.py",
+    "src/ravel/transition.py",
+    "src/ravel/planning.py",
+    "src/ravel/checkpoint.py",
+    "src/ravel/lifecycle.py",
+    "src/ravel/experience.py",
+)
 CANDIDATE_ID = "ravel-0.6-candidate-001"
 ENVIRONMENT_KEYS = ("CC", "CFLAGS", "CPPFLAGS", "LDFLAGS", "LC_ALL", "LANG")
 CANONICAL_FLAGS = ("-std=c11", "-O3", "-Wall", "-Wextra", "-Werror", "-pedantic")
@@ -127,7 +137,15 @@ def build(output_dir: Path, *, require_clean_worktree: bool = False) -> dict[str
             "path": str(GENERATOR.relative_to(ROOT)),
             "sha256": sha256_file(GENERATOR),
             "seed_builder": "tools/ravel_0_6_seed_candidate.py",
+            "transaction_surface": {
+                "path": str(TRANSACTION_SURFACE.relative_to(ROOT)),
+                "sha256": sha256_file(TRANSACTION_SURFACE),
+            },
         },
+        "mechanism_components": [
+            {"path": path, "sha256": sha256_file(ROOT / path)}
+            for path in COMPONENT_FILES
+        ],
         "generated_source": {
             "path": str(source_path),
             "sha256": sha256_bytes(source),
@@ -152,6 +170,11 @@ def build(output_dir: Path, *, require_clean_worktree: bool = False) -> dict[str
             "stderr": result.stderr,
             "exit_status": result.returncode,
             "binary_sha256": sha256_file(binary_path) if result.returncode == 0 else None,
+        },
+        "execution": {
+            "argv": None,
+            "status": "NOT_RUN",
+            "reason": "build record does not claim a trial execution",
         },
     }
     record_path.write_text(canonical_json(record) + "\n", encoding="utf-8")
