@@ -28,6 +28,23 @@ jobs:
       - run: python -m pip check
       - run: cd /tmp && python -c "import ravel; assert 'site-packages' in ravel.__file__; from ravel.policy import load_frozen_policy; print(load_frozen_policy().threshold_identity)"
 
+  rust-foundation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.97.1
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e .
+      - run: cargo test --workspace
+      - run: python -m unittest tests.test_rust_parity tests.test_rust_knowledge
+
   ravel-06-c:
     runs-on: ubuntu-latest
     permissions:

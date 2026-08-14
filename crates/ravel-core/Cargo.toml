@@ -1,0 +1,20 @@
+[package]
+name = "ravel-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Foundational RAVEL control-plane behavior: adaptation, worlds, policy, lifecycle"
+readme = false
+
+[dependencies]
+ravel-contracts = { workspace = true }
+ravel-memory = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

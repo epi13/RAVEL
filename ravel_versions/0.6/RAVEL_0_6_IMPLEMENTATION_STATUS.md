@@ -94,6 +94,22 @@ This is a development status record, not RAVEL 0.6 evaluation evidence.
 
 ## Not yet implemented or externally unavailable
 
+- **Knowledge store milestone:** Rust now owns fail-closed knowledge promotion
+  (`ravel-knowledge-record/0.1`), semantic consolidation / retrieval-layout
+  parity with Python, compaction that never deletes sources, a content-addressed
+  artifact store, and a curation report. Forge workflow `knowledge-lifecycle`
+  proves the discrete surfaces. This does not authorize transfer, selection, or
+  MNCS promotion.
+
+- **Rust foundation:** the repository now has a Cargo workspace
+  (`ravel-contracts`, `ravel-memory`, `ravel-core`, `ravel-cli`) under
+  `ravel-rust-foundation/0.1`. Rust is the canonical future implementation
+  language. Forge workflows `rust-build`, `rust-test`, `rust-python-parity`,
+  and `rust-c-parity` prove discrete C/Python/Rust agreement for adaptation
+  reasons, frozen policy identity, toy-world planning, canonical checkpoints,
+  C transaction evaluation, and advisory experience class. This does not
+  replace candidate-001 C, freeze the candidate, or create MNCS authority.
+
 - The C-side trial is connected to `ravel.c_observations` through the versioned
   JSON record and shared reason vocabulary, with accepted and negative-path
   cross-checks. The parser/evaluator remains advisory and does not create

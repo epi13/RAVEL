@@ -23,6 +23,7 @@ modules or historical logical paths.
 | `ravel_0_6_seed_candidate.py` | Derive bounded 0.6 candidate-001 development source from an exact SHA-256-bound 0.5 input |
 | `ravel_0_6_build.py` | Generate and compile candidate-001 in a temporary directory with provenance-bound raw build output |
 | `ravel_0_6_behavioral_fixtures.py` | Run compiled slot-one planning and birth-support fixtures plus bounded reverted-correction mutations |
+| `../crates/ravel-cli` (`ravel-rs`) | Rust interchange CLI for C/Python/Rust contract proofs |
 
 Other support modules in this directory should follow the same separation:
 mechanism execution emits facts; evaluators derive results; digest tools bind

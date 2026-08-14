@@ -93,11 +93,17 @@ execution remains `UNKNOWN` while native Fabric bundle transfer is unavailable.
   implementation changes are still expected.
 - **R6-06:** external custody and evaluation remain unavailable/`UNKNOWN`.
 
-The next logical implementation task is to review and, if independently
-falsifiable, promote the observation/reporting boundary while aligning its raw
-record identity with the Fabric observation contract. Do not freeze
-candidate-001 or consume selection partitions until further implementation,
-policy parity, and the full development trial matrix are stable.
+The Rust workspace is the canonical future implementation home. The first
+knowledge-store milestone (lifecycle, compaction-by-proposal, retention, and
+curation reports) is in place. Do not add embeddings, learned routing, or
+automated promotion until those Forge parity workflows remain green.
+
+The next logical 0.6 implementation task is still to review and, if
+independently falsifiable, promote the observation/reporting boundary while
+aligning its raw record identity with the Fabric observation contract. Do not
+freeze candidate-001 or consume selection partitions until further
+implementation, policy parity, and the full development trial matrix are
+stable.
 
 ## Codex next steps
 

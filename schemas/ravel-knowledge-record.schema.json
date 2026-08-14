@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ravel.dev/schema/ravel-knowledge-record/0.1",
+  "title": "RAVEL knowledge lifecycle record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "record_id", "stage", "statement", "scope", "parent_ids", "created_at"],
+  "properties": {
+    "schema": {"const": "ravel-knowledge-record/0.1"},
+    "record_id": {"type": "string", "minLength": 1},
+    "stage": {
+      "enum": [
+        "observation",
+        "episode",
+        "open_hypothesis",
+        "intervention",
+        "attribution",
+        "provisional_principle",
+        "transfer_tested_principle",
+        "restricted_strategy",
+        "supported_strategy",
+        "counterexample",
+        "retired"
+      ]
+    },
+    "statement": {"type": "string", "minLength": 1},
+    "scope": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "string"}
+    },
+    "parent_ids": {"type": "array", "items": {"type": "string"}},
+    "evidence_ids": {"type": "array", "items": {"type": "string"}},
+    "evaluation_status": {"type": ["string", "null"], "enum": ["PASS", "FAIL", "UNKNOWN", null]},
+    "transfer_status": {"type": "string"},
+    "attribution": {"type": ["string", "null"]},
+    "producer_id": {"type": "string"},
+    "created_at": {"type": "string"}
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ravel.dev/schema/ravel-interchange/0.1",
+  "title": "RAVEL cross-language interchange envelope",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema", "surface"],
+  "properties": {
+    "schema": {
+      "const": "ravel-interchange/0.1"
+    },
+    "surface": {
+      "type": "string",
+      "enum": [
+        "adaptation.evaluate_constraints",
+        "adaptation.run_transaction",
+        "checkpoint.encode",
+        "world.compile_and_plan",
+        "policy.load",
+        "c_observations.evaluate",
+        "matched_compute.evaluate",
+        "experience.from_development_transaction",
+        "lifecycle.round_trip",
+        "memory.propose_consolidation",
+        "memory.plan_retrieval",
+        "knowledge.promote",
+        "retention.compact"
+      ]
+    },
+    "implementation": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["PASS", "FAIL", "UNKNOWN"]
+    },
+    "input": {
+      "type": "object"
+    }
+  }
+}

@@ -23,6 +23,12 @@ where = ["src"]
   "ravel_versions/0.6/ravel-0.6-fabric-observation.schema.json",
   "ravel_versions/0.6/ravel-0.6-family-compatibility-lock.json",
 ]
+"share/ravel/schemas" = [
+  "schemas/ravel-rust-foundation.schema.json",
+  "schemas/ravel-interchange.schema.json",
+  "schemas/ravel-knowledge-record.schema.json",
+  "schemas/consolidation-proposal.schema.json",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

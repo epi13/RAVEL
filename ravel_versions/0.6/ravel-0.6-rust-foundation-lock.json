@@ -1,0 +1,12 @@
+{
+  "schema": "ravel-rust-foundation/0.1",
+  "implementation": "ravel-rs/0.1",
+  "foundation_contract": "ravel-rust-foundation/0.1",
+  "canonical_json_contract": "ravel-canonical-json/1",
+  "interchange_schema": "ravel-interchange/0.1",
+  "world_abi": "ravel-0.6-world-abi/1",
+  "checkpoint_abi": "ravel-0.6-checkpoint-abi/1",
+  "authority": "development scaffolding only; not MNCS/MNCDS evaluation",
+  "python_compatibility": "src/ravel/rust_bridge.py",
+  "historical_lineage": "preserved; 0.4/0.5/0.6 C and Python evidence are not rewritten"
+}

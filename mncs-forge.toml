@@ -1,5 +1,5 @@
 version = 1
-environment_allowlist = ["PATH", "LANG", "LC_ALL", "PYTHONPATH", "CC", "RAVEL06_PROVIDER"]
+environment_allowlist = ["PATH", "LANG", "LC_ALL", "PYTHONPATH", "CC", "RAVEL06_PROVIDER", "CARGO_HOME", "RUSTUP_HOME", "RAVEL_ROOT"]
 
 [project]
 name = "RAVEL 0.6 development"
@@ -9,7 +9,7 @@ root = "."
 [paths]
 candidates = []
 generated = ["build"]
-contracts = ["ravel_versions/0.4", "ravel_versions/0.5", "ravel_versions/0.6/ravel-0.6-preregistration.json", "ravel_versions/0.6/ravel-0.6-preregistration.schema.json", "ravel_versions/0.6/ravel-0.6-fabric-observation.schema.json", "ravel_versions/0.6/ravel-0.6-family-compatibility-lock.json"]
+contracts = ["ravel_versions/0.4", "ravel_versions/0.5", "ravel_versions/0.6/ravel-0.6-preregistration.json", "ravel_versions/0.6/ravel-0.6-preregistration.schema.json", "ravel_versions/0.6/ravel-0.6-fabric-observation.schema.json", "ravel_versions/0.6/ravel-0.6-family-compatibility-lock.json", "ravel_versions/0.6/ravel-0.6-rust-foundation-lock.json", "schemas/ravel-rust-foundation.schema.json", "schemas/ravel-interchange.schema.json", "schemas/ravel-knowledge-record.schema.json", "schemas/consolidation-proposal.schema.json"]
 references = ["docs", "README.md"]
 evaluators = ["src/ravel/development_evaluator.py"]
 acceptance_policies = ["ravel_versions/0.6/ravel-0.6-forge-development-policy.json", "ravel_versions/0.6/ravel-0.6-preregistration.json"]
@@ -185,6 +185,51 @@ name = "family-compatibility-lock"
 category = "inspection"
 mode = "development"
 command = ["python3", "tools/ravel_forge_check.py", "family-compatibility-lock"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "rust-build"
+category = "build"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "rust-build"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "rust-test"
+category = "inspection"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "rust-test"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "rust-python-parity"
+category = "differential_behavior"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "rust-python-parity"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "rust-c-parity"
+category = "differential_behavior"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "rust-c-parity"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "knowledge-lifecycle"
+category = "inspection"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "knowledge-lifecycle"]
 provider_protocol = false
 subject = "project"
 disclosure = "compact"

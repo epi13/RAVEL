@@ -7,6 +7,7 @@ __all__ = [
     "development_evaluator",
     "experience",
     "fabric",
+    "knowledge",
     "lifecycle",
     "matched_compute",
     "mncs_receipts",
@@ -16,6 +17,8 @@ __all__ = [
     "policy",
     "providers",
     "resources",
+    "rust_bridge",
+    "siblings",
     "transition",
     "world",
 ]

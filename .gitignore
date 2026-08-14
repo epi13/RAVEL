@@ -4,6 +4,7 @@ __pycache__/
 build/
 dist/
 *.egg-info/
+target/
 
 # Local build and evidence diagnostics
 ravel_versions/**/ravel

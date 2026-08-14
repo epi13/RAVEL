@@ -6,7 +6,7 @@ RAVEL — the **Recursive Adaptive Vector Execution Lattice** — is an experime
 
 RAVEL operates beneath the technical authority of the Machine-Native Complexity Standard (MNCS) and the Machine-Native Complexity Development Standard (MNCDS). It is not intended to replace a language model, compiler, static analyzer, test framework, or the MNCS Forge. Its role is to decide what evidence should be gathered, what action should follow, and what experience should be retained for later use without redefining the governing status of that evidence.
 
-> **Project status:** RAVEL is research software. Historical RAVEL 0.4 and 0.5 results remain development `FAIL`; RAVEL 0.6 candidate-001 now has digest-bound policy/evaluator surfaces, separately compiled checkpoint and world/provider contracts, branching/ring unity parity, a Forge-governed development configuration, official MNCS bundle/receipt adapters, a bounded local Fabric development path, and lifecycle/memory integration. It remains unfrozen and has not been selection-evaluated, independently evaluated, or promoted. Formal MNCS/MNCDS conformance, independent attestation, protected custody, production safety, and general recursive self-improvement remain `UNKNOWN`.
+> **Project status:** RAVEL is research software. Historical RAVEL 0.4 and 0.5 results remain development `FAIL`; RAVEL 0.6 candidate-001 now has digest-bound policy/evaluator surfaces, separately compiled checkpoint and world/provider contracts, branching/ring unity parity, a Forge-governed development configuration, official MNCS bundle/receipt adapters, a bounded local Fabric development path, and lifecycle/memory integration. It remains unfrozen and has not been selection-evaluated, independently evaluated, or promoted. **Rust is now the canonical future implementation language** (`crates/`, `ravel-rust-foundation/0.1`); C and Python remain the historical and 0.6 compatibility surfaces. Formal MNCS/MNCDS conformance, independent attestation, protected custody, production safety, and general recursive self-improvement remain `UNKNOWN`.
 
 ## Place in the MNCS ecosystem
 
@@ -101,6 +101,7 @@ The recommended extraction is history-preserving rather than a manual file copy.
 4. Add standalone CI and repair repository-root assumptions.
 5. Update MNCS to reference RAVEL as a sibling project without deleting historical evidence prematurely.
 6. Develop the Forge interface and MNCS/MNCDS-governed evidence and knowledge schemas before adding broad autonomy.
+7. Establish the Rust workspace as the canonical future implementation and prove C/Python parity before the knowledge-lifecycle phase.
 
 The current 0.6 implementation status is recorded in
 [`ravel_versions/0.6/RAVEL_0_6_IMPLEMENTATION_STATUS.md`](ravel_versions/0.6/RAVEL_0_6_IMPLEMENTATION_STATUS.md).
@@ -116,7 +117,10 @@ and checkpoint fixtures; they do not replace the historical 0.5 source.
 `src/ravel/fabric.py` adds the optional public Fabric local-controller path;
 `tools/ravel_fabric_reference.py` runs branching/ring parity, replication,
 reconciliation, bundle, and replay/negative checks without dispatching selection
-or final material.
+or final material. The Rust crates under `crates/` and the `ravel-rs` CLI are
+the future implementation home; `src/ravel/rust_bridge.py` and
+`tests/test_rust_parity.py` prove discrete C/Python/Rust agreement without
+making either side authoritative. See [`docs/RUST_FOUNDATION.md`](docs/RUST_FOUNDATION.md).
 
 ## Non-goals
 

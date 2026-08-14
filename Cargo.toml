@@ -1,0 +1,39 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/ravel-contracts",
+    "crates/ravel-memory",
+    "crates/ravel-core",
+    "crates/ravel-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.97"
+license = "Apache-2.0"
+repository = "https://github.com/epi13/RAVEL"
+authors = ["RAVEL contributors"]
+
+[workspace.dependencies]
+ravel-contracts = { path = "crates/ravel-contracts", version = "0.1.0" }
+ravel-memory = { path = "crates/ravel-memory", version = "0.1.0" }
+ravel-core = { path = "crates/ravel-core", version = "0.1.0" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+clap = { version = "4.5", features = ["derive"] }
+anyhow = "1.0"
+thiserror = "2.0"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
