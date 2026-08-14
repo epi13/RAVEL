@@ -7,11 +7,21 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 FABRIC_LOCK = ROOT / "ravel_versions/0.6/ravel-0.6-family-compatibility-lock.json"
+sys.path.insert(0, str(ROOT / "src"))
+
+
+def _python_env() -> dict[str, str]:
+    env = dict(os.environ)
+    env["RAVEL_ROOT"] = str(ROOT)
+    existing = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = str(ROOT / "src") if not existing else f"{ROOT / 'src'}{os.pathsep}{existing}"
+    return env
 
 
 def _run(module: str, *tests: str) -> tuple[str, str]:
@@ -21,8 +31,24 @@ def _run(module: str, *tests: str) -> tuple[str, str]:
         text=True,
         capture_output=True,
         check=False,
+        env=_python_env(),
     )
     return ("PASS" if result.returncode == 0 else "FAIL", result.stderr[-2000:])
+
+
+def _cargo(arguments: list[str]) -> tuple[str, str]:
+    result = subprocess.run(
+        ["cargo", *arguments],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+        env=_python_env(),
+    )
+    detail = (result.stdout or result.stderr)[-2000:]
+    if result.returncode != 0:
+        return "FAIL", detail
+    return "PASS", detail or "cargo completed"
 
 
 def _build(provider: str, root: Path) -> dict[str, object]:
@@ -162,11 +188,21 @@ def check(name: str) -> tuple[str, str]:
         sibling = ROOT.parent / "MNCS-Commons/src"
         if not sibling.is_dir():
             return "UNKNOWN", "MNCS Commons checkout unavailable"
-        import sys
         sys.path.insert(0, str(sibling))
         try:
             from mncs_commons.application.services import CompatibilityApplication
-            report = CompatibilityApplication.report({"ravel": ROOT})
+            repositories = {"ravel": ROOT}
+            for alias, directory in {
+                "mncs-fabric": ROOT.parent / "mncs-fabric",
+                "mncs-forge-mcp": ROOT.parent / "mncs-forge-mcp",
+                "machine-native-complexity-standard": ROOT.parent / "machine-native-complexity-standard",
+                "Machine-Native-Experimental-Learning": ROOT.parent / "Machine-Native-Experimental-Learning",
+                "MNCS-Commons": ROOT.parent / "MNCS-Commons",
+                "mncs-language": ROOT.parent / "mncs-language",
+            }.items():
+                if directory.is_dir():
+                    repositories[alias] = directory
+            report = CompatibilityApplication.report(repositories)
         except Exception as error:
             return "UNKNOWN", f"Commons compatibility adapter unavailable: {type(error).__name__}"
         statuses = {str(item.get("status")) for item in report}
@@ -177,6 +213,19 @@ def check(name: str) -> tuple[str, str]:
         return "PASS", json.dumps(report, sort_keys=True)
     if name == "lifecycle":
         return "PASS", "RAVEL candidate remains development-only; Forge mapping is reference-only"
+    if name == "rust-build":
+        return _cargo(["build", "--workspace"])
+    if name == "rust-test":
+        return _cargo(["test", "--workspace"])
+    if name == "rust-python-parity":
+        return _run(name, "tests/test_rust_parity.py")
+    if name == "rust-c-parity":
+        return _run(
+            name,
+            "tests.test_rust_parity.RustParityTests.test_c_transaction_evaluation_matches_python",
+        )
+    if name == "knowledge-lifecycle":
+        return _run(name, "tests/test_rust_knowledge.py", "tests/test_consolidation.py")
     raise ValueError(f"unknown Forge workflow: {name}")
 
 

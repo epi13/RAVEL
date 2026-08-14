@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ravel.dev/schema/ravel-rust-foundation/0.1",
+  "title": "RAVEL Rust foundation contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "implementation",
+    "foundation_contract",
+    "canonical_json_contract",
+    "world_abi",
+    "checkpoint_abi",
+    "authority"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ravel-rust-foundation/0.1"
+    },
+    "implementation": {
+      "type": "string",
+      "const": "ravel-rs/0.1"
+    },
+    "foundation_contract": {
+      "type": "string",
+      "const": "ravel-rust-foundation/0.1"
+    },
+    "canonical_json_contract": {
+      "type": "string",
+      "const": "ravel-canonical-json/1"
+    },
+    "world_abi": {
+      "type": "string",
+      "const": "ravel-0.6-world-abi/1"
+    },
+    "checkpoint_abi": {
+      "type": "string",
+      "const": "ravel-0.6-checkpoint-abi/1"
+    },
+    "authority": {
+      "type": "string",
+      "const": "development scaffolding only; not MNCS/MNCDS evaluation"
+    }
+  }
+}

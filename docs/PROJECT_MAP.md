@@ -14,6 +14,11 @@ remain unchanged and are resolved by the versioned compatibility runners.
 | 0.4 | `ravel_versions/0.4/ravel_0_4.c` | `ravel_versions/0.4/RAVEL_0_4_CONTRACT.md` |
 | 0.5 | `ravel_versions/0.5/ravel_0_5.c` | `ravel_versions/0.5/RAVEL_0_5_CONTRACT.md` |
 | 0.6 | Candidate source is derived by `tools/ravel_0_6_seed_candidate.py` | `ravel_versions/0.6/RAVEL_0_6_SCOPE.md` and preregistration |
+| future | Rust workspace (`crates/ravel-*`, `ravel-rs`) | `docs/RUST_FOUNDATION.md`, `ravel-rust-foundation/0.1` |
+
+Rust is the canonical future implementation language. Historical C epochs and
+the Python 0.6 adapter remain the evidence-bearing compatibility surfaces.
+See [`RUST_FOUNDATION.md`](RUST_FOUNDATION.md).
 
 Candidate-001 development builds are orchestrated by
 `tools/ravel_0_6_build.py`; generated source and binaries are temporary
@@ -52,6 +57,7 @@ regenerating the frozen records.
 - [Architecture gaps](ARCHITECTURE_GAPS.md) records the early design gaps.
 - [`../tools/README.md`](../tools/README.md) documents evaluators, digest tools,
   mutation checks, runtime capture, and 0.6 candidate derivation.
+- `src/ravel/knowledge.py` and `crates/ravel-memory` provide fail-closed knowledge promotion, consolidation, retention, and curation.
 - `src/ravel/adaptation.py` provides the tested retention-transaction boundary.
 - `src/ravel/providers.py` and `src/ravel/resources.py` provide optional,
   replaceable Forge/runtime protocols without heavy ML dependencies.
@@ -101,6 +107,8 @@ From the repository root, the main checks are:
 - `make unified-check`
 - `make 0.4-check`
 - `make 0.5-check`
+- `make rust-test`
+- `make rust-python-parity`
 
 Additional compiler-matrix, sanitizer, runtime, checkpoint, lineage, negative,
 and mutation targets remain available in the root Makefile.

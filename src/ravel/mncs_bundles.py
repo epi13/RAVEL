@@ -10,6 +10,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
+from .siblings import ensure_sibling_src
+
 
 @dataclass(frozen=True, slots=True)
 class BundleResult:
@@ -43,6 +45,7 @@ def build_execution_bundle(
 ) -> BundleResult:
     """Delegate deterministic bundle construction to MNCS when installed."""
 
+    ensure_sibling_src("mncs_validator")
     try:
         from mncs_validator.execution_bundle import build_execution_bundle as build
     except ImportError:
@@ -58,6 +61,7 @@ def verify_execution_bundle(
 ) -> BundleResult:
     """Verify an archive and optionally bind its logical identity."""
 
+    ensure_sibling_src("mncs_validator")
     try:
         from mncs_validator.execution_bundle import verify_execution_bundle_archive
     except ImportError:
@@ -76,6 +80,7 @@ def bind_receipt_to_bundle(receipt: Mapping[str, Any], bundle: BundleResult) -> 
 
     if bundle.status != "PASS" or bundle.logical_identity is None:
         return "UNKNOWN"
+    ensure_sibling_src("mncs_validator")
     try:
         from mncs_validator.execution_bundle import (
             ExecutionBundleReport,

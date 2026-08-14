@@ -156,6 +156,13 @@ The repository now contains small, dependency-free foundations beneath the
   C policy header; `ravel.matched_compute` independently evaluates raw
   development comparator counts.
 
+The Rust workspace (`crates/ravel-contracts`, `crates/ravel-memory`,
+`crates/ravel-core`, `crates/ravel-cli`) is the canonical future implementation
+of these surfaces. Python remains the compatibility adapter used by Fabric and
+the 0.6 development runner. Cross-language proofs go through `ravel-rs`
+(`ravel-interchange/0.1`) and do not make either side authoritative. See
+[`RUST_FOUNDATION.md`](RUST_FOUNDATION.md).
+
 The generated candidate-001 C source now has an explicit copy, hard-gate, raw
 observation, rollback, matched-compute, and provider surface around the
 existing adaptation primitive. `tools/ravel_0_6_decompose.py` losslessly emits
@@ -338,3 +345,5 @@ The architectural invariant is:
    store and benchmark negative/contradiction retrieval.
 5. Use the inspected Forge CLI/provider boundary only through explicit,
    dependency-injected adapters; unavailable capabilities remain `UNKNOWN`.
+6. Port the reusable foundations into the Rust workspace and keep C/Python as
+   compatibility oracles until the next knowledge-lifecycle phase.

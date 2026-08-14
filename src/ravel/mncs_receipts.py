@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Mapping
 
 from .providers import RawEvidence
+from .siblings import ensure_sibling_src
 
 
 ReceiptBuilder = Callable[[dict[str, Any]], dict[str, Any]]
@@ -29,6 +30,7 @@ class ReceiptResult:
 
 
 def _optional_builder() -> ReceiptBuilder | None:
+    ensure_sibling_src("mncs-fabric")
     try:
         from mncs_fabric.receipts import build_execution_receipt
     except ImportError:
@@ -37,6 +39,7 @@ def _optional_builder() -> ReceiptBuilder | None:
 
 
 def _optional_validator() -> ReceiptValidator | None:
+    ensure_sibling_src("mncs_validator")
     try:
         from mncs_validator.execution_receipt import validate_execution_receipt_value
     except ImportError:

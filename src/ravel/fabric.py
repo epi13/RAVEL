@@ -22,6 +22,7 @@ import tempfile
 from typing import Any, Mapping, Protocol
 
 from .mncs_bundles import BundleResult, build_execution_bundle
+from .siblings import ensure_sibling_src
 
 
 WORKLOAD_SCHEMA = "ravel-fabric-workload/0.1"
@@ -364,6 +365,7 @@ class FabricLocalBackend:
     def __init__(self, workspace: str | Path) -> None:
         self.workspace = Path(workspace)
         self.workspace.mkdir(parents=True, exist_ok=True)
+        ensure_sibling_src("mncs-fabric", "mncs_validator")
         try:
             from mncs_fabric.artifacts import build_manifest
             from mncs_fabric.challenges import ChallengeReplayStore, challenge_for_receipt
@@ -747,6 +749,7 @@ class FabricNetworkBackend:
     backend_identity = "ravel-fabric-network-public-controller/0.1"
 
     def __init__(self, config: FabricNetworkConfig) -> None:
+        ensure_sibling_src("mncs-fabric", "mncs_validator")
         try:
             from mncs_fabric.controller import NetworkController
             from mncs_fabric.enrollment import TrustStore

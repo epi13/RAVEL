@@ -15,7 +15,7 @@ RAVEL_05_DIR := ravel_versions/0.5
         0.4-compiler-matrix 0.4-sanitizers 0.4-runtime 0.5-test \
         0.5-evidence 0.5-check 0.5-development-gates 0.5-negative-test \
         0.5-manifest-negative-test 0.5-compiler-matrix 0.5-sanitizers \
-        0.5-runtime 0.5-clean all clean
+        0.5-runtime 0.5-clean rust-test rust-python-parity all clean
 
 test: $(BASELINE_DIR)/ravel
 	./$(BASELINE_DIR)/ravel >/dev/null
@@ -130,7 +130,13 @@ unified-check: $(UNIFIED_DIR)/ravel_unified_bin
 0.5-clean:
 	$(MAKE) clean
 
-all: test training-check unified-check 0.4-check 0.5-check
+rust-test:
+	cargo test --workspace
+
+rust-python-parity:
+	PYTHONPATH=src python3 -m unittest tests.test_rust_parity
+
+all: test training-check unified-check 0.4-check 0.5-check rust-test
 
 $(BASELINE_DIR)/ravel: $(BASELINE_DIR)/ravel.c
 	$(CC) $(CFLAGS) $< -o $@
