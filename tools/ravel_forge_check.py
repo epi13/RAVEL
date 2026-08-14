@@ -226,6 +226,31 @@ def check(name: str) -> tuple[str, str]:
         )
     if name == "knowledge-lifecycle":
         return _run(name, "tests/test_rust_knowledge.py", "tests/test_consolidation.py")
+    if name == "canonical-json-parity":
+        return _run(name, "tests/test_canonical_json.py")
+    if name == "append-log-replay":
+        return _cargo(["test", "-p", "ravel-memory", "store::"])
+    if name == "knowledge-negative-matrix":
+        return _run(
+            name,
+            "tests.test_rust_knowledge.KnowledgeParityTests.test_knowledge_promotion_is_fail_closed_on_both_sides",
+            "tests.test_rust_knowledge.KnowledgeParityTests.test_omitted_counterexample_is_rejected",
+            "tests.test_rust_knowledge.KnowledgeParityTests.test_malformed_evaluation_status_is_rejected",
+        )
+    if name == "counterexample-preservation":
+        return _run(
+            name,
+            "tests.test_rust_knowledge.KnowledgeParityTests.test_omitted_counterexample_is_rejected",
+            "tests.test_consolidation.ConsolidationTests.test_explicit_contradiction_is_retained",
+        )
+    if name == "retention-advisory":
+        return _cargo(["test", "-p", "ravel-memory", "retention"])
+    if name == "artifact-integrity":
+        return _cargo(["test", "-p", "ravel-memory", "artifacts"])
+    if name == "rust-fmt":
+        return _cargo(["fmt", "--all", "--", "--check"])
+    if name == "rust-clippy":
+        return _cargo(["clippy", "--workspace", "--all-targets", "--all-features", "--", "-D", "warnings"])
     raise ValueError(f"unknown Forge workflow: {name}")
 
 

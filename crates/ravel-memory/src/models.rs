@@ -28,6 +28,19 @@ pub enum MemoryClass {
 }
 
 impl MemoryClass {
+    pub fn parse(value: &str) -> Result<Self, MemoryError> {
+        match value {
+            "episodic" => Ok(Self::Episodic),
+            "causal" => Ok(Self::Causal),
+            "semantic" => Ok(Self::Semantic),
+            "procedural" => Ok(Self::Procedural),
+            "negative" => Ok(Self::Negative),
+            other => Err(MemoryError::Invalid(format!(
+                "unsupported memory class: {other}"
+            ))),
+        }
+    }
+
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Episodic => "episodic",
@@ -35,6 +48,78 @@ impl MemoryClass {
             Self::Semantic => "semantic",
             Self::Procedural => "procedural",
             Self::Negative => "negative",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum AuthorityClass {
+    Advisory,
+    #[serde(rename = "repository-local")]
+    RepositoryLocal,
+    #[serde(rename = "governed-evaluation")]
+    GovernedEvaluation,
+    Protected,
+}
+
+impl AuthorityClass {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Advisory => "advisory",
+            Self::RepositoryLocal => "repository-local",
+            Self::GovernedEvaluation => "governed-evaluation",
+            Self::Protected => "protected",
+        }
+    }
+
+    pub fn parse(value: &str) -> Result<Self, MemoryError> {
+        match value {
+            "advisory" => Ok(Self::Advisory),
+            "repository-local" => Ok(Self::RepositoryLocal),
+            "governed-evaluation" => Ok(Self::GovernedEvaluation),
+            "protected" => Ok(Self::Protected),
+            other => Err(MemoryError::Invalid(format!(
+                "unsupported authority class: {other}"
+            ))),
+        }
+    }
+
+    pub fn rank(self) -> i32 {
+        match self {
+            Self::Advisory => 0,
+            Self::RepositoryLocal => 1,
+            Self::GovernedEvaluation => 2,
+            Self::Protected => 3,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum RecordStatus {
+    Active,
+    Retired,
+    Rejected,
+}
+
+impl RecordStatus {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Active => "active",
+            Self::Retired => "retired",
+            Self::Rejected => "rejected",
+        }
+    }
+
+    pub fn parse(value: &str) -> Result<Self, MemoryError> {
+        match value {
+            "active" => Ok(Self::Active),
+            "retired" => Ok(Self::Retired),
+            "rejected" => Ok(Self::Rejected),
+            other => Err(MemoryError::Invalid(format!(
+                "unsupported record status: {other}"
+            ))),
         }
     }
 }
@@ -84,8 +169,8 @@ pub struct MemoryRecord {
     pub scope: BTreeMap<String, String>,
     pub created_at: String,
     pub producer_id: String,
-    pub authority_class: String,
-    pub status: String,
+    pub authority_class: AuthorityClass,
+    pub status: RecordStatus,
     pub tags: Vec<String>,
     pub source_ids: Vec<String>,
     pub relations: BTreeMap<String, Vec<String>>,
@@ -111,8 +196,8 @@ impl MemoryRecord {
             scope,
             created_at: created_at.into(),
             producer_id: producer_id.into(),
-            authority_class: "advisory".to_string(),
-            status: "active".to_string(),
+            authority_class: AuthorityClass::Advisory,
+            status: RecordStatus::Active,
             tags: Vec::new(),
             source_ids: Vec::new(),
             relations: BTreeMap::new(),
@@ -166,8 +251,8 @@ impl MemoryRecord {
             "scope": Value::Object(scope),
             "created_at": self.created_at,
             "producer_id": self.producer_id,
-            "authority_class": self.authority_class,
-            "status": self.status,
+            "authority_class": self.authority_class.as_str(),
+            "status": self.status.as_str(),
             "tags": self.tags,
             "source_ids": self.source_ids,
             "relations": Value::Object(relations),
@@ -197,18 +282,7 @@ impl MemoryRecord {
             .get("memory_class")
             .and_then(Value::as_str)
             .ok_or_else(|| MemoryError::Invalid("memory_class is required".into()))?;
-        let memory_class = match class {
-            "episodic" => MemoryClass::Episodic,
-            "causal" => MemoryClass::Causal,
-            "semantic" => MemoryClass::Semantic,
-            "procedural" => MemoryClass::Procedural,
-            "negative" => MemoryClass::Negative,
-            other => {
-                return Err(MemoryError::Invalid(format!(
-                    "unsupported memory class: {other}"
-                )));
-            }
-        };
+        let memory_class = MemoryClass::parse(class)?;
         let scope = object
             .get("scope")
             .and_then(Value::as_object)
@@ -221,40 +295,46 @@ impl MemoryRecord {
                     .ok_or_else(|| MemoryError::Invalid("scope values must be strings".into()))
             })
             .collect::<Result<BTreeMap<_, _>, _>>()?;
-        let string_list = |key: &str| -> Vec<String> {
-            object
-                .get(key)
-                .and_then(Value::as_array)
-                .map(|items| {
-                    items
-                        .iter()
-                        .filter_map(Value::as_str)
-                        .map(str::to_string)
-                        .collect()
-                })
-                .unwrap_or_default()
-        };
-        let relations = object
-            .get("relations")
-            .and_then(Value::as_object)
-            .map(|map| {
-                map.iter()
-                    .map(|(key, value)| {
-                        let values = value
-                            .as_array()
-                            .map(|items| {
-                                items
-                                    .iter()
-                                    .filter_map(Value::as_str)
-                                    .map(str::to_string)
-                                    .collect()
-                            })
-                            .unwrap_or_default();
-                        (key.clone(), values)
+        let string_list = |key: &str| -> Result<Vec<String>, MemoryError> {
+            match object.get(key) {
+                None => Ok(Vec::new()),
+                Some(Value::Array(items)) => items
+                    .iter()
+                    .map(|item| {
+                        item.as_str().map(str::to_string).ok_or_else(|| {
+                            MemoryError::Invalid(format!("{key} entries must be strings"))
+                        })
                     })
-                    .collect()
-            })
-            .unwrap_or_default();
+                    .collect(),
+                Some(_) => Err(MemoryError::Invalid(format!("{key} must be an array"))),
+            }
+        };
+        let relations = match object.get("relations") {
+            None => BTreeMap::new(),
+            Some(Value::Object(map)) => {
+                let mut out = BTreeMap::new();
+                for (key, value) in map {
+                    let Value::Array(items) = value else {
+                        return Err(MemoryError::Invalid(
+                            "relation values must be string arrays".into(),
+                        ));
+                    };
+                    let values = items
+                        .iter()
+                        .map(|item| {
+                            item.as_str().map(str::to_string).ok_or_else(|| {
+                                MemoryError::Invalid("relation targets must be strings".into())
+                            })
+                        })
+                        .collect::<Result<Vec<_>, _>>()?;
+                    out.insert(key.clone(), values);
+                }
+                out
+            }
+            Some(_) => {
+                return Err(MemoryError::Invalid("relations must be an object".into()));
+            }
+        };
         let metadata = object
             .get("metadata")
             .and_then(Value::as_object)
@@ -270,18 +350,22 @@ impl MemoryRecord {
             scope,
             created_at: required_str("created_at")?,
             producer_id: required_str("producer_id")?,
-            authority_class: object
-                .get("authority_class")
-                .and_then(Value::as_str)
-                .unwrap_or("advisory")
-                .to_string(),
-            status: object
-                .get("status")
-                .and_then(Value::as_str)
-                .unwrap_or("active")
-                .to_string(),
-            tags: string_list("tags"),
-            source_ids: string_list("source_ids"),
+            authority_class: match object.get("authority_class") {
+                None => AuthorityClass::Advisory,
+                Some(Value::String(value)) => AuthorityClass::parse(value)?,
+                Some(_) => {
+                    return Err(MemoryError::Invalid(
+                        "authority_class must be a string".into(),
+                    ));
+                }
+            },
+            status: match object.get("status") {
+                None => RecordStatus::Active,
+                Some(Value::String(value)) => RecordStatus::parse(value)?,
+                Some(_) => return Err(MemoryError::Invalid("status must be a string".into())),
+            },
+            tags: string_list("tags")?,
+            source_ids: string_list("source_ids")?,
             relations,
             metadata,
             schema_version: object

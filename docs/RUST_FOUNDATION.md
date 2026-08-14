@@ -42,7 +42,7 @@ The Cargo workspace at the repository root:
 Contract identities introduced or bound here:
 
 - `ravel-rust-foundation/0.1`
-- `ravel-interchange/0.1`
+- `ravel-interchange/0.2` (replaces `0.1`; operation_outcome is OK/ERROR and is not evidentiary)
 - `ravel-canonical-json/1`
 
 Unchanged inherited identities:
@@ -99,13 +99,10 @@ independent evaluation and do not promote 0.6.
 
 ## Next phase, not this one
 
-The first knowledge-store milestone now lives in `ravel-memory`:
-
-- fail-closed `ravel-knowledge-lifecycle/0.1` promotion;
-- semantic consolidation and retrieval-layout planning;
-- retention that compact-by-proposal and never deletes sources;
-- content-addressed artifacts; and
-- inspectable curation reports.
+The knowledge store is now an append-only hash-chained log
+(`ravel-memory-log/0.1`) plus rebuildable projections. Compaction creates
+proposals; retention emits advisories and never deletes. Knowledge promotion
+requires attribution and transfer-test records rather than magic strings.
 
 Vector indexes, learned routing, and automated promotion remain out of scope.
 

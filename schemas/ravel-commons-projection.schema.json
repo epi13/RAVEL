@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ravel.dev/schema/ravel-commons-projection/0.1",
+  "title": "RAVEL to Commons curated knowledge product",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "kind", "statement", "scope", "source_ids", "authority"],
+  "properties": {
+    "schema": {"const": "ravel-commons-projection/0.1"},
+    "kind": {"enum": ["principle", "counterexample", "negative", "strategy"]},
+    "statement": {"type": "string", "minLength": 1},
+    "scope": {"type": "object", "additionalProperties": {"type": "string"}},
+    "source_ids": {"type": "array", "items": {"type": "string"}},
+    "authority": {"const": "advisory"}
+  }
+}

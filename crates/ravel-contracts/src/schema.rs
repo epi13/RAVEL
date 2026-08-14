@@ -2,8 +2,10 @@
 //! contract and must not be renamed without a new identity.
 
 pub const FOUNDATION_CONTRACT: &str = "ravel-rust-foundation/0.1";
-pub const INTERCHANGE_SCHEMA: &str = "ravel-interchange/0.1";
+pub const INTERCHANGE_SCHEMA: &str = "ravel-interchange/0.2";
+pub const INTERCHANGE_SCHEMA_V1: &str = "ravel-interchange/0.1";
 pub const CANONICAL_JSON_CONTRACT: &str = "ravel-canonical-json/1";
+pub const MEMORY_LOG_SCHEMA: &str = "ravel-memory-log/0.1";
 pub const CHECKPOINT_SCHEMA: &str = "ravel-0.6-mechanism-checkpoint/0.1";
 pub const LEDGER_SCHEMA: &str = "ravel-0.6-candidate-ledger/0.1";
 pub const MEMORY_RECORD_SCHEMA: &str = "ravel-memory-record/0.1";

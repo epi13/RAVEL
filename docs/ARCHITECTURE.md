@@ -160,7 +160,7 @@ The Rust workspace (`crates/ravel-contracts`, `crates/ravel-memory`,
 `crates/ravel-core`, `crates/ravel-cli`) is the canonical future implementation
 of these surfaces. Python remains the compatibility adapter used by Fabric and
 the 0.6 development runner. Cross-language proofs go through `ravel-rs`
-(`ravel-interchange/0.1`) and do not make either side authoritative. See
+(`ravel-interchange/0.2`) and do not make either side authoritative. See
 [`RUST_FOUNDATION.md`](RUST_FOUNDATION.md).
 
 The generated candidate-001 C source now has an explicit copy, hard-gate, raw

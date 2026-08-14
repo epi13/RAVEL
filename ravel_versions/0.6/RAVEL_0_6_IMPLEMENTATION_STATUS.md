@@ -94,6 +94,15 @@ This is a development status record, not RAVEL 0.6 evaluation evidence.
 
 ## Not yet implemented or externally unavailable
 
+- **Append-only memory log:** `ravel-memory-log/0.1` is a hash-chained JSONL
+  log. Historical entries are never rewritten. Incomplete tails fail closed
+  unless `TailPolicy::IgnoreIncompleteLastLine` is explicit. Projections are
+  rebuilt on load. Curation counts typed proposals, not substring matches.
+
+- **Interchange 0.2:** operation execution uses `operation_outcome=OK|ERROR`.
+  `PASS/FAIL/UNKNOWN` remain evidentiary. `0.1` is rejected as an unsupported
+  version.
+
 - **Knowledge store milestone:** Rust now owns fail-closed knowledge promotion
   (`ravel-knowledge-record/0.1`), semantic consolidation / retrieval-layout
   parity with Python, compaction that never deletes sources, a content-addressed

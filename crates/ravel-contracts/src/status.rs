@@ -65,3 +65,20 @@ impl PlanStatus {
         }
     }
 }
+
+/// Outcome of an interchange operation. Not an evidentiary disposition.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum OperationOutcome {
+    Ok,
+    Error,
+}
+
+impl OperationOutcome {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ok => "OK",
+            Self::Error => "ERROR",
+        }
+    }
+}

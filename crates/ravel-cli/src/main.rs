@@ -19,7 +19,10 @@ use ravel_core::world::provider_by_id;
 use ravel_core::{
     RawObservation, RetentionConstraintPolicy, evaluate_constraints, run_transaction,
 };
-use ravel_memory::knowledge::{KnowledgeRecord, KnowledgeStage, promote};
+use ravel_memory::knowledge::{
+    AttributionDisposition, AttributionRecord, KnowledgeRecord, KnowledgeStage, TransferStatus,
+    TransferTestRecord, promote,
+};
 use ravel_memory::{
     AccessEvent, ConsolidationPolicy, MemoryConsolidator, MemoryRecord, RetrievalLayoutPlanner,
     ScopeCompatibility, compact,
@@ -84,7 +87,7 @@ fn main() {
             let payload = json!({
                 "schema": INTERCHANGE_SCHEMA,
                 "implementation": IMPLEMENTATION_IDENTITY,
-                "status": "FAIL",
+                "operation_outcome": "ERROR",
                 "error": error.to_string(),
             });
             println!(
@@ -104,7 +107,7 @@ fn print_identity() -> Result<()> {
         "world_abi": WORLD_ABI,
         "checkpoint_abi": CHECKPOINT_ABI,
         "q20": Q20,
-        "status": "PASS",
+        "operation_outcome": "OK",
     }))
 }
 
@@ -130,7 +133,7 @@ fn load_policy_cmd(root: Option<PathBuf>) -> Result<()> {
     emit(&json!({
         "schema": INTERCHANGE_SCHEMA,
         "surface": "policy.load",
-        "status": "PASS",
+        "operation_outcome": "OK",
         "policy": policy.to_value()?,
         "c_header": policy_c_header(&policy)?,
     }))
@@ -143,6 +146,11 @@ fn plan_cmd(provider_id: &str, start: i64, goal: i64, maximum_steps: i64) -> Res
 fn interchange() -> Result<()> {
     let value = read_stdin_json()?;
     let schema = value.get("schema").and_then(Value::as_str);
+    if schema == Some(ravel_contracts::schema::INTERCHANGE_SCHEMA_V1) {
+        return Err(anyhow!(
+            "unsupported interchange version: ravel-interchange/0.1; use ravel-interchange/0.2"
+        ));
+    }
     if schema != Some(INTERCHANGE_SCHEMA) {
         return Err(anyhow!("unsupported interchange schema"));
     }
@@ -175,7 +183,7 @@ fn interchange() -> Result<()> {
             json!({
                 "schema": INTERCHANGE_SCHEMA,
                 "surface": "policy.load",
-                "status": "PASS",
+                "operation_outcome": "OK",
                 "policy": policy.to_value()?,
             })
         }
@@ -187,6 +195,59 @@ fn interchange() -> Result<()> {
         "memory.plan_retrieval" => plan_retrieval(&input)?,
         "knowledge.promote" => promote_knowledge(&input)?,
         "retention.compact" => compact_memory(&input)?,
+        "memory.validate_proposal" => {
+            let records = records_from_input(&input)?;
+            let proposal = input
+                .get("proposal")
+                .ok_or_else(|| anyhow!("proposal is required"))?;
+            let parsed = ravel_memory::ConsolidationProposal {
+                proposal_id: proposal
+                    .get("proposal_id")
+                    .and_then(Value::as_str)
+                    .unwrap_or("consolidation:incomplete")
+                    .to_string(),
+                method_version: "ravel-semantic-consolidation/0.1".into(),
+                created_at: "t0".into(),
+                memory_class: ravel_memory::MemoryClass::Semantic,
+                canonical_statement: "candidate".into(),
+                scope: Default::default(),
+                member_ids: required_string_list(proposal, "member_ids")?,
+                supporting_ids: required_string_list(proposal, "supporting_ids")?,
+                contradicting_ids: required_string_list(proposal, "contradicting_ids")?,
+                superseded_ids: Vec::new(),
+                retrieval_keys: Vec::new(),
+                clustering_confidence: 0.0,
+                status: "proposed".into(),
+                scope_contract_id: "ravel-scope-exact/1".into(),
+                limitations: Vec::new(),
+            };
+            match MemoryConsolidator::validate_completeness(&parsed, &records) {
+                Ok(()) => json!({
+                    "schema": INTERCHANGE_SCHEMA,
+                    "surface": "memory.validate_proposal",
+                    "operation_outcome": "OK",
+                }),
+                Err(error) => json!({
+                    "schema": INTERCHANGE_SCHEMA,
+                    "surface": "memory.validate_proposal",
+                    "operation_outcome": "ERROR",
+                    "error": error.to_string(),
+                }),
+            }
+        }
+        "canonical.encode" => {
+            let payload = input
+                .get("value")
+                .cloned()
+                .ok_or_else(|| anyhow!("canonical value is required"))?;
+            json!({
+                "schema": INTERCHANGE_SCHEMA,
+                "surface": "canonical.encode",
+                "operation_outcome": "OK",
+                "canonical": canonical_json(&payload)?,
+                "digest": ravel_contracts::digest_canonical(&payload)?,
+            })
+        }
         other => return Err(anyhow!("unknown interchange surface: {other}")),
     };
     emit(&output)
@@ -215,7 +276,7 @@ fn evaluate_constraints_value(value: &Value) -> Result<Value> {
     Ok(json!({
         "schema": INTERCHANGE_SCHEMA,
         "surface": "adaptation.evaluate_constraints",
-        "status": "PASS",
+        "operation_outcome": "OK",
         "report": report.to_value(),
     }))
 }
@@ -253,7 +314,7 @@ fn run_transaction_value(value: &Value) -> Result<Value> {
     Ok(json!({
         "schema": INTERCHANGE_SCHEMA,
         "surface": "adaptation.run_transaction",
-        "status": "PASS",
+        "operation_outcome": "OK",
         "transaction": transaction.to_value(),
     }))
 }
@@ -265,7 +326,7 @@ fn encode_checkpoint_value(value: &Value) -> Result<Value> {
     Ok(json!({
         "schema": INTERCHANGE_SCHEMA,
         "surface": "checkpoint.encode",
-        "status": "PASS",
+        "operation_outcome": "OK",
         "checkpoint": String::from_utf8(encoded.clone())?,
         "identity": codec.identity(&encoded),
     }))
@@ -279,7 +340,7 @@ fn plan_value(provider_id: &str, start: i64, goal: i64, maximum_steps: i64) -> R
     Ok(json!({
         "schema": INTERCHANGE_SCHEMA,
         "surface": "world.compile_and_plan",
-        "status": "PASS",
+        "operation_outcome": "OK",
         "provider_id": graph.provider_id,
         "world_abi": WORLD_ABI,
         "plan": {
@@ -307,7 +368,7 @@ fn evaluate_c_transaction(value: &Value) -> Result<Value> {
     Ok(json!({
         "schema": INTERCHANGE_SCHEMA,
         "surface": "c_observations.evaluate",
-        "status": "PASS",
+        "operation_outcome": "OK",
         "threshold_identity": parsed.threshold_identity,
         "committed": parsed.committed,
         "rollback_byte_identical": parsed.rollback_byte_identical,
@@ -327,7 +388,7 @@ fn evaluate_matched_compute(value: &Value) -> Result<Value> {
     Ok(json!({
         "schema": INTERCHANGE_SCHEMA,
         "surface": "matched_compute.evaluate",
-        "status": "PASS",
+        "operation_outcome": "OK",
         "report": report.to_value(),
     }))
 }
@@ -370,7 +431,7 @@ fn experience_from_transaction(value: &Value) -> Result<Value> {
     Ok(json!({
         "schema": INTERCHANGE_SCHEMA,
         "surface": "experience.from_development_transaction",
-        "status": "PASS",
+        "operation_outcome": "OK",
         "record_id": record.record_id(),
         "negative": record.negative(),
         "memory_class": memory.memory_class.as_str(),
@@ -398,7 +459,7 @@ fn lifecycle_round_trip(value: &Value) -> Result<Value> {
     Ok(json!({
         "schema": INTERCHANGE_SCHEMA,
         "surface": "lifecycle.round_trip",
-        "status": "PASS",
+        "operation_outcome": "OK",
         "candidate_id": created.candidate_id,
         "state": frozen.state.as_str(),
     }))
@@ -415,7 +476,7 @@ fn propose_consolidation(value: &Value) -> Result<Value> {
     Ok(json!({
         "schema": INTERCHANGE_SCHEMA,
         "surface": "memory.propose_consolidation",
-        "status": "PASS",
+        "operation_outcome": "OK",
         "proposals": proposals.iter().map(ConsolidationProposalValue::from).collect::<Vec<_>>(),
     }))
 }
@@ -455,7 +516,7 @@ fn plan_retrieval(value: &Value) -> Result<Value> {
     Ok(json!({
         "schema": INTERCHANGE_SCHEMA,
         "surface": "memory.plan_retrieval",
-        "status": "PASS",
+        "operation_outcome": "OK",
         "buckets": buckets.iter().map(|bucket| json!({
             "bucket_id": bucket.bucket_id,
             "member_ids": bucket.member_ids,
@@ -486,40 +547,25 @@ fn promote_knowledge(value: &Value) -> Result<Value> {
             .get("statement")
             .and_then(Value::as_str)
             .unwrap_or(current.statement.as_str()),
-        string_list(value, "evidence_ids"),
-        value
-            .get("evaluation_status")
-            .and_then(Value::as_str)
-            .map(|item| match item {
-                "PASS" => Ok(ravel_contracts::status::EvidenceStatus::Pass),
-                "FAIL" => Ok(ravel_contracts::status::EvidenceStatus::Fail),
-                "UNKNOWN" => Ok(ravel_contracts::status::EvidenceStatus::Unknown),
-                other => Err(anyhow!("unknown evaluation status: {other}")),
-            })
-            .transpose()?,
-        value
-            .get("transfer_status")
-            .and_then(Value::as_str)
-            .unwrap_or("untested"),
-        value
-            .get("attribution")
-            .and_then(Value::as_str)
-            .map(str::to_string),
+        required_string_list(value, "evidence_ids")?,
+        parse_optional_evidence_status(value.get("evaluation_status"))?,
+        parse_optional_attribution(value.get("attribution_record"))?,
+        parse_transfer_tests(value.get("transfer_tests"))?,
         value
             .get("created_at")
             .and_then(Value::as_str)
-            .unwrap_or("2026-08-14T00:00:00Z"),
+            .ok_or_else(|| anyhow!("created_at is required"))?,
     ) {
         Ok(record) => Ok(json!({
             "schema": INTERCHANGE_SCHEMA,
             "surface": "knowledge.promote",
-            "status": "PASS",
+            "operation_outcome": "OK",
             "record": record.to_value(),
         })),
         Err(error) => Ok(json!({
             "schema": INTERCHANGE_SCHEMA,
             "surface": "knowledge.promote",
-            "status": "FAIL",
+            "operation_outcome": "ERROR",
             "error": error.to_string(),
         })),
     }
@@ -540,7 +586,7 @@ fn compact_memory(value: &Value) -> Result<Value> {
     Ok(json!({
         "schema": INTERCHANGE_SCHEMA,
         "surface": "retention.compact",
-        "status": "PASS",
+        "operation_outcome": "OK",
         "deleted": 0,
         "proposals": proposals.iter().map(|item| item.to_value()).collect::<Vec<_>>(),
     }))
@@ -585,6 +631,19 @@ fn policy_from_input(value: &Value) -> Result<ConsolidationPolicy> {
 }
 
 fn knowledge_from_value(value: &Value) -> Result<KnowledgeRecord> {
+    let scope = value
+        .get("scope")
+        .ok_or_else(|| anyhow!("scope is required"))?;
+    let Value::Object(map) = scope else {
+        return Err(anyhow!("scope must be an object"));
+    };
+    let mut parsed_scope = std::collections::BTreeMap::new();
+    for (key, item) in map {
+        let Some(text) = item.as_str() else {
+            return Err(anyhow!("scope values must be strings"));
+        };
+        parsed_scope.insert(key.clone(), text.to_string());
+    }
     Ok(KnowledgeRecord {
         record_id: value
             .get("record_id")
@@ -602,61 +661,142 @@ fn knowledge_from_value(value: &Value) -> Result<KnowledgeRecord> {
             .and_then(Value::as_str)
             .ok_or_else(|| anyhow!("statement is required"))?
             .to_string(),
-        scope: value
-            .get("scope")
-            .and_then(Value::as_object)
-            .map(|map| {
-                map.iter()
-                    .filter_map(|(key, item)| {
-                        item.as_str().map(|text| (key.clone(), text.to_string()))
-                    })
-                    .collect()
-            })
-            .unwrap_or_default(),
-        parent_ids: string_list(value, "parent_ids"),
-        evidence_ids: string_list(value, "evidence_ids"),
-        evaluation_status: value
-            .get("evaluation_status")
-            .and_then(Value::as_str)
-            .map(|item| match item {
-                "PASS" => ravel_contracts::status::EvidenceStatus::Pass,
-                "FAIL" => ravel_contracts::status::EvidenceStatus::Fail,
-                _ => ravel_contracts::status::EvidenceStatus::Unknown,
-            }),
-        transfer_status: value
-            .get("transfer_status")
-            .and_then(Value::as_str)
-            .unwrap_or("untested")
-            .to_string(),
-        attribution: value
-            .get("attribution")
-            .and_then(Value::as_str)
-            .map(str::to_string),
+        scope: parsed_scope,
+        parent_ids: required_string_list(value, "parent_ids")?,
+        evidence_ids: required_string_list(value, "evidence_ids")?,
+        evaluation_status: parse_optional_evidence_status(value.get("evaluation_status"))?,
+        transfer_status: match value.get("transfer_status") {
+            None => TransferStatus::Untested,
+            Some(Value::String(text)) => TransferStatus::parse(text)?,
+            Some(_) => return Err(anyhow!("transfer_status must be a string")),
+        },
+        attribution_id: match value.get("attribution_id") {
+            None | Some(Value::Null) => None,
+            Some(Value::String(text)) => Some(text.clone()),
+            Some(_) => return Err(anyhow!("attribution_id must be a string")),
+        },
+        transfer_test_ids: required_string_list(value, "transfer_test_ids")?,
+        challenged_ids: required_string_list(value, "challenged_ids")?,
         producer_id: value
             .get("producer_id")
             .and_then(Value::as_str)
-            .unwrap_or("ravel-knowledge")
+            .ok_or_else(|| anyhow!("producer_id is required"))?
             .to_string(),
         created_at: value
             .get("created_at")
             .and_then(Value::as_str)
-            .unwrap_or("2026-08-14T00:00:00Z")
+            .ok_or_else(|| anyhow!("created_at is required"))?
             .to_string(),
     })
 }
 
+fn parse_optional_evidence_status(
+    value: Option<&Value>,
+) -> Result<Option<ravel_contracts::status::EvidenceStatus>> {
+    match value {
+        None | Some(Value::Null) => Ok(None),
+        Some(Value::String(item)) => match item.as_str() {
+            "PASS" => Ok(Some(ravel_contracts::status::EvidenceStatus::Pass)),
+            "FAIL" => Ok(Some(ravel_contracts::status::EvidenceStatus::Fail)),
+            "UNKNOWN" => Ok(Some(ravel_contracts::status::EvidenceStatus::Unknown)),
+            other => Err(anyhow!("malformed evaluation_status: {other}")),
+        },
+        Some(_) => Err(anyhow!("evaluation_status must be a string")),
+    }
+}
+
+fn parse_optional_attribution(value: Option<&Value>) -> Result<Option<AttributionRecord>> {
+    match value {
+        None | Some(Value::Null) => Ok(None),
+        Some(item) => {
+            let scope = item
+                .get("scope")
+                .and_then(Value::as_object)
+                .ok_or_else(|| anyhow!("attribution scope is required"))?;
+            Ok(Some(AttributionRecord {
+                attribution_id: item
+                    .get("attribution_id")
+                    .and_then(Value::as_str)
+                    .ok_or_else(|| anyhow!("attribution_id is required"))?
+                    .to_string(),
+                source_intervention_ids: required_string_list(item, "source_intervention_ids")?,
+                evaluator_identity: item
+                    .get("evaluator_identity")
+                    .and_then(Value::as_str)
+                    .ok_or_else(|| anyhow!("evaluator_identity is required"))?
+                    .to_string(),
+                evidence_ids: required_string_list(item, "evidence_ids")?,
+                disposition: AttributionDisposition::parse(
+                    item.get("disposition")
+                        .and_then(Value::as_str)
+                        .ok_or_else(|| anyhow!("attribution disposition is required"))?,
+                )?,
+                scope: scope
+                    .iter()
+                    .map(|(key, value)| {
+                        value
+                            .as_str()
+                            .map(|text| (key.clone(), text.to_string()))
+                            .ok_or_else(|| anyhow!("attribution scope values must be strings"))
+                    })
+                    .collect::<Result<_>>()?,
+            }))
+        }
+    }
+}
+
+fn parse_transfer_tests(value: Option<&Value>) -> Result<Vec<TransferTestRecord>> {
+    match value {
+        None | Some(Value::Null) => Ok(Vec::new()),
+        Some(Value::Array(items)) => items
+            .iter()
+            .map(|item| {
+                Ok(TransferTestRecord {
+                    test_id: item
+                        .get("test_id")
+                        .and_then(Value::as_str)
+                        .ok_or_else(|| anyhow!("test_id is required"))?
+                        .to_string(),
+                    principle_id: item
+                        .get("principle_id")
+                        .and_then(Value::as_str)
+                        .ok_or_else(|| anyhow!("principle_id is required"))?
+                        .to_string(),
+                    context_identity: item
+                        .get("context_identity")
+                        .and_then(Value::as_str)
+                        .ok_or_else(|| anyhow!("context_identity is required"))?
+                        .to_string(),
+                    evidence_ids: required_string_list(item, "evidence_ids")?,
+                    outcome: TransferStatus::parse(
+                        item.get("outcome")
+                            .and_then(Value::as_str)
+                            .ok_or_else(|| anyhow!("transfer outcome is required"))?,
+                    )?,
+                })
+            })
+            .collect(),
+        Some(_) => Err(anyhow!("transfer_tests must be an array")),
+    }
+}
+
+fn required_string_list(value: &Value, key: &str) -> Result<Vec<String>> {
+    match value.get(key) {
+        None => Ok(Vec::new()),
+        Some(Value::Array(items)) => items
+            .iter()
+            .map(|item| {
+                item.as_str()
+                    .map(str::to_string)
+                    .ok_or_else(|| anyhow!("{key} entries must be strings"))
+            })
+            .collect(),
+        Some(_) => Err(anyhow!("{key} must be an array")),
+    }
+}
+
 fn string_list(value: &Value, key: &str) -> Vec<String> {
-    value
-        .get(key)
-        .and_then(Value::as_array)
-        .map(|items| {
-            items
-                .iter()
-                .filter_map(Value::as_str)
-                .map(str::to_string)
-                .collect()
-        })
-        .unwrap_or_default()
+    required_string_list(value, key).unwrap_or_default()
 }
 
 fn resolve_root(root: Option<PathBuf>) -> Result<PathBuf> {

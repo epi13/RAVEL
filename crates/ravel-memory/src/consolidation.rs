@@ -243,6 +243,40 @@ impl MemoryConsolidator {
     }
 }
 
+impl MemoryConsolidator {
+    pub fn validate_completeness(
+        proposal: &ConsolidationProposal,
+        records: &[MemoryRecord],
+    ) -> Result<(), MemoryError> {
+        let known: std::collections::BTreeSet<_> =
+            records.iter().map(|item| item.record_id.as_str()).collect();
+        let listed: std::collections::BTreeSet<_> = proposal
+            .contradicting_ids
+            .iter()
+            .map(String::as_str)
+            .collect();
+        for record in records {
+            if !proposal
+                .member_ids
+                .iter()
+                .any(|item| item == &record.record_id)
+            {
+                continue;
+            }
+            if let Some(targets) = record.relations.get("contradicts") {
+                for target in targets {
+                    if known.contains(target.as_str()) && !listed.contains(target.as_str()) {
+                        return Err(MemoryError::Invalid(
+                            "consolidation proposal omitted a known counterexample".into(),
+                        ));
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
 pub struct RetrievalLayoutPlanner;
 
 impl RetrievalLayoutPlanner {
@@ -371,20 +405,13 @@ fn jaccard(left: &BTreeSet<String>, right: &BTreeSet<String>) -> f64 {
 }
 
 fn representative_rank(record: &MemoryRecord) -> (i32, i32, usize, String, String) {
-    let status_rank = if matches!(record.status.as_str(), "retired" | "rejected") {
-        0
-    } else {
-        1
-    };
-    let authority_rank = match record.authority_class.as_str() {
-        "repository-local" => 1,
-        "governed-evaluation" => 2,
-        "protected" => 3,
-        _ => 0,
+    let status_rank = match record.status {
+        crate::models::RecordStatus::Active => 1,
+        crate::models::RecordStatus::Retired | crate::models::RecordStatus::Rejected => 0,
     };
     (
         status_rank,
-        authority_rank,
+        record.authority_class.rank(),
         record.source_ids.len(),
         record.created_at.clone(),
         record.record_id.clone(),

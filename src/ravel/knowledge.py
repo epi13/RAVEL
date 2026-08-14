@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from typing import Mapping
+from typing import Mapping, Sequence
 
 
 STAGES = {
@@ -26,6 +26,25 @@ class KnowledgeError(ValueError):
 
 
 @dataclass(frozen=True, slots=True)
+class AttributionRecord:
+    attribution_id: str
+    source_intervention_ids: tuple[str, ...]
+    evaluator_identity: str
+    evidence_ids: tuple[str, ...]
+    disposition: str
+    scope: Mapping[str, str]
+
+
+@dataclass(frozen=True, slots=True)
+class TransferTestRecord:
+    test_id: str
+    principle_id: str
+    context_identity: str
+    evidence_ids: tuple[str, ...]
+    outcome: str
+
+
+@dataclass(frozen=True, slots=True)
 class KnowledgeRecord:
     record_id: str
     stage: str
@@ -35,7 +54,9 @@ class KnowledgeRecord:
     evidence_ids: tuple[str, ...] = ()
     evaluation_status: str | None = None
     transfer_status: str = "untested"
-    attribution: str | None = None
+    attribution_id: str | None = None
+    transfer_test_ids: tuple[str, ...] = ()
+    challenged_ids: tuple[str, ...] = ()
     producer_id: str = "ravel-knowledge"
     created_at: str = ""
 
@@ -44,6 +65,8 @@ class KnowledgeRecord:
         payload["scope"] = dict(self.scope)
         payload["parent_ids"] = list(self.parent_ids)
         payload["evidence_ids"] = list(self.evidence_ids)
+        payload["transfer_test_ids"] = list(self.transfer_test_ids)
+        payload["challenged_ids"] = list(self.challenged_ids)
         return payload
 
 
@@ -55,8 +78,8 @@ def promote(
     statement: str,
     evidence_ids: tuple[str, ...] = (),
     evaluation_status: str | None = None,
-    transfer_status: str = "untested",
-    attribution: str | None = None,
+    attribution: AttributionRecord | None = None,
+    transfer_tests: Sequence[TransferTestRecord] = (),
     created_at: str,
 ) -> KnowledgeRecord:
     """Create the next knowledge record or fail closed."""
@@ -65,20 +88,29 @@ def promote(
         raise KnowledgeError(
             f"invalid knowledge transition: {current.stage}->{next_stage}"
         )
-    if current.stage == "episode" and next_stage == "supported_strategy":
-        raise KnowledgeError("an episode cannot directly become a global strategy")
-    if next_stage == "provisional_principle" and attribution != "supported":
-        raise KnowledgeError(
-            "a successful intervention cannot become a principle without supported attribution"
-        )
-    if next_stage == "transfer_tested_principle" and not evidence_ids:
-        raise KnowledgeError("an untested principle cannot authorize transfer")
-    if next_stage == "supported_strategy" and transfer_status != "supported":
-        raise KnowledgeError("an untested principle cannot authorize broad reuse")
-    if current.evaluation_status == "UNKNOWN" and evaluation_status == "PASS":
-        raise KnowledgeError("knowledge promotion cannot convert UNKNOWN into PASS")
+    if current.evaluation_status in {"UNKNOWN", "FAIL"} and evaluation_status == "PASS":
+        raise KnowledgeError("knowledge promotion cannot convert FAIL or UNKNOWN into PASS")
+    if next_id == current.record_id:
+        raise KnowledgeError("promotion must not overwrite its parent")
+    if next_stage == "provisional_principle":
+        if attribution is None or attribution.disposition != "supported":
+            raise KnowledgeError("a principle requires a valid attribution record")
+        if dict(attribution.scope) != dict(current.scope):
+            raise KnowledgeError("attribution scope must match the parent knowledge scope")
+    if next_stage == "transfer_tested_principle" and not transfer_tests:
+        raise KnowledgeError("a transfer-tested principle must identify actual transfer tests")
+    if next_stage == "supported_strategy":
+        contexts = {
+            item.context_identity for item in transfer_tests if item.outcome == "supported"
+        }
+        if len(contexts) < 2:
+            raise KnowledgeError(
+                "a supported strategy must not be created from one local context"
+            )
     if next_stage == "counterexample" and not evidence_ids:
-        raise KnowledgeError("a failed transfer test must remain linked to the principle")
+        raise KnowledgeError(
+            "a counterexample must remain linked to the knowledge it challenges"
+        )
     return KnowledgeRecord(
         record_id=next_id,
         stage=next_stage,
@@ -87,8 +119,10 @@ def promote(
         parent_ids=(current.record_id,),
         evidence_ids=evidence_ids,
         evaluation_status=evaluation_status,
-        transfer_status=transfer_status,
-        attribution=attribution,
+        transfer_status="supported" if next_stage == "supported_strategy" else "untested",
+        attribution_id=None if attribution is None else attribution.attribution_id,
+        transfer_test_ids=tuple(item.test_id for item in transfer_tests),
+        challenged_ids=(current.record_id,) if next_stage == "counterexample" else (),
         producer_id=current.producer_id,
         created_at=created_at,
     )

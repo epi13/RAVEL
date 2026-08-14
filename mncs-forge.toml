@@ -233,3 +233,75 @@ command = ["python3", "tools/ravel_forge_check.py", "knowledge-lifecycle"]
 provider_protocol = false
 subject = "project"
 disclosure = "compact"
+
+[[workflows]]
+name = "rust-fmt"
+category = "inspection"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "rust-fmt"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "rust-clippy"
+category = "inspection"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "rust-clippy"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "canonical-json-parity"
+category = "differential_behavior"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "canonical-json-parity"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "append-log-replay"
+category = "checkpoint_recovery"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "append-log-replay"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "knowledge-negative-matrix"
+category = "mutation"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "knowledge-negative-matrix"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "counterexample-preservation"
+category = "mutation"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "counterexample-preservation"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "retention-advisory"
+category = "inspection"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "retention-advisory"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
+name = "artifact-integrity"
+category = "inspection"
+mode = "development"
+command = ["python3", "tools/ravel_forge_check.py", "artifact-integrity"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"

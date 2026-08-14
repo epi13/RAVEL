@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ravel.dev/schema/ravel-mnel-projection/0.1",
+  "title": "RAVEL to MNEL curated experience set",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "set_kind", "member_ids", "authority"],
+  "properties": {
+    "schema": {"const": "ravel-mnel-projection/0.1"},
+    "set_kind": {
+      "enum": [
+        "representative-successes",
+        "hard-negatives",
+        "counterexamples",
+        "rare-anomalies",
+        "transfer-examples",
+        "failure-families",
+        "stable-principles",
+        "contradictory-evidence"
+      ]
+    },
+    "member_ids": {"type": "array", "items": {"type": "string"}},
+    "authority": {"const": "advisory-not-training"}
+  }
+}

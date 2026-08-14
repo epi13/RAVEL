@@ -1,13 +1,17 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ravel.dev/schema/ravel-interchange/0.1",
+  "$id": "https://ravel.dev/schema/ravel-interchange/0.2",
   "title": "RAVEL cross-language interchange envelope",
   "type": "object",
   "additionalProperties": true,
   "required": ["schema", "surface"],
   "properties": {
     "schema": {
-      "const": "ravel-interchange/0.1"
+      "const": "ravel-interchange/0.2"
+    },
+    "operation_outcome": {
+      "type": "string",
+      "enum": ["OK", "ERROR"]
     },
     "surface": {
       "type": "string",

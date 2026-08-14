@@ -188,9 +188,10 @@ class KnowledgeParityTests(unittest.TestCase):
                 "statement": "must not skip",
                 "evaluation_status": "UNKNOWN",
                 "created_at": "t1",
+                "evidence_ids": [],
             },
         )
-        self.assertEqual(rust_skip["status"], "FAIL")
+        self.assertEqual(rust_skip["operation_outcome"], "ERROR")
         episode = promote(
             current,
             next_stage="episode",
@@ -210,9 +211,10 @@ class KnowledgeParityTests(unittest.TestCase):
                 "evidence_ids": list(current.evidence_ids),
                 "evaluation_status": "UNKNOWN",
                 "created_at": "t1",
+                "evidence_ids": [],
             },
         )
-        self.assertEqual(rust_episode["status"], "PASS")
+        self.assertEqual(rust_episode["operation_outcome"], "OK")
         self.assertEqual(rust_episode["record"]["stage"], episode.stage)
         rust_unknown = interchange(
             "knowledge.promote",
@@ -225,7 +227,58 @@ class KnowledgeParityTests(unittest.TestCase):
                 "created_at": "t2",
             },
         )
-        self.assertEqual(rust_unknown["status"], "FAIL")
+        self.assertEqual(rust_unknown["operation_outcome"], "ERROR")
+
+    def test_omitted_counterexample_is_rejected(self) -> None:
+        records = [
+            record("memory:old", "The routing policy uses a static verifier order."),
+            record(
+                "memory:new",
+                "The routing policy uses a static verifier order.",
+                relations={"contradicts": ("memory:old",)},
+                authority_class="governed-evaluation",
+            ),
+        ]
+        rust = interchange(
+            "memory.validate_proposal",
+            {
+                "records": [item.to_dict() for item in records],
+                "proposal": {
+                    "proposal_id": "consolidation:bad",
+                    "member_ids": ["memory:old", "memory:new"],
+                    "supporting_ids": ["memory:old", "memory:new"],
+                    "contradicting_ids": [],
+                },
+            },
+        )
+        self.assertEqual(rust["operation_outcome"], "ERROR")
+        self.assertIn("counterexample", rust["error"])
+
+    def test_malformed_evaluation_status_is_rejected(self) -> None:
+        current = KnowledgeRecord(
+            record_id="knowledge:obs",
+            stage="observation",
+            statement="A bounded Forge check returned UNKNOWN.",
+            scope={"partition": "development"},
+            evidence_ids=("obs:1",),
+            evaluation_status="UNKNOWN",
+            created_at="2026-08-14T00:00:00Z",
+        )
+        try:
+            interchange(
+                "knowledge.promote",
+                {
+                    "current": current.to_dict(),
+                    "next_stage": "episode",
+                    "next_id": "knowledge:ep",
+                    "statement": current.statement,
+                    "evaluation_status": "MAYBE",
+                    "created_at": "t1",
+                },
+            )
+            self.fail("malformed status should fail closed")
+        except RustFoundationUnavailable:
+            pass
 
 
 if __name__ == "__main__":

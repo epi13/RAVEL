@@ -18,7 +18,9 @@ pub use schema::{
     FOUNDATION_CONTRACT, INTERCHANGE_SCHEMA, LEDGER_SCHEMA, MATCHED_COMPUTE_SCHEMA,
     MEMORY_RECORD_SCHEMA, TRANSACTION_SCHEMA, WORLD_ABI,
 };
-pub use status::{EvidenceStatus, FormalDisposition, PlanStatus, TransactionStatus};
+pub use status::{
+    EvidenceStatus, FormalDisposition, OperationOutcome, PlanStatus, TransactionStatus,
+};
 
 /// Workspace identity bound into interchange envelopes and Forge reports.
 pub const IMPLEMENTATION_IDENTITY: &str = "ravel-rs/0.1";

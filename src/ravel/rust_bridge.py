@@ -16,7 +16,7 @@ from typing import Any, Mapping
 
 
 ROOT = Path(__file__).resolve().parents[2]
-INTERCHANGE_SCHEMA = "ravel-interchange/0.1"
+INTERCHANGE_SCHEMA = "ravel-interchange/0.2"
 FOUNDATION_CONTRACT = "ravel-rust-foundation/0.1"
 
 

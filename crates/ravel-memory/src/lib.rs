@@ -11,10 +11,15 @@ pub mod store;
 pub use artifacts::{ArtifactRecord, ArtifactStore};
 pub use consolidation::{ConsolidationPolicy, MemoryConsolidator, RetrievalLayoutPlanner};
 pub use curation::{CurationReport, curate};
-pub use knowledge::{KnowledgeRecord, KnowledgeStage, promote};
-pub use models::{
-    AccessEvent, ConsolidationProposal, MemoryClass, MemoryError, MemoryRecord,
-    ProposalLifecycleEvent, RetrievalBucket, ScopeCompatibility,
+pub use knowledge::{
+    AttributionDisposition, AttributionRecord, KnowledgeRecord, KnowledgeStage, TransferStatus,
+    TransferTestRecord, promote,
 };
-pub use retention::{RetentionPolicy, compact};
-pub use store::{ImmutableRecordError, JsonlMemoryStore};
+pub use models::{
+    AccessEvent, AuthorityClass, ConsolidationProposal, MemoryClass, MemoryError, MemoryRecord,
+    ProposalLifecycleEvent, RecordStatus, RetrievalBucket, ScopeCompatibility,
+};
+pub use retention::{
+    RetentionAdvisory, RetentionClass, RetentionPolicy, advise_retention, compact,
+};
+pub use store::{ImmutableRecordError, JsonlMemoryStore, TailPolicy};
