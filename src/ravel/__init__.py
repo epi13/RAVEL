@@ -7,6 +7,7 @@ __all__ = [
     "development_evaluator",
     "experience",
     "fabric",
+    "fabric_persistent",
     "knowledge",
     "lifecycle",
     "matched_compute",
