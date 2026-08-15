@@ -1,0 +1,10 @@
+# RAVEL -> persistent MNCS Fabric consumer configuration.
+#
+# The persistent controller owns worker endpoints, TLS material, TrustStore
+# state, registries, bundle caches, placement, and execution lifecycle.
+# RAVEL receives only the controller consumer socket.
+[fabric]
+mode = "persistent-controller"
+socket_path = "/run/mncs-fabric/controller.sock"
+client_identity = "ravel"
+timeout = 5.0
