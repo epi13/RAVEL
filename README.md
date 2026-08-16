@@ -120,7 +120,10 @@ reconciliation, bundle, and replay/negative checks without dispatching selection
 or final material. `src/ravel/fabric_persistent.py` is the preferred live Fabric
 consumer path: it connects through the persistent controller, delegates bundle
 transport and worker placement to Fabric, and supports detached execution with
-restart-safe RAVEL provenance metadata. The Rust crates under `crates/` and the
+restart-safe RAVEL provenance metadata. `ravel-fabric-agent` adds a bounded
+long-running consumer that checks live readiness, can submit one idempotent pair
+of development bootstrap probes, and retains completed Fabric evidence
+references without taking over fleet or evaluator authority. The Rust crates under `crates/` and the
 `ravel-rs` CLI are the future implementation home; `src/ravel/rust_bridge.py`
 and `tests/test_rust_parity.py` prove discrete C/Python/Rust agreement without
 making either side authoritative. See [`docs/RUST_FOUNDATION.md`](docs/RUST_FOUNDATION.md)

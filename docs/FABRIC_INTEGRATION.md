@@ -35,7 +35,7 @@ A minimal configuration is:
 ```toml
 [fabric]
 mode = "persistent-controller"
-socket_path = "/run/mncs-fabric/controller.sock"
+socket_path = "~/.local/state/mncs-fabric/controller.sock"
 client_identity = "ravel"
 timeout = 5.0
 ```
@@ -82,6 +82,39 @@ returned evidence.
 No model is hard-coded into the adapter. `submit_provider_parity()` accepts an
 optional Fabric `model` and `role`, while the default leaves model/worker
 selection to the surrounding MNCS policy and Fabric capability inventory.
+
+### Live RAVEL consumer agent
+
+`ravel-fabric-agent` (or `python3 tools/ravel_fabric_agent.py` from a checkout)
+provides the bounded long-running consumer process. It performs three jobs only:
+
+1. reports controller/fleet readiness through Fabric's public consumer API;
+2. optionally submits one branching and one ring development bootstrap probe; and
+3. watches RAVEL's own detached work and retains completed Fabric evidence
+   references under the RAVEL state directory.
+
+It does **not** poll controller ledgers directly, inspect worker secrets, ingest
+arbitrary MNCS experiments, resubmit work on a timer, or grant evaluator status.
+The bootstrap operation is idempotent with respect to RAVEL's retained provider
+submissions, so restarting the agent does not create an endless stream of jobs.
+
+From the standard controller layout no config file is required:
+
+```bash
+python3 tools/ravel_fabric_agent.py doctor
+python3 tools/ravel_fabric_agent.py run --bootstrap --interval 30
+```
+
+The default socket is `~/.local/state/mncs-fabric/controller.sock` and the
+default RAVEL-owned state root is `~/.local/state/ravel/fabric-live`. A custom
+config may still be supplied with `--config` or `RAVEL_FABRIC_CONFIG`.
+
+Because the current 0.6 provider probe bundles a binary compiled on the
+controller, its Fabric workload is explicitly constrained to the producing OS
+and architecture in addition to `python`. This prevents, for example, a Linux
+ELF candidate from being placed on a Windows worker merely because both expose
+Python. Cross-platform RAVEL probes require platform-native build artifacts; the
+adapter does not pretend otherwise.
 
 ### Authority and evidence boundary
 

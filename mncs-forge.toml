@@ -233,3 +233,12 @@ command = ["python3", "tools/ravel_forge_check.py", "knowledge-lifecycle"]
 provider_protocol = false
 subject = "project"
 disclosure = "compact"
+
+[[workflows]]
+name = "fabric-live-doctor"
+category = "inspection"
+mode = "development"
+command = ["python3", "tools/ravel_fabric_agent.py", "doctor"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
