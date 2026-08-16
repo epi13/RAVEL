@@ -33,6 +33,7 @@ from .fabric import (
     FabricUnavailableError,
     FabricWorkload,
     _aggregate,
+    _build_provider_candidate,
     _identity,
     _task_source,
     _write_bundle_source_manifest,
@@ -421,17 +422,7 @@ class FabricPersistentBackend:
         }
 
     def _build_provider(self, provider: str, output: Path) -> dict[str, Any]:
-        from tools.ravel_0_6_build import build
-
-        prior = os.environ.get("RAVEL06_PROVIDER")
-        try:
-            os.environ["RAVEL06_PROVIDER"] = provider
-            return build(output)
-        finally:
-            if prior is None:
-                os.environ.pop("RAVEL06_PROVIDER", None)
-            else:
-                os.environ["RAVEL06_PROVIDER"] = prior
+        return _build_provider_candidate(provider, output)
 
     def _make_artifact(
         self, provider: str, root: Path

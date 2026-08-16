@@ -9,21 +9,22 @@ into an RAVEL evaluator or promotion decision.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from enum import StrEnum
 import hashlib
 import json
 import math
 import os
-from pathlib import Path
 import shutil
 import stat
-import tempfile
-from typing import Any, Mapping, Protocol
+import subprocess
+import sys
+from collections.abc import Mapping
+from dataclasses import dataclass, field
+from enum import StrEnum
+from pathlib import Path
+from typing import Any, Protocol
 
 from .mncs_bundles import BundleResult, build_execution_bundle
 from .siblings import ensure_sibling_src
-
 
 WORKLOAD_SCHEMA = "ravel-fabric-workload/0.1"
 OBSERVATION_SCHEMA = "ravel-fabric-observation/0.1"
@@ -322,6 +323,42 @@ def _write_bundle_source_manifest(source_root: Path, destination: Path) -> None:
     destination.write_text(json.dumps(value, sort_keys=True), encoding="utf-8")
 
 
+def _build_provider_candidate(provider: str, output: Path) -> dict[str, Any]:
+    """Build development material without importing repository-only tools as a package."""
+
+    if provider not in {"branching", "ring"}:
+        raise FabricError("provider must be branching or ring")
+    project_root = Path(__file__).resolve().parents[2]
+    build_tool = project_root / "tools" / "ravel_0_6_build.py"
+    if not build_tool.is_file():
+        raise FabricUnavailableError(
+            "RAVEL 0.6 development bootstrap requires a source checkout containing "
+            "tools/ravel_0_6_build.py"
+        )
+    environment = dict(os.environ)
+    environment["RAVEL06_PROVIDER"] = provider
+    completed = subprocess.run(
+        [sys.executable, str(build_tool), "build", "--output-dir", str(output)],
+        cwd=project_root,
+        env=environment,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        detail = (completed.stderr or completed.stdout)[-4096:].strip()
+        raise FabricUnavailableError(
+            "RAVEL 0.6 development build failed" + (f": {detail}" if detail else "")
+        )
+    try:
+        record = json.loads(completed.stdout)
+    except json.JSONDecodeError as error:
+        raise FabricUnavailableError("RAVEL 0.6 development build returned invalid JSON") from error
+    if not isinstance(record, dict):
+        raise FabricUnavailableError("RAVEL 0.6 development build returned a non-object record")
+    return record
+
+
 def _task_source(provider: str) -> str:
     return f'''import json
 from pathlib import Path
@@ -368,7 +405,10 @@ class FabricLocalBackend:
         ensure_sibling_src("mncs-fabric", "mncs_validator")
         try:
             from mncs_fabric.artifacts import build_manifest
-            from mncs_fabric.challenges import ChallengeReplayStore, challenge_for_receipt
+            from mncs_fabric.challenges import (
+                ChallengeReplayStore,
+                challenge_for_receipt,
+            )
             from mncs_fabric.controller import LocalController
             from mncs_fabric.receipts import build_execution_receipt
             from mncs_fabric.service import FabricService
@@ -400,17 +440,7 @@ class FabricLocalBackend:
         return self._service.reconcile(list(records), require_distinct_nodes=True)
 
     def _build_provider(self, provider: str, output: Path) -> dict[str, Any]:
-        from tools.ravel_0_6_build import build
-
-        prior = os.environ.get("RAVEL06_PROVIDER")
-        try:
-            os.environ["RAVEL06_PROVIDER"] = provider
-            return build(output)
-        finally:
-            if prior is None:
-                os.environ.pop("RAVEL06_PROVIDER", None)
-            else:
-                os.environ["RAVEL06_PROVIDER"] = prior
+        return _build_provider_candidate(provider, output)
 
     def _make_artifact(self, provider: str, root: Path) -> tuple[Path, dict[str, Any], BundleResult]:
         artifact = root / "artifact"
@@ -540,7 +570,7 @@ class FabricLocalBackend:
                         "issues": list(binding.get("issues", [])),
                     }
                 )
-            except Exception as error:
+            except Exception as error:  # noqa: BLE001
                 receipt_bindings.append(
                     {"status": "UNKNOWN", "issues": [type(error).__name__]}
                 )
@@ -700,7 +730,7 @@ class FabricNetworkConfig:
     pre_staged_bundle_identity: str | None = None
 
     @classmethod
-    def load(cls, path: str | Path) -> "FabricNetworkConfig":
+    def load(cls, path: str | Path) -> FabricNetworkConfig:
         import tomllib
 
         source = Path(path).resolve(strict=True)
