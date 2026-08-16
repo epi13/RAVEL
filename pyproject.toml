@@ -10,6 +10,9 @@ requires-python = ">=3.11"
 authors = [{name = "RAVEL contributors"}]
 dependencies = []
 
+[project.scripts]
+ravel-fabric-agent = "ravel.fabric_agent:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
@@ -32,3 +35,4 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]

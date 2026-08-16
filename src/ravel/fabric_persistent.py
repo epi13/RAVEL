@@ -11,25 +11,27 @@ can use Fabric's current public consumer boundary.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import json
 import os
-from pathlib import Path
+import platform
 import shutil
 import stat
 import tomllib
-from typing import Any, Mapping
+from collections.abc import Mapping
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
 
 from .fabric import (
     DEVELOPMENT_AUTHORITY,
+    MAX_OUTPUT_BYTES,
+    MAX_REPLICAS,
     FabricError,
     FabricExecutionObservation,
     FabricQuestion,
     FabricReferenceResult,
     FabricUnavailableError,
     FabricWorkload,
-    MAX_OUTPUT_BYTES,
-    MAX_REPLICAS,
     _aggregate,
     _identity,
     _task_source,
@@ -37,7 +39,6 @@ from .fabric import (
 )
 from .mncs_bundles import BundleResult, build_execution_bundle
 from .siblings import ensure_sibling_src
-
 
 PERSISTENT_CONFIG_SCHEMA = "ravel-fabric-persistent-config/0.1"
 PERSISTENT_SUBMISSION_SCHEMA = "ravel-fabric-persistent-submission/0.1"
@@ -54,13 +55,22 @@ class FabricPersistentConfig:
     def __post_init__(self) -> None:
         if not str(self.socket_path):
             raise FabricError("persistent Fabric socket_path is required")
+        if not self.socket_path.is_absolute():
+            raise FabricError("persistent Fabric socket_path must be absolute")
         if not self.client_identity or len(self.client_identity) > 128 or "\x00" in self.client_identity:
             raise FabricError("persistent Fabric client_identity must be bounded text")
         if self.timeout <= 0 or self.timeout > 300:
             raise FabricError("persistent Fabric timeout must be within (0, 300] seconds")
 
     @classmethod
-    def load(cls, path: str | Path) -> "FabricPersistentConfig":
+    def default(cls) -> FabricPersistentConfig:
+        """Use the controller's standard per-user state location without owning it."""
+
+        state_root = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state"))
+        return cls(socket_path=state_root / "mncs-fabric" / "controller.sock")
+
+    @classmethod
+    def load(cls, path: str | Path) -> FabricPersistentConfig:
         """Load a deliberately narrow config that cannot smuggle worker trust state."""
 
         candidate = Path(path)
@@ -148,7 +158,7 @@ class FabricPersistentSubmission:
         }
 
     @classmethod
-    def from_dict(cls, value: Mapping[str, Any]) -> "FabricPersistentSubmission":
+    def from_dict(cls, value: Mapping[str, Any]) -> FabricPersistentSubmission:
         if value.get("schema") != PERSISTENT_SUBMISSION_SCHEMA:
             raise FabricError("unsupported persistent submission schema")
         workload_value = value.get("workload")
@@ -239,7 +249,7 @@ class FabricPersistentBackend:
                 client_identity=config.client_identity,
                 timeout=config.timeout,
             )
-        except Exception as error:
+        except Exception as error:  # noqa: BLE001
             self.unavailable_reason = (
                 f"persistent Fabric controller unavailable: {type(error).__name__}"
             )
@@ -258,6 +268,8 @@ class FabricPersistentBackend:
     def close(self) -> None:
         if self.available and hasattr(self._client, "close"):
             self._client.close()
+        self.available = False
+        self.unavailable_reason = "persistent Fabric backend is closed"
 
     def _submission_path(self, work_id: str) -> Path:
         digest = _identity({"fabric_work_id": work_id})[7:]
@@ -265,12 +277,31 @@ class FabricPersistentBackend:
 
     def _persist_submission(self, submission: FabricPersistentSubmission) -> None:
         path = self._submission_path(submission.work_id)
-        temporary = path.with_suffix(".tmp")
+        temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
         temporary.write_text(
             json.dumps(submission.to_dict(), sort_keys=True, indent=2) + "\n",
             encoding="utf-8",
         )
-        temporary.replace(path)
+        temporary.chmod(0o600)
+        os.replace(temporary, path)
+        path.chmod(0o600)
+
+    def submissions(self) -> tuple[FabricPersistentSubmission, ...]:
+        """Load all locally retained detached-work references, failing closed on corruption."""
+
+        items: list[FabricPersistentSubmission] = []
+        for path in sorted(self.submission_root.glob("*.json")):
+            try:
+                value = json.loads(path.read_text(encoding="utf-8"))
+                submission = FabricPersistentSubmission.from_dict(value)
+            except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
+                raise FabricError(
+                    f"persistent submission metadata is corrupt: {path.name}: {type(error).__name__}"
+                ) from error
+            if self._submission_path(submission.work_id).name != path.name:
+                raise FabricError("persistent submission filename does not bind its work identity")
+            items.append(submission)
+        return tuple(items)
 
     def load_submission(self, work_id: str) -> FabricPersistentSubmission:
         path = self._submission_path(work_id)
@@ -294,6 +325,68 @@ class FabricPersistentBackend:
                 "reason": "fabric_public_contract_unavailable",
             }
         return dict(contract())
+
+    @staticmethod
+    def artifact_required_capabilities() -> tuple[str, ...]:
+        """Bind precompiled candidate artifacts to the platform that produced them."""
+
+        system = platform.system().lower()
+        machine = platform.machine().lower()
+        os_capability = {
+            "linux": "os:linux",
+            "windows": "os:windows",
+            "darwin": "os:darwin",
+        }.get(system, f"os:{system or 'unknown'}")
+        architecture = machine or "unknown"
+        return ("python", os_capability, f"arch:{architecture}")
+
+    def health(self) -> Mapping[str, Any]:
+        """Return a bounded live-readiness view from Fabric's public consumer surface."""
+
+        self._require()
+        controller_status: Mapping[str, Any] = {}
+        controller_doctor: Mapping[str, Any] = {}
+        status_fn = getattr(self._client, "controller_status", None)
+        doctor_fn = getattr(self._client, "controller_doctor", None)
+        if status_fn is not None:
+            controller_status = dict(status_fn())
+        if doctor_fn is not None:
+            controller_doctor = dict(doctor_fn())
+        required = set(self.artifact_required_capabilities())
+        workers = self.workers()
+        summaries = []
+        eligible = []
+        for worker in workers:
+            capabilities = {str(item) for item in worker.get("capabilities", ())}
+            summary = {
+                "worker_id": worker.get("worker_id") or worker.get("worker_identity"),
+                "availability": worker.get("availability", "UNKNOWN"),
+                "available": bool(worker.get("available", False)),
+                "capabilities": sorted(capabilities),
+                "capability_inventory_status": worker.get("capability_inventory_status", "UNKNOWN"),
+            }
+            summaries.append(summary)
+            if summary["available"] and required.issubset(capabilities):
+                eligible.append(summary["worker_id"])
+        checks = controller_doctor.get("checks", {}) if isinstance(controller_doctor, Mapping) else {}
+        controller_ok = not checks or all(
+            value in {"PASS", "CONTROLLER_MANAGED_ENDPOINTS", "NOT_CONFIGURED", "LOCAL_OPERATOR_SOCKET"}
+            for value in checks.values()
+        )
+        return {
+            "schema": "ravel-fabric-persistent-health/0.1",
+            "backend": self.backend_identity,
+            "outcome": "PASS" if controller_ok and eligible else "UNKNOWN",
+            "controller_id": controller_status.get("controller_id"),
+            "fabric_version": controller_status.get("fabric_version"),
+            "configured": controller_status.get("configured"),
+            "required_capabilities": sorted(required),
+            "eligible_workers": eligible,
+            "workers": summaries,
+            "controller_checks": dict(checks) if isinstance(checks, Mapping) else {},
+            "authority": "consumer-only",
+            "semantics": "live readiness only; not evaluator or conformance authority",
+        }
 
     def workers(self) -> list[dict[str, Any]]:
         """Return controller-observed fleet state without reading worker secrets."""
@@ -420,7 +513,7 @@ class FabricPersistentBackend:
             question_kind=FabricQuestion.PROVIDER_PARITY,
             bundle_identity=str(bundle.logical_identity),
             fabric_manifest_identity=str(manifest["manifest_identity"]),
-            required_capabilities=("python",),
+            required_capabilities=self.artifact_required_capabilities(),
             replication_count=replication_count,
             provider_identity=f"ravel-toy-{provider}-c/1",
         )
@@ -607,6 +700,12 @@ class FabricPersistentBackend:
         for result in results:
             record = result.get("record") if isinstance(result.get("record"), Mapping) else {}
             receipt = result.get("receipt") if isinstance(result.get("receipt"), Mapping) else {}
+            observed_manifest = record.get("artifact_manifest_identity")
+            if observed_manifest is not None and observed_manifest != workload.fabric_manifest_identity:
+                raise FabricError("persistent Fabric result does not bind the submitted manifest")
+            observed_bundle = result.get("bundle_identity")
+            if observed_bundle is not None and observed_bundle != bundle_identity:
+                raise FabricError("persistent Fabric result does not bind the submitted bundle")
             records.append(record)
             raw_status = record.get("outcome", "UNKNOWN")
             status = raw_status if raw_status in {"PASS", "FAIL", "UNKNOWN"} else "UNKNOWN"
@@ -698,9 +797,9 @@ class FabricPersistentBackend:
 
 
 __all__ = [
+    "PERSISTENT_CONFIG_SCHEMA",
+    "PERSISTENT_SUBMISSION_SCHEMA",
     "FabricPersistentBackend",
     "FabricPersistentConfig",
     "FabricPersistentSubmission",
-    "PERSISTENT_CONFIG_SCHEMA",
-    "PERSISTENT_SUBMISSION_SCHEMA",
 ]

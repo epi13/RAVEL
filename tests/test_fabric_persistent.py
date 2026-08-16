@@ -127,6 +127,28 @@ class PersistentContractTests(unittest.TestCase):
             observation.resource_observations["fabric_work_id"], "work-123"
         )
 
+
+    def test_workload_pins_precompiled_artifact_platform(self) -> None:
+        backend = FabricPersistentBackend.__new__(FabricPersistentBackend)
+        capabilities = backend.artifact_required_capabilities()
+        self.assertIn("python", capabilities)
+        self.assertTrue(any(item.startswith("os:") for item in capabilities))
+        self.assertTrue(any(item.startswith("arch:") for item in capabilities))
+
+    def test_report_rejects_manifest_binding_mismatch(self) -> None:
+        backend = FabricPersistentBackend.__new__(FabricPersistentBackend)
+        backend.available = True
+        backend.unavailable_reason = None
+        workload = self._workload()
+        with self.assertRaises(FabricError):
+            backend._report(
+                workload,
+                "branching",
+                "sha256:" + "2" * 64,
+                "sha256:" + "4" * 64,
+                [{"record": {"artifact_manifest_identity": "sha256:" + "f" * 64}}],
+            )
+
     def test_submission_round_trip_preserves_workload_identity(self) -> None:
         workload = self._workload()
         submission = FabricPersistentSubmission(
