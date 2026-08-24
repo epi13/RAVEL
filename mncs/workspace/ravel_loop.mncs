@@ -1,0 +1,113 @@
+mncs 0.5;
+
+// MNCS-native RAVEL learning loop: hypothesis, prediction, bounded
+// observation, governed disposition, causal attribution, and experience
+// retention as explicit logical values.
+//
+// Authority boundaries preserved here:
+// - a prediction never changes the status of an observation;
+// - UNKNOWN observations stay inconclusive instead of becoming PASS;
+// - refuted hypotheses and failed interventions are retained as first-class
+//   negative experience that a later success cannot erase;
+// - commit eligibility requires every hard gate PASS *and* a confirmed
+//   prediction, so a candidate can never certify itself.
+module ravel.loop.v1;
+
+enum Status { PASS, FAIL, UNKNOWN }
+
+enum Attribution { CONFIRMED, REFUTED, INCONCLUSIVE }
+
+record Hypothesis {
+    id: i64,
+    subject: i64,
+    change: i64,
+    predicted: Status,
+}
+
+record GateSet { a: Status, b: Status, c: Status }
+
+record LoopOutcome {
+    attribution_kind: Attribution,
+    commit_eligible: bool,
+    retain_negative: bool,
+}
+
+fn both(left: bool, right: bool) -> (result: bool) {
+    if left {
+        return right;
+    }
+    return false;
+}
+
+fn either(left: bool, right: bool) -> (result: bool) {
+    if left {
+        return true;
+    }
+    return right;
+}
+
+fn attribute(predicted: Status, observed: Status) -> (result: Attribution) {
+    return match predicted {
+        PASS => match observed {
+            PASS => Attribution.CONFIRMED,
+            FAIL => Attribution.REFUTED,
+            UNKNOWN => Attribution.INCONCLUSIVE,
+        },
+        FAIL => match observed {
+            PASS => Attribution.REFUTED,
+            FAIL => Attribution.CONFIRMED,
+            UNKNOWN => Attribution.INCONCLUSIVE,
+        },
+        UNKNOWN => Attribution.INCONCLUSIVE,
+    };
+}
+
+fn dominates(left: Status, right: Status) -> (result: Status) {
+    return match left {
+        PASS => right,
+        FAIL => Status.FAIL,
+        UNKNOWN => match right {
+            PASS => Status.UNKNOWN,
+            FAIL => Status.FAIL,
+            UNKNOWN => Status.UNKNOWN,
+        },
+    };
+}
+
+fn gate_status(gates: GateSet) -> (result: Status) {
+    let ab: Status = dominates(gates.a, gates.b);
+    return dominates(ab, gates.c);
+}
+
+fn evaluate(hypothesis: Hypothesis, gates: GateSet, observed: Status) -> (result: LoopOutcome)
+    capability ravel_evidence_request
+    effect observe authorized_by ravel_evidence_request
+{
+    let combined: Status = gate_status(gates);
+    let kind: Attribution = attribute(hypothesis.predicted, observed);
+    let confirmed: bool = match kind {
+        CONFIRMED => true,
+        REFUTED => false,
+        INCONCLUSIVE => false,
+    };
+    let gates_clean: bool = match combined {
+        PASS => true,
+        FAIL => false,
+        UNKNOWN => false,
+    };
+    let observed_bad: bool = match observed {
+        PASS => false,
+        FAIL => true,
+        UNKNOWN => false,
+    };
+    let refuted: bool = match kind {
+        CONFIRMED => false,
+        REFUTED => true,
+        INCONCLUSIVE => false,
+    };
+    return LoopOutcome {
+        attribution_kind: kind,
+        commit_eligible: both(confirmed, gates_clean),
+        retain_negative: either(observed_bad, refuted),
+    };
+}

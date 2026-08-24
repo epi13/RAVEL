@@ -1,0 +1,127 @@
+mncs 0.5;
+
+// MNCS-native RAVEL memory: promotion lifecycle and negative-knowledge
+// retention.
+//
+// A causal attribution becomes a scoped provisional principle only after
+// repeated support with zero counterexamples; a principle becomes a reusable
+// strategy only after surviving a transfer test inside its declared scope.
+// Counterexamples are never decremented by later successes, so negative
+// memory survives every positive outcome. Embedding-free integer identities
+// stand in for content identity at this layer; host boundaries bind them to
+// full digests.
+module ravel.memory.v1;
+
+enum Status { PASS, FAIL, UNKNOWN }
+
+enum TransferOutcome { TRANSFERS, FAILS_TRANSFER, UNTESTED }
+
+enum Selection { PRIMARY_STRATEGY, FALLBACK_STRATEGY, NO_STRATEGY }
+
+record Principle {
+    id: i64,
+    scope_domain: i64,
+    support_count: i64,
+    counterexample_count: i64,
+}
+
+record Strategy {
+    principle_id: i64,
+    scope_domain: i64,
+    rank: i64,
+}
+
+fn at_least_two(count: i64) -> (result: bool) {
+    return count >= 2;
+}
+
+// Promotion gate for episodic+causal experience into a semantic principle:
+// bounded repeated support and zero surviving counterexamples.
+fn promotable(principle: Principle) -> (result: bool) {
+    if at_least_two(principle.support_count) {
+        return principle.counterexample_count == 0;
+    }
+    return false;
+}
+
+// Record a new supporting episode. Support may grow; counterexamples are
+// untouched.
+fn absorb_support(principle: Principle) -> (result: Principle) {
+    let support: i64 = principle.support_count + 1;
+    return Principle {
+        id: principle.id,
+        scope_domain: principle.scope_domain,
+        support_count: support,
+        counterexample_count: principle.counterexample_count,
+    };
+}
+
+// Record a counterexample. This is the only way a principle loses
+// promotability, and no later operation can remove it.
+fn absorb_counterexample(principle: Principle) -> (result: Principle) {
+    let counterexamples: i64 = principle.counterexample_count + 1;
+    return Principle {
+        id: principle.id,
+        scope_domain: principle.scope_domain,
+        support_count: principle.support_count,
+        counterexample_count: counterexamples,
+    };
+}
+
+// A later successful episode may add support but must never erase an earlier
+// counterexample: negative evidence dominates the memory update.
+fn absorb_success_after_failure(failed: Principle) -> (result: Principle) {
+    let supported: Principle = absorb_support(failed);
+    return supported;
+}
+
+// Transfer test: a strategy is reusable in a context only when its principle
+// is promotable and the context lies inside the declared scope. Out-of-scope
+// use is refused rather than guessed.
+fn transfer_test(principle: Principle, strategy: Strategy, task_domain: i64) -> (result: TransferOutcome) {
+    if promotable(principle) {
+        if principle.id == strategy.principle_id {
+            if task_domain == strategy.scope_domain {
+                return TransferOutcome.TRANSFERS;
+            }
+            return TransferOutcome.UNTESTED;
+        }
+        return TransferOutcome.FAILS_TRANSFER;
+    }
+    return TransferOutcome.FAILS_TRANSFER;
+}
+
+// Protected selection partition: choose between two candidate strategies for
+// a task. A primary whose principle carries counterexamples is demoted to the
+// fallback; equal ranks prefer the primary. The function can only select
+// among offered strategies - it cannot invent authority for either.
+fn select(
+    primary: Strategy,
+    fallback: Strategy,
+    primary_counterexamples: i64,
+    fallback_counterexamples: i64,
+    task_domain: i64,
+) -> (result: Selection) {
+    let primary_clean: bool = primary_counterexamples == 0;
+    let fallback_clean: bool = fallback_counterexamples == 0;
+    let primary_in_scope: bool = task_domain == primary.scope_domain;
+    let fallback_in_scope: bool = task_domain == fallback.scope_domain;
+
+    if primary_in_scope {
+        if primary_clean {
+            return Selection.PRIMARY_STRATEGY;
+        }
+        if fallback_in_scope {
+            if fallback_clean {
+                return Selection.FALLBACK_STRATEGY;
+            }
+        }
+        return Selection.NO_STRATEGY;
+    }
+    if fallback_in_scope {
+        if fallback_clean {
+            return Selection.FALLBACK_STRATEGY;
+        }
+    }
+    return Selection.NO_STRATEGY;
+}

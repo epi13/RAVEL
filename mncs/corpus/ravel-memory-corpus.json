@@ -1,0 +1,1298 @@
+{
+ "schema_version": "0.1",
+ "name": "ravel-memory-v1",
+ "cases": [
+  {
+   "id": "promotable-clean-supported",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.memory.v1",
+     "function": "promotable"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Principle::counterexample_count%3Ai64%3Bid%3Ai64%3Bscope_domain%3Ai64%3Bsupport_count%3Ai64%3B",
+       "name": "Principle",
+       "fields": [
+        [
+         "counterexample_count",
+         {
+          "integer": {
+           "value": 0,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "support_count",
+         {
+          "integer": {
+           "value": 2,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "promotable-single-support",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.memory.v1",
+     "function": "promotable"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Principle::counterexample_count%3Ai64%3Bid%3Ai64%3Bscope_domain%3Ai64%3Bsupport_count%3Ai64%3B",
+       "name": "Principle",
+       "fields": [
+        [
+         "counterexample_count",
+         {
+          "integer": {
+           "value": 0,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "support_count",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "promotable-counterexample-blocks",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.memory.v1",
+     "function": "promotable"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Principle::counterexample_count%3Ai64%3Bid%3Ai64%3Bscope_domain%3Ai64%3Bsupport_count%3Ai64%3B",
+       "name": "Principle",
+       "fields": [
+        [
+         "counterexample_count",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "support_count",
+         {
+          "integer": {
+           "value": 5,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "absorb-success-after-failure-retains-negative",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.memory.v1",
+     "function": "absorb_success_after_failure"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Principle::counterexample_count%3Ai64%3Bid%3Ai64%3Bscope_domain%3Ai64%3Bsupport_count%3Ai64%3B",
+       "name": "Principle",
+       "fields": [
+        [
+         "counterexample_count",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "support_count",
+         {
+          "integer": {
+           "value": 2,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Principle::counterexample_count%3Ai64%3Bid%3Ai64%3Bscope_domain%3Ai64%3Bsupport_count%3Ai64%3B",
+      "name": "Principle",
+      "fields": [
+       [
+        "counterexample_count",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "id",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "scope_domain",
+        {
+         "integer": {
+          "value": 10,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "support_count",
+        {
+         "integer": {
+          "value": 3,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "absorb-counterexample",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.memory.v1",
+     "function": "absorb_counterexample"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Principle::counterexample_count%3Ai64%3Bid%3Ai64%3Bscope_domain%3Ai64%3Bsupport_count%3Ai64%3B",
+       "name": "Principle",
+       "fields": [
+        [
+         "counterexample_count",
+         {
+          "integer": {
+           "value": 0,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "support_count",
+         {
+          "integer": {
+           "value": 2,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Principle::counterexample_count%3Ai64%3Bid%3Ai64%3Bscope_domain%3Ai64%3Bsupport_count%3Ai64%3B",
+      "name": "Principle",
+      "fields": [
+       [
+        "counterexample_count",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "id",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "scope_domain",
+        {
+         "integer": {
+          "value": 10,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "support_count",
+        {
+         "integer": {
+          "value": 2,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "transfer-inside-scope",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.memory.v1",
+     "function": "transfer_test"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Principle::counterexample_count%3Ai64%3Bid%3Ai64%3Bscope_domain%3Ai64%3Bsupport_count%3Ai64%3B",
+       "name": "Principle",
+       "fields": [
+        [
+         "counterexample_count",
+         {
+          "integer": {
+           "value": 0,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "support_count",
+         {
+          "integer": {
+           "value": 3,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Strategy::principle_id%3Ai64%3Brank%3Ai64%3Bscope_domain%3Ai64%3B",
+       "name": "Strategy",
+       "fields": [
+        [
+         "principle_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "rank",
+         {
+          "integer": {
+           "value": 5,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 10,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.memory.v1::TransferOutcome",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.memory.v1::TransferOutcome::TRANSFERS",
+      "discriminant": 0
+     }
+    }
+   ]
+  },
+  {
+   "id": "transfer-out-of-scope-untested",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.memory.v1",
+     "function": "transfer_test"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Principle::counterexample_count%3Ai64%3Bid%3Ai64%3Bscope_domain%3Ai64%3Bsupport_count%3Ai64%3B",
+       "name": "Principle",
+       "fields": [
+        [
+         "counterexample_count",
+         {
+          "integer": {
+           "value": 0,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "support_count",
+         {
+          "integer": {
+           "value": 3,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Strategy::principle_id%3Ai64%3Brank%3Ai64%3Bscope_domain%3Ai64%3B",
+       "name": "Strategy",
+       "fields": [
+        [
+         "principle_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "rank",
+         {
+          "integer": {
+           "value": 5,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 11,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.memory.v1::TransferOutcome",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.memory.v1::TransferOutcome::UNTESTED",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "select-primary-in-scope-clean",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.memory.v1",
+     "function": "select"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Strategy::principle_id%3Ai64%3Brank%3Ai64%3Bscope_domain%3Ai64%3B",
+       "name": "Strategy",
+       "fields": [
+        [
+         "principle_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "rank",
+         {
+          "integer": {
+           "value": 5,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Strategy::principle_id%3Ai64%3Brank%3Ai64%3Bscope_domain%3Ai64%3B",
+       "name": "Strategy",
+       "fields": [
+        [
+         "principle_id",
+         {
+          "integer": {
+           "value": 2,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "rank",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 10,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.memory.v1::Selection",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.memory.v1::Selection::PRIMARY_STRATEGY",
+      "discriminant": 0
+     }
+    }
+   ]
+  },
+  {
+   "id": "select-demotes-primary-with-counterexamples",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.memory.v1",
+     "function": "select"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Strategy::principle_id%3Ai64%3Brank%3Ai64%3Bscope_domain%3Ai64%3B",
+       "name": "Strategy",
+       "fields": [
+        [
+         "principle_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "rank",
+         {
+          "integer": {
+           "value": 5,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Strategy::principle_id%3Ai64%3Brank%3Ai64%3Bscope_domain%3Ai64%3B",
+       "name": "Strategy",
+       "fields": [
+        [
+         "principle_id",
+         {
+          "integer": {
+           "value": 2,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "rank",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 10,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.memory.v1::Selection",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.memory.v1::Selection::FALLBACK_STRATEGY",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "select-no-strategy-out-of-scope",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.memory.v1",
+     "function": "select"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Strategy::principle_id%3Ai64%3Brank%3Ai64%3Bscope_domain%3Ai64%3B",
+       "name": "Strategy",
+       "fields": [
+        [
+         "principle_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "rank",
+         {
+          "integer": {
+           "value": 5,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Strategy::principle_id%3Ai64%3Brank%3Ai64%3Bscope_domain%3Ai64%3B",
+       "name": "Strategy",
+       "fields": [
+        [
+         "principle_id",
+         {
+          "integer": {
+           "value": 2,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "rank",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 20,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 99,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.memory.v1::Selection",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.memory.v1::Selection::NO_STRATEGY",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "select-refuses-dirty-fallback",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.memory.v1",
+     "function": "select"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Strategy::principle_id%3Ai64%3Brank%3Ai64%3Bscope_domain%3Ai64%3B",
+       "name": "Strategy",
+       "fields": [
+        [
+         "principle_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "rank",
+         {
+          "integer": {
+           "value": 5,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 99,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.memory.v1::Strategy::principle_id%3Ai64%3Brank%3Ai64%3Bscope_domain%3Ai64%3B",
+       "name": "Strategy",
+       "fields": [
+        [
+         "principle_id",
+         {
+          "integer": {
+           "value": 2,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "rank",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "scope_domain",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 10,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.memory.v1::Selection",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.memory.v1::Selection::NO_STRATEGY",
+      "discriminant": 2
+     }
+    }
+   ]
+  }
+ ]
+}

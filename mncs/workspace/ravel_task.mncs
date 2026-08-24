@@ -1,0 +1,117 @@
+mncs 0.5;
+
+// MNCS-native RAVEL task contexts.
+//
+// Every RAVEL episode must name the exact program state its reasoning refers
+// to. A TaskContext carries fragments of the resident Language Service
+// snapshot identity that produced it; when the live workspace advances, the
+// context is stale and every derived request is refused instead of silently
+// applied to drifted semantics. Evidence requests stay inside the declared
+// authority domain and inside the step budget.
+module ravel.task.v1;
+
+enum RequestDecision { ISSUE_REQUEST, REFUSE_STALE, REFUSE_AUTHORITY, REFUSE_BUDGET }
+
+record TaskContext {
+    task_id: i64,
+    snapshot_hi: i64,
+    snapshot_lo: i64,
+    subject: i64,
+    authority_domain: i64,
+    budget_steps: i64,
+}
+
+record EvidenceRequest {
+    task_id: i64,
+    snapshot_hi: i64,
+    snapshot_lo: i64,
+    subject: i64,
+    verifier: i64,
+    max_steps: i64,
+}
+
+record PlannedRequest {
+    decision: RequestDecision,
+    request: EvidenceRequest,
+}
+
+fn both(left: bool, right: bool) -> (result: bool) {
+    if left {
+        return right;
+    }
+    return false;
+}
+
+// Identity drift: any half of the bound snapshot identity mismatching the
+// live workspace makes the whole context stale.
+fn stale(context: TaskContext, live_hi: i64, live_lo: i64) -> (result: bool) {
+    let hi_matches: bool = context.snapshot_hi == live_hi;
+    let lo_matches: bool = context.snapshot_lo == live_lo;
+    if both(hi_matches, lo_matches) {
+        return false;
+    }
+    return true;
+}
+
+// An inert request names the abandoned context so the caller can see exactly
+// which semantic state was refused; zero subject and steps mark it dead.
+fn inert(context: TaskContext, verifier: i64) -> (result: EvidenceRequest) {
+    return EvidenceRequest {
+        task_id: context.task_id,
+        snapshot_hi: context.snapshot_hi,
+        snapshot_lo: context.snapshot_lo,
+        subject: 0,
+        verifier: verifier,
+        max_steps: 0,
+    };
+}
+
+// Decide whether an evidence request may be issued under this context.
+// Refusals are explicit and carry their reason; nothing is downgraded or
+// retried against a different snapshot behind the caller's back.
+fn plan_request(
+    context: TaskContext,
+    live_hi: i64,
+    live_lo: i64,
+    candidate_subject: i64,
+    requested_domain: i64,
+    requested_steps: i64,
+    verifier: i64,
+) -> (result: PlannedRequest) {
+    let drifted: bool = stale(context, live_hi, live_lo);
+    if drifted {
+        return PlannedRequest {
+            decision: RequestDecision.REFUSE_STALE,
+            request: inert(context, verifier),
+        };
+    }
+    let in_authority: bool = context.authority_domain == requested_domain;
+    let on_subject: bool = context.subject == candidate_subject;
+    if both(in_authority, on_subject) {
+        if affordable(context, requested_steps) {
+            return PlannedRequest {
+                decision: RequestDecision.ISSUE_REQUEST,
+                request: EvidenceRequest {
+                    task_id: context.task_id,
+                    snapshot_hi: context.snapshot_hi,
+                    snapshot_lo: context.snapshot_lo,
+                    subject: context.subject,
+                    verifier: verifier,
+                    max_steps: requested_steps,
+                },
+            };
+        }
+        return PlannedRequest {
+            decision: RequestDecision.REFUSE_BUDGET,
+            request: inert(context, verifier),
+        };
+    }
+    return PlannedRequest {
+        decision: RequestDecision.REFUSE_AUTHORITY,
+        request: inert(context, verifier),
+    };
+}
+
+fn affordable(context: TaskContext, requested_steps: i64) -> (result: bool) {
+    return requested_steps <= context.budget_steps;
+}
