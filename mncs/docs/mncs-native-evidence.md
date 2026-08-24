@@ -65,6 +65,22 @@ case met its expectation and layered agreement passed. Results are
 deterministic: re-running the same source/corpus/compiler reproduces identical
 result identities (verified across independent invocations).
 
+## Frozen replication (local; Fabric path)
+
+The frozen ravel.core.v1 artifact was re-executed through the language's
+identity-bound replication boundary
+(`experiment execute ARTIFACT CORPUS --baseline RESULT`):
+
+- baseline result: `mncs:language:experiment:result:42382f998449aacf758e6a57ef66828e11b88ce9f22e464a6850a4217d5628ba`
+- replicated result: **identical identity**, status PASS, all corpus cases
+  matching, identity checks valid (fail-closed on any mismatch)
+- producer-native Family Record reference emitted
+  (`recordKind: LanguageExperimentResult`, producer `mncs-language`)
+
+This exercised the exact runtime boundary Fabric packages without a remote
+controller; no remote worker observation was made in this cycle, so no
+distributed evidence is claimed.
+
 ## Legacy differential mapping
 
 No executable differential harness against legacy Python/Rust RAVEL exists yet
