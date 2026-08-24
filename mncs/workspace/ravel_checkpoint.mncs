@@ -1,0 +1,135 @@
+mncs 0.5;
+
+// MNCS-native RAVEL checkpointed transactions.
+//
+// A candidate change is constructed against an immutable checkpoint, its
+// evaluation is bounded by hard gates, and the disposition either commits the
+// candidate state or rolls back to the untouched checkpoint while retaining
+// the negative experience. Rollback is a logical value selection here: the
+// baseline record is never mutated, so isolation is structural rather than
+// defensive.
+module ravel.checkpoint.v1;
+
+enum Status { PASS, FAIL, UNKNOWN }
+
+enum TxKind { COMMITTED, ROLLED_BACK }
+
+record Checkpoint {
+    id: i64,
+    total: i64,
+    count: i64,
+}
+
+record Candidate {
+    parent: i64,
+    delta_total: i64,
+    delta_count: i64,
+    predicted: Status,
+}
+
+record GateSet { a: Status, b: Status, c: Status }
+
+record TxOutcome {
+    kind: TxKind,
+    checkpoint_id: i64,
+    total: i64,
+    count: i64,
+    negative_retained: bool,
+}
+
+fn dominates(left: Status, right: Status) -> (result: Status) {
+    return match left {
+        PASS => right,
+        FAIL => Status.FAIL,
+        UNKNOWN => match right {
+            PASS => Status.UNKNOWN,
+            FAIL => Status.FAIL,
+            UNKNOWN => Status.UNKNOWN,
+        },
+    };
+}
+
+fn gate_status(gates: GateSet) -> (result: Status) {
+    let ab: Status = dominates(gates.a, gates.b);
+    return dominates(ab, gates.c);
+}
+
+fn status_pass(subject: Status) -> (result: bool) {
+    return match subject {
+        PASS => true,
+        FAIL => false,
+        UNKNOWN => false,
+    };
+}
+
+fn status_fail(subject: Status) -> (result: bool) {
+    return match subject {
+        PASS => false,
+        FAIL => true,
+        UNKNOWN => false,
+    };
+}
+
+fn both(left: bool, right: bool) -> (result: bool) {
+    if left {
+        return right;
+    }
+    return false;
+}
+
+// Construct the candidate state purely from the baseline checkpoint. The
+// candidate names its parent; a mismatch is a caller error the type system
+// cannot see yet, so commit re-checks it below.
+fn apply(base: Checkpoint, change: Candidate) -> (result: Checkpoint) {
+    let total: i64 = base.total + change.delta_total;
+    let count: i64 = base.count + change.delta_count;
+    return Checkpoint { id: base.id, total: total, count: count };
+}
+
+fn transact(
+    base: Checkpoint,
+    change: Candidate,
+    gates: GateSet,
+    observed: Status,
+) -> (result: TxOutcome)
+    capability ravel_transaction_authority
+{
+    let combined: Status = gate_status(gates);
+    let predicted_well: bool = status_pass(change.predicted);
+    let observed_bad: bool = status_fail(observed);
+
+    if status_fail(combined) {
+        return TxOutcome {
+            kind: TxKind.ROLLED_BACK,
+            checkpoint_id: base.id,
+            total: base.total,
+            count: base.count,
+            negative_retained: true,
+        };
+    }
+    if both(predicted_well, status_pass(combined)) {
+        if both(status_pass(observed), same_parent(base, change)) {
+            let committed_state: Checkpoint = apply(base, change);
+            return TxOutcome {
+                kind: TxKind.COMMITTED,
+                checkpoint_id: committed_state.id,
+                total: committed_state.total,
+                count: committed_state.count,
+                negative_retained: false,
+            };
+        }
+    }
+    // Unresolved gates or inconclusive observation hold the candidate: the
+    // baseline stands and nothing is fabricated.
+    return TxOutcome {
+        kind: TxKind.ROLLED_BACK,
+        checkpoint_id: base.id,
+        total: base.total,
+        count: base.count,
+        negative_retained: observed_bad,
+    };
+}
+
+fn same_parent(base: Checkpoint, change: Candidate) -> (result: bool) {
+    return base.id == change.parent;
+}

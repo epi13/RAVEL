@@ -1,0 +1,1256 @@
+{
+ "schema_version": "0.1",
+ "name": "ravel-task-v1",
+ "cases": [
+  {
+   "id": "issue",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.task.v1",
+     "function": "plan_request"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.task.v1::TaskContext::authority_domain%3Ai64%3Bbudget_steps%3Ai64%3Bsnapshot_hi%3Ai64%3Bsnapshot_lo%3Ai64%3Bsubject%3Ai64%3Btask_id%3Ai64%3B",
+       "name": "TaskContext",
+       "fields": [
+        [
+         "authority_domain",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "budget_steps",
+         {
+          "integer": {
+           "value": 512,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot_hi",
+         {
+          "integer": {
+           "value": 111,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot_lo",
+         {
+          "integer": {
+           "value": 222,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "subject",
+         {
+          "integer": {
+           "value": 33,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 111,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 222,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 33,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 7,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 256,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 9,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:ravel.task.v1::PlannedRequest::decision%3ARequestDecision%3Brequest%3AEvidenceRequest%3B",
+      "name": "PlannedRequest",
+      "fields": [
+       [
+        "decision",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:ravel.task.v1::RequestDecision",
+          "variant_identity": "mncs:0.2:finite-variant:ravel.task.v1::RequestDecision::ISSUE_REQUEST",
+          "discriminant": 0
+         }
+        }
+       ],
+       [
+        "request",
+        {
+         "record": {
+          "type_identity": "mncs:0.2:record-type:ravel.task.v1::EvidenceRequest::max_steps%3Ai64%3Bsnapshot_hi%3Ai64%3Bsnapshot_lo%3Ai64%3Bsubject%3Ai64%3Btask_id%3Ai64%3Bverifier%3Ai64%3B",
+          "name": "EvidenceRequest",
+          "fields": [
+           [
+            "max_steps",
+            {
+             "integer": {
+              "value": 256,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "snapshot_hi",
+            {
+             "integer": {
+              "value": 111,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "snapshot_lo",
+            {
+             "integer": {
+              "value": 222,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "subject",
+            {
+             "integer": {
+              "value": 33,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "task_id",
+            {
+             "integer": {
+              "value": 1,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "verifier",
+            {
+             "integer": {
+              "value": 9,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ]
+          ]
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "refuse-stale",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.task.v1",
+     "function": "plan_request"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.task.v1::TaskContext::authority_domain%3Ai64%3Bbudget_steps%3Ai64%3Bsnapshot_hi%3Ai64%3Bsnapshot_lo%3Ai64%3Bsubject%3Ai64%3Btask_id%3Ai64%3B",
+       "name": "TaskContext",
+       "fields": [
+        [
+         "authority_domain",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "budget_steps",
+         {
+          "integer": {
+           "value": 512,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot_hi",
+         {
+          "integer": {
+           "value": 111,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot_lo",
+         {
+          "integer": {
+           "value": 222,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "subject",
+         {
+          "integer": {
+           "value": 33,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 999,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 222,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 33,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 7,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 256,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 9,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:ravel.task.v1::PlannedRequest::decision%3ARequestDecision%3Brequest%3AEvidenceRequest%3B",
+      "name": "PlannedRequest",
+      "fields": [
+       [
+        "decision",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:ravel.task.v1::RequestDecision",
+          "variant_identity": "mncs:0.2:finite-variant:ravel.task.v1::RequestDecision::REFUSE_STALE",
+          "discriminant": 1
+         }
+        }
+       ],
+       [
+        "request",
+        {
+         "record": {
+          "type_identity": "mncs:0.2:record-type:ravel.task.v1::EvidenceRequest::max_steps%3Ai64%3Bsnapshot_hi%3Ai64%3Bsnapshot_lo%3Ai64%3Bsubject%3Ai64%3Btask_id%3Ai64%3Bverifier%3Ai64%3B",
+          "name": "EvidenceRequest",
+          "fields": [
+           [
+            "max_steps",
+            {
+             "integer": {
+              "value": 0,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "snapshot_hi",
+            {
+             "integer": {
+              "value": 111,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "snapshot_lo",
+            {
+             "integer": {
+              "value": 222,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "subject",
+            {
+             "integer": {
+              "value": 0,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "task_id",
+            {
+             "integer": {
+              "value": 1,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "verifier",
+            {
+             "integer": {
+              "value": 9,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ]
+          ]
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "refuse-authority",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.task.v1",
+     "function": "plan_request"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.task.v1::TaskContext::authority_domain%3Ai64%3Bbudget_steps%3Ai64%3Bsnapshot_hi%3Ai64%3Bsnapshot_lo%3Ai64%3Bsubject%3Ai64%3Btask_id%3Ai64%3B",
+       "name": "TaskContext",
+       "fields": [
+        [
+         "authority_domain",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "budget_steps",
+         {
+          "integer": {
+           "value": 512,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot_hi",
+         {
+          "integer": {
+           "value": 111,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot_lo",
+         {
+          "integer": {
+           "value": 222,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "subject",
+         {
+          "integer": {
+           "value": 33,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 111,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 222,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 33,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 8,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 256,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 9,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:ravel.task.v1::PlannedRequest::decision%3ARequestDecision%3Brequest%3AEvidenceRequest%3B",
+      "name": "PlannedRequest",
+      "fields": [
+       [
+        "decision",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:ravel.task.v1::RequestDecision",
+          "variant_identity": "mncs:0.2:finite-variant:ravel.task.v1::RequestDecision::REFUSE_AUTHORITY",
+          "discriminant": 2
+         }
+        }
+       ],
+       [
+        "request",
+        {
+         "record": {
+          "type_identity": "mncs:0.2:record-type:ravel.task.v1::EvidenceRequest::max_steps%3Ai64%3Bsnapshot_hi%3Ai64%3Bsnapshot_lo%3Ai64%3Bsubject%3Ai64%3Btask_id%3Ai64%3Bverifier%3Ai64%3B",
+          "name": "EvidenceRequest",
+          "fields": [
+           [
+            "max_steps",
+            {
+             "integer": {
+              "value": 0,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "snapshot_hi",
+            {
+             "integer": {
+              "value": 111,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "snapshot_lo",
+            {
+             "integer": {
+              "value": 222,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "subject",
+            {
+             "integer": {
+              "value": 0,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "task_id",
+            {
+             "integer": {
+              "value": 1,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "verifier",
+            {
+             "integer": {
+              "value": 9,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ]
+          ]
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "refuse-subject-drift",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.task.v1",
+     "function": "plan_request"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.task.v1::TaskContext::authority_domain%3Ai64%3Bbudget_steps%3Ai64%3Bsnapshot_hi%3Ai64%3Bsnapshot_lo%3Ai64%3Bsubject%3Ai64%3Btask_id%3Ai64%3B",
+       "name": "TaskContext",
+       "fields": [
+        [
+         "authority_domain",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "budget_steps",
+         {
+          "integer": {
+           "value": 512,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot_hi",
+         {
+          "integer": {
+           "value": 111,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot_lo",
+         {
+          "integer": {
+           "value": 222,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "subject",
+         {
+          "integer": {
+           "value": 33,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 111,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 222,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 44,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 7,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 256,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 9,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:ravel.task.v1::PlannedRequest::decision%3ARequestDecision%3Brequest%3AEvidenceRequest%3B",
+      "name": "PlannedRequest",
+      "fields": [
+       [
+        "decision",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:ravel.task.v1::RequestDecision",
+          "variant_identity": "mncs:0.2:finite-variant:ravel.task.v1::RequestDecision::REFUSE_AUTHORITY",
+          "discriminant": 2
+         }
+        }
+       ],
+       [
+        "request",
+        {
+         "record": {
+          "type_identity": "mncs:0.2:record-type:ravel.task.v1::EvidenceRequest::max_steps%3Ai64%3Bsnapshot_hi%3Ai64%3Bsnapshot_lo%3Ai64%3Bsubject%3Ai64%3Btask_id%3Ai64%3Bverifier%3Ai64%3B",
+          "name": "EvidenceRequest",
+          "fields": [
+           [
+            "max_steps",
+            {
+             "integer": {
+              "value": 0,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "snapshot_hi",
+            {
+             "integer": {
+              "value": 111,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "snapshot_lo",
+            {
+             "integer": {
+              "value": 222,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "subject",
+            {
+             "integer": {
+              "value": 0,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "task_id",
+            {
+             "integer": {
+              "value": 1,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "verifier",
+            {
+             "integer": {
+              "value": 9,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ]
+          ]
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "refuse-budget",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.task.v1",
+     "function": "plan_request"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.task.v1::TaskContext::authority_domain%3Ai64%3Bbudget_steps%3Ai64%3Bsnapshot_hi%3Ai64%3Bsnapshot_lo%3Ai64%3Bsubject%3Ai64%3Btask_id%3Ai64%3B",
+       "name": "TaskContext",
+       "fields": [
+        [
+         "authority_domain",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "budget_steps",
+         {
+          "integer": {
+           "value": 100,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot_hi",
+         {
+          "integer": {
+           "value": 111,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot_lo",
+         {
+          "integer": {
+           "value": 222,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "subject",
+         {
+          "integer": {
+           "value": 33,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 111,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 222,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 33,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 7,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 256,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 9,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:ravel.task.v1::PlannedRequest::decision%3ARequestDecision%3Brequest%3AEvidenceRequest%3B",
+      "name": "PlannedRequest",
+      "fields": [
+       [
+        "decision",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:ravel.task.v1::RequestDecision",
+          "variant_identity": "mncs:0.2:finite-variant:ravel.task.v1::RequestDecision::REFUSE_BUDGET",
+          "discriminant": 3
+         }
+        }
+       ],
+       [
+        "request",
+        {
+         "record": {
+          "type_identity": "mncs:0.2:record-type:ravel.task.v1::EvidenceRequest::max_steps%3Ai64%3Bsnapshot_hi%3Ai64%3Bsnapshot_lo%3Ai64%3Bsubject%3Ai64%3Btask_id%3Ai64%3Bverifier%3Ai64%3B",
+          "name": "EvidenceRequest",
+          "fields": [
+           [
+            "max_steps",
+            {
+             "integer": {
+              "value": 0,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "snapshot_hi",
+            {
+             "integer": {
+              "value": 111,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "snapshot_lo",
+            {
+             "integer": {
+              "value": 222,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "subject",
+            {
+             "integer": {
+              "value": 0,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "task_id",
+            {
+             "integer": {
+              "value": 1,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "verifier",
+            {
+             "integer": {
+              "value": 9,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ]
+          ]
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

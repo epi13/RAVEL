@@ -1,0 +1,934 @@
+{
+ "schema_version": "0.1",
+ "name": "ravel-core-v1",
+ "cases": [
+  {
+   "id": "dominate-0-0",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "dominate"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+       "discriminant": 0
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+      "discriminant": 0
+     }
+    }
+   ]
+  },
+  {
+   "id": "dominate-0-1",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "dominate"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+       "discriminant": 0
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+       "discriminant": 1
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "dominate-0-2",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "dominate"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+       "discriminant": 0
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+       "discriminant": 2
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "dominate-1-0",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "dominate"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+       "discriminant": 1
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "dominate-1-1",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "dominate"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+       "discriminant": 1
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+       "discriminant": 1
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "dominate-1-2",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "dominate"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+       "discriminant": 1
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+       "discriminant": 2
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "dominate-2-0",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "dominate"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+       "discriminant": 2
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "dominate-2-1",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "dominate"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+       "discriminant": 2
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+       "discriminant": 1
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "dominate-2-2",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "dominate"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+       "discriminant": 2
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+       "discriminant": 2
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "combine-fail-dominates-pass",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "combine_evidence"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::EvidenceRef::obligation%3Ai64%3Bstatus%3AStatus%3Bverifier%3Ai64%3B",
+       "name": "EvidenceRef",
+       "fields": [
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "status",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "verifier",
+         {
+          "integer": {
+           "value": 100,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::EvidenceRef::obligation%3Ai64%3Bstatus%3AStatus%3Bverifier%3Ai64%3B",
+       "name": "EvidenceRef",
+       "fields": [
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 2,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "status",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+           "discriminant": 1
+          }
+         }
+        ],
+        [
+         "verifier",
+         {
+          "integer": {
+           "value": 101,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "combine-unknown-survives",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "combine_evidence"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::EvidenceRef::obligation%3Ai64%3Bstatus%3AStatus%3Bverifier%3Ai64%3B",
+       "name": "EvidenceRef",
+       "fields": [
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "status",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "verifier",
+         {
+          "integer": {
+           "value": 100,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::EvidenceRef::obligation%3Ai64%3Bstatus%3AStatus%3Bverifier%3Ai64%3B",
+       "name": "EvidenceRef",
+       "fields": [
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 2,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "status",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+           "discriminant": 2
+          }
+         }
+        ],
+        [
+         "verifier",
+         {
+          "integer": {
+           "value": 101,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "disposition-commit",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "disposition"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::GateSet::a%3AStatus%3Bb%3AStatus%3Bc%3AStatus%3Bd%3AStatus%3B",
+       "name": "GateSet",
+       "fields": [
+        [
+         "a",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "b",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "c",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "d",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Disposition",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Disposition::COMMIT",
+      "discriminant": 0
+     }
+    }
+   ]
+  },
+  {
+   "id": "disposition-reject",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "disposition"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::GateSet::a%3AStatus%3Bb%3AStatus%3Bc%3AStatus%3Bd%3AStatus%3B",
+       "name": "GateSet",
+       "fields": [
+        [
+         "a",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "b",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+           "discriminant": 1
+          }
+         }
+        ],
+        [
+         "c",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "d",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Disposition",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Disposition::REJECT",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "disposition-hold",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "disposition"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::GateSet::a%3AStatus%3Bb%3AStatus%3Bc%3AStatus%3Bd%3AStatus%3B",
+       "name": "GateSet",
+       "fields": [
+        [
+         "a",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "b",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+           "discriminant": 2
+          }
+         }
+        ],
+        [
+         "c",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "d",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Disposition",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Disposition::HOLD",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "disposition-fail-beats-unknown",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "disposition"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::GateSet::a%3AStatus%3Bb%3AStatus%3Bc%3AStatus%3Bd%3AStatus%3B",
+       "name": "GateSet",
+       "fields": [
+        [
+         "a",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+           "discriminant": 2
+          }
+         }
+        ],
+        [
+         "b",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+           "discriminant": 1
+          }
+         }
+        ],
+        [
+         "c",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+           "discriminant": 2
+          }
+         }
+        ],
+        [
+         "d",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+           "discriminant": 2
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Disposition",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Disposition::REJECT",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "confidence-prefers-stronger",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "confidence_ranked"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 80,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 40,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+       "discriminant": 0
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "integer": {
+      "value": 80,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "confidence-skips-failed-subject",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "confidence_ranked"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 80,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 40,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+       "discriminant": 1
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "integer": {
+      "value": 40,
+      "type": {
+       "bits": 64,
+       "signed": true
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

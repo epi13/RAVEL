@@ -46,6 +46,15 @@ subject = "project"
 disclosure = "compact"
 
 [[workflows]]
+name = "mncs-experiments"
+category = "language_experiment"
+mode = "development"
+command = ["python3", "tools/ravel_mncs_check.py", "mncs-experiments"]
+provider_protocol = false
+subject = "project"
+disclosure = "compact"
+
+[[workflows]]
 name = "policy"
 category = "inspection"
 mode = "development"

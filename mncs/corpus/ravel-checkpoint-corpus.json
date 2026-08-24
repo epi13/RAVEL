@@ -1,0 +1,1106 @@
+{
+ "schema_version": "0.1",
+ "name": "ravel-checkpoint-v1",
+ "cases": [
+  {
+   "id": "tx-commit",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.checkpoint.v1",
+     "function": "transact"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::Checkpoint::count%3Ai64%3Bid%3Ai64%3Btotal%3Ai64%3B",
+       "name": "Checkpoint",
+       "fields": [
+        [
+         "count",
+         {
+          "integer": {
+           "value": 3,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "id",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "total",
+         {
+          "integer": {
+           "value": 100,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::Candidate::delta_count%3Ai64%3Bdelta_total%3Ai64%3Bparent%3Ai64%3Bpredicted%3AStatus%3B",
+       "name": "Candidate",
+       "fields": [
+        [
+         "delta_count",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "delta_total",
+         {
+          "integer": {
+           "value": 5,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "parent",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "predicted",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::GateSet::a%3AStatus%3Bb%3AStatus%3Bc%3AStatus%3B",
+       "name": "GateSet",
+       "fields": [
+        [
+         "a",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "b",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "c",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::TxOutcome::checkpoint_id%3Ai64%3Bcount%3Ai64%3Bkind%3ATxKind%3Bnegative_retained%3Abool%3Btotal%3Ai64%3B",
+      "name": "TxOutcome",
+      "fields": [
+       [
+        "checkpoint_id",
+        {
+         "integer": {
+          "value": 7,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "count",
+        {
+         "integer": {
+          "value": 4,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "kind",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::TxKind",
+          "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::TxKind::COMMITTED",
+          "discriminant": 0
+         }
+        }
+       ],
+       [
+        "negative_retained",
+        {
+         "boolean": {
+          "value": false
+         }
+        }
+       ],
+       [
+        "total",
+        {
+         "integer": {
+          "value": 105,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "tx-rollback-on-failed-gate",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.checkpoint.v1",
+     "function": "transact"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::Checkpoint::count%3Ai64%3Bid%3Ai64%3Btotal%3Ai64%3B",
+       "name": "Checkpoint",
+       "fields": [
+        [
+         "count",
+         {
+          "integer": {
+           "value": 3,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "id",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "total",
+         {
+          "integer": {
+           "value": 100,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::Candidate::delta_count%3Ai64%3Bdelta_total%3Ai64%3Bparent%3Ai64%3Bpredicted%3AStatus%3B",
+       "name": "Candidate",
+       "fields": [
+        [
+         "delta_count",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "delta_total",
+         {
+          "integer": {
+           "value": 5,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "parent",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "predicted",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::GateSet::a%3AStatus%3Bb%3AStatus%3Bc%3AStatus%3B",
+       "name": "GateSet",
+       "fields": [
+        [
+         "a",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "b",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::FAIL",
+           "discriminant": 1
+          }
+         }
+        ],
+        [
+         "c",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::TxOutcome::checkpoint_id%3Ai64%3Bcount%3Ai64%3Bkind%3ATxKind%3Bnegative_retained%3Abool%3Btotal%3Ai64%3B",
+      "name": "TxOutcome",
+      "fields": [
+       [
+        "checkpoint_id",
+        {
+         "integer": {
+          "value": 7,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "count",
+        {
+         "integer": {
+          "value": 3,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "kind",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::TxKind",
+          "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::TxKind::ROLLED_BACK",
+          "discriminant": 1
+         }
+        }
+       ],
+       [
+        "negative_retained",
+        {
+         "boolean": {
+          "value": true
+         }
+        }
+       ],
+       [
+        "total",
+        {
+         "integer": {
+          "value": 100,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "tx-hold-on-unknown-gate",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.checkpoint.v1",
+     "function": "transact"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::Checkpoint::count%3Ai64%3Bid%3Ai64%3Btotal%3Ai64%3B",
+       "name": "Checkpoint",
+       "fields": [
+        [
+         "count",
+         {
+          "integer": {
+           "value": 3,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "id",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "total",
+         {
+          "integer": {
+           "value": 100,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::Candidate::delta_count%3Ai64%3Bdelta_total%3Ai64%3Bparent%3Ai64%3Bpredicted%3AStatus%3B",
+       "name": "Candidate",
+       "fields": [
+        [
+         "delta_count",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "delta_total",
+         {
+          "integer": {
+           "value": 5,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "parent",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "predicted",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::GateSet::a%3AStatus%3Bb%3AStatus%3Bc%3AStatus%3B",
+       "name": "GateSet",
+       "fields": [
+        [
+         "a",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "b",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::UNKNOWN",
+           "discriminant": 2
+          }
+         }
+        ],
+        [
+         "c",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::TxOutcome::checkpoint_id%3Ai64%3Bcount%3Ai64%3Bkind%3ATxKind%3Bnegative_retained%3Abool%3Btotal%3Ai64%3B",
+      "name": "TxOutcome",
+      "fields": [
+       [
+        "checkpoint_id",
+        {
+         "integer": {
+          "value": 7,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "count",
+        {
+         "integer": {
+          "value": 3,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "kind",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::TxKind",
+          "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::TxKind::ROLLED_BACK",
+          "discriminant": 1
+         }
+        }
+       ],
+       [
+        "negative_retained",
+        {
+         "boolean": {
+          "value": false
+         }
+        }
+       ],
+       [
+        "total",
+        {
+         "integer": {
+          "value": 100,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "tx-rollback-on-failed-observation",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.checkpoint.v1",
+     "function": "transact"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::Checkpoint::count%3Ai64%3Bid%3Ai64%3Btotal%3Ai64%3B",
+       "name": "Checkpoint",
+       "fields": [
+        [
+         "count",
+         {
+          "integer": {
+           "value": 3,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "id",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "total",
+         {
+          "integer": {
+           "value": 100,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::Candidate::delta_count%3Ai64%3Bdelta_total%3Ai64%3Bparent%3Ai64%3Bpredicted%3AStatus%3B",
+       "name": "Candidate",
+       "fields": [
+        [
+         "delta_count",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "delta_total",
+         {
+          "integer": {
+           "value": 5,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "parent",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "predicted",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::GateSet::a%3AStatus%3Bb%3AStatus%3Bc%3AStatus%3B",
+       "name": "GateSet",
+       "fields": [
+        [
+         "a",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "b",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "c",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::FAIL",
+       "discriminant": 1
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::TxOutcome::checkpoint_id%3Ai64%3Bcount%3Ai64%3Bkind%3ATxKind%3Bnegative_retained%3Abool%3Btotal%3Ai64%3B",
+      "name": "TxOutcome",
+      "fields": [
+       [
+        "checkpoint_id",
+        {
+         "integer": {
+          "value": 7,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "count",
+        {
+         "integer": {
+          "value": 3,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "kind",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::TxKind",
+          "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::TxKind::ROLLED_BACK",
+          "discriminant": 1
+         }
+        }
+       ],
+       [
+        "negative_retained",
+        {
+         "boolean": {
+          "value": true
+         }
+        }
+       ],
+       [
+        "total",
+        {
+         "integer": {
+          "value": 100,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "tx-refuses-orphan-candidate",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.checkpoint.v1",
+     "function": "transact"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::Checkpoint::count%3Ai64%3Bid%3Ai64%3Btotal%3Ai64%3B",
+       "name": "Checkpoint",
+       "fields": [
+        [
+         "count",
+         {
+          "integer": {
+           "value": 3,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "id",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "total",
+         {
+          "integer": {
+           "value": 100,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::Candidate::delta_count%3Ai64%3Bdelta_total%3Ai64%3Bparent%3Ai64%3Bpredicted%3AStatus%3B",
+       "name": "Candidate",
+       "fields": [
+        [
+         "delta_count",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "delta_total",
+         {
+          "integer": {
+           "value": 5,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "parent",
+         {
+          "integer": {
+           "value": 9,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "predicted",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::GateSet::a%3AStatus%3Bb%3AStatus%3Bc%3AStatus%3B",
+       "name": "GateSet",
+       "fields": [
+        [
+         "a",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "b",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "c",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::Status::PASS",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:ravel.checkpoint.v1::TxOutcome::checkpoint_id%3Ai64%3Bcount%3Ai64%3Bkind%3ATxKind%3Bnegative_retained%3Abool%3Btotal%3Ai64%3B",
+      "name": "TxOutcome",
+      "fields": [
+       [
+        "checkpoint_id",
+        {
+         "integer": {
+          "value": 7,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "count",
+        {
+         "integer": {
+          "value": 3,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "kind",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:ravel.checkpoint.v1::TxKind",
+          "variant_identity": "mncs:0.2:finite-variant:ravel.checkpoint.v1::TxKind::ROLLED_BACK",
+          "discriminant": 1
+         }
+        }
+       ],
+       [
+        "negative_retained",
+        {
+         "boolean": {
+          "value": false
+         }
+        }
+       ],
+       [
+        "total",
+        {
+         "integer": {
+          "value": 100,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}
