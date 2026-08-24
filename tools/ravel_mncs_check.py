@@ -32,6 +32,41 @@ MODULES: dict[str, dict[str, object]] = {
 BACKENDS: list[str] = ["mncs-research-bytecode"]
 
 
+PROBE_SOURCE = """mncs 0.5;
+module ravel.forge.probe;
+enum S { A, B }
+fn pick(s: S) -> (result: i32) {
+    return match s {
+        A => 1,
+        B => 0,
+    };
+}
+"""
+
+
+def _accepts_profile_05(binary: str) -> bool:
+    """The binary must parse a bare-name match under profile 0.5 (pre-fix
+    compilers rejected `match name {` once records existed)."""
+    import tempfile
+
+    with tempfile.NamedTemporaryFile("w", suffix=".mncs", delete=False) as handle:
+        handle.write(PROBE_SOURCE)
+        path = handle.name
+    try:
+        result = subprocess.run(
+            [binary, "source-study", path, "--node-id", "forge-probe"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        document = json.loads(result.stdout or "{}")
+        return not document.get("diagnostics")
+    except Exception:
+        return False
+    finally:
+        os.unlink(path)
+
+
 def _mncs_cli() -> str | None:
     """Locate the sibling mncs-language CLI binary or build it."""
     candidates = [
@@ -43,7 +78,10 @@ def _mncs_cli() -> str | None:
             continue
         binary = base / "target/debug/mncs"
         if binary.is_file():
-            return str(binary)
+            if _accepts_profile_05(str(binary)):
+                return str(binary)
+            # Stale or wrong toolchain: keep searching rather than fail.
+            continue
         if (base / "Cargo.toml").is_file():
             result = subprocess.run(
                 ["cargo", "build", "-p", "mncs-cli"],
@@ -52,7 +90,7 @@ def _mncs_cli() -> str | None:
                 text=True,
                 check=False,
             )
-            if result.returncode == 0 and binary.is_file():
+            if result.returncode == 0 and binary.is_file() and _accepts_profile_05(str(binary)):
                 return str(binary)
     return None
 
