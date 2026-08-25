@@ -1,4 +1,4 @@
-mncs 0.5;
+mncs 0.6;
 
 // MNCS-native RAVEL checkpointed transactions.
 //
@@ -8,9 +8,14 @@ mncs 0.5;
 // the negative experience. Rollback is a logical value selection here: the
 // baseline record is never mutated, so isolation is structural rather than
 // defensive.
+//
+// Delta application uses explicit saturating arithmetic (`+|`): world-state
+// counters are total and monotone under clamping, which discharges the
+// overflow obligation by semantics instead of leaving the module honestly
+// UNKNOWN. Status semantics are imported from mncs.core.status.v1.
 module ravel.checkpoint.v1;
 
-enum Status { PASS, FAIL, UNKNOWN }
+use mncs.core.status.v1;
 
 enum TxKind { COMMITTED, ROLLED_BACK }
 
@@ -37,21 +42,9 @@ record TxOutcome {
     negative_retained: bool,
 }
 
-fn dominates(left: Status, right: Status) -> (result: Status) {
-    return match left {
-        PASS => right,
-        FAIL => Status.FAIL,
-        UNKNOWN => match right {
-            PASS => Status.UNKNOWN,
-            FAIL => Status.FAIL,
-            UNKNOWN => Status.UNKNOWN,
-        },
-    };
-}
-
 fn gate_status(gates: GateSet) -> (result: Status) {
-    let ab: Status = dominates(gates.a, gates.b);
-    return dominates(ab, gates.c);
+    let ab: Status = dominate(gates.a, gates.b);
+    return dominate(ab, gates.c);
 }
 
 fn status_pass(subject: Status) -> (result: bool) {
@@ -70,19 +63,12 @@ fn status_fail(subject: Status) -> (result: bool) {
     };
 }
 
-fn both(left: bool, right: bool) -> (result: bool) {
-    if left {
-        return right;
-    }
-    return false;
-}
-
 // Construct the candidate state purely from the baseline checkpoint. The
 // candidate names its parent; a mismatch is a caller error the type system
 // cannot see yet, so commit re-checks it below.
 fn apply(base: Checkpoint, change: Candidate) -> (result: Checkpoint) {
-    let total: i64 = base.total + change.delta_total;
-    let count: i64 = base.count + change.delta_count;
+    let total: i64 = base.total +| change.delta_total;
+    let count: i64 = base.count +| change.delta_count;
     return Checkpoint { id: base.id, total: total, count: count };
 }
 
@@ -107,8 +93,8 @@ fn transact(
             negative_retained: true,
         };
     }
-    if both(predicted_well, status_pass(combined)) {
-        if both(status_pass(observed), same_parent(base, change)) {
+    if predicted_well && status_pass(combined) {
+        if status_pass(observed) && same_parent(base, change) {
             let committed_state: Checkpoint = apply(base, change);
             return TxOutcome {
                 kind: TxKind.COMMITTED,

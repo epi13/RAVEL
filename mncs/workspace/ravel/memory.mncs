@@ -1,4 +1,4 @@
-mncs 0.5;
+mncs 0.6;
 
 // MNCS-native RAVEL memory: promotion lifecycle and negative-knowledge
 // retention.
@@ -7,12 +7,14 @@ mncs 0.5;
 // repeated support with zero counterexamples; a principle becomes a reusable
 // strategy only after surviving a transfer test inside its declared scope.
 // Counterexamples are never decremented by later successes, so negative
-// memory survives every positive outcome. Embedding-free integer identities
-// stand in for content identity at this layer; host boundaries bind them to
-// full digests.
+// memory survives every positive outcome.
+//
+// Counter increments use explicit saturating arithmetic (`+|`): support and
+// counterexample counts are total and monotone under clamping, which
+// discharges the overflow obligation by semantics. Embedding-free integer
+// identities stand in for content identity at this layer; host boundaries
+// bind them to full digests.
 module ravel.memory.v1;
-
-enum Status { PASS, FAIL, UNKNOWN }
 
 enum TransferOutcome { TRANSFERS, FAILS_TRANSFER, UNTESTED }
 
@@ -47,7 +49,7 @@ fn promotable(principle: Principle) -> (result: bool) {
 // Record a new supporting episode. Support may grow; counterexamples are
 // untouched.
 fn absorb_support(principle: Principle) -> (result: Principle) {
-    let support: i64 = principle.support_count + 1;
+    let support: i64 = principle.support_count +| 1;
     return Principle {
         id: principle.id,
         scope_domain: principle.scope_domain,
@@ -59,7 +61,7 @@ fn absorb_support(principle: Principle) -> (result: Principle) {
 // Record a counterexample. This is the only way a principle loses
 // promotability, and no later operation can remove it.
 fn absorb_counterexample(principle: Principle) -> (result: Principle) {
-    let counterexamples: i64 = principle.counterexample_count + 1;
+    let counterexamples: i64 = principle.counterexample_count +| 1;
     return Principle {
         id: principle.id,
         scope_domain: principle.scope_domain,
@@ -107,21 +109,11 @@ fn select(
     let primary_in_scope: bool = task_domain == primary.scope_domain;
     let fallback_in_scope: bool = task_domain == fallback.scope_domain;
 
-    if primary_in_scope {
-        if primary_clean {
-            return Selection.PRIMARY_STRATEGY;
-        }
-        if fallback_in_scope {
-            if fallback_clean {
-                return Selection.FALLBACK_STRATEGY;
-            }
-        }
-        return Selection.NO_STRATEGY;
+    if primary_in_scope && primary_clean {
+        return Selection.PRIMARY_STRATEGY;
     }
-    if fallback_in_scope {
-        if fallback_clean {
-            return Selection.FALLBACK_STRATEGY;
-        }
+    if fallback_in_scope && fallback_clean {
+        return Selection.FALLBACK_STRATEGY;
     }
     return Selection.NO_STRATEGY;
 }

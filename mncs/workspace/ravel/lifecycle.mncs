@@ -1,0 +1,163 @@
+mncs 0.6;
+
+// MNCS-native RAVEL knowledge promotion lifecycle.
+//
+// The lifecycle is fail-closed: every promotion edge must be named by the
+// stage graph, a candidate can never skip evidence stages, and an episode
+// can never become a global strategy directly. Counterexamples and retired
+// records are terminal — nothing unpromotes them, and nothing promotes past
+// them without starting a new record.
+//
+// Edge structure mirrors the legacy promotion state machine exactly;
+// transitions that would skip evidence are refused with their reason rather
+// than approximated.
+module ravel.lifecycle.v1;
+
+use mncs.core.status.v1;
+
+enum Stage {
+    OBSERVATION,
+    EPISODE,
+    OPEN_HYPOTHESIS,
+    INTERVENTION,
+    ATTRIBUTION,
+    PROVISIONAL_PRINCIPLE,
+    TRANSFER_TESTED_PRINCIPLE,
+    RESTRICTED_STRATEGY,
+    SUPPORTED_STRATEGY,
+    COUNTEREXAMPLE,
+    RETIRED,
+}
+
+enum Step {
+    ADVANCE { following: Stage },
+    REFUSE_TRANSITION { reason: i32 },
+}
+
+// Attribution gate: only supported attribution may mint a principle.
+enum AttributionKind { SUPPORTED, CONTRADICTED, INCONCLUSIVE }
+
+// Request one promotion step. Refusal reasons are part of the contract:
+// 1 = edge not present in the stage graph;
+// 2 = evidence-skip attack (an episode may not become a global strategy);
+// 3 = principle minted without supported attribution;
+// 4 = source stage is terminal.
+fn transition(
+    current: Stage,
+    requested: Stage,
+    attribution: AttributionKind,
+) -> (result: Step) {
+    return match current {
+        OBSERVATION => require_edge(requested, Stage.EPISODE),
+        EPISODE => refuse_skip_to_global(requested, Stage.OPEN_HYPOTHESIS),
+        OPEN_HYPOTHESIS => accept_any(requested, Stage.INTERVENTION, Stage.COUNTEREXAMPLE, Stage.RETIRED),
+        INTERVENTION => accept_any(requested, Stage.ATTRIBUTION, Stage.COUNTEREXAMPLE, Stage.RETIRED),
+        ATTRIBUTION => gate_principle(requested, attribution),
+        PROVISIONAL_PRINCIPLE => accept_any(requested, Stage.TRANSFER_TESTED_PRINCIPLE, Stage.COUNTEREXAMPLE, Stage.RETIRED),
+        TRANSFER_TESTED_PRINCIPLE => accept_any(requested, Stage.RESTRICTED_STRATEGY, Stage.COUNTEREXAMPLE, Stage.RETIRED),
+        RESTRICTED_STRATEGY => accept_any(requested, Stage.SUPPORTED_STRATEGY, Stage.COUNTEREXAMPLE, Stage.RETIRED),
+        SUPPORTED_STRATEGY => accept_any(requested, Stage.COUNTEREXAMPLE, Stage.RETIRED, Stage.RETIRED),
+        // Terminal stages: negative knowledge and retirement survive.
+        COUNTEREXAMPLE => Step.REFUSE_TRANSITION { reason: 4 },
+        RETIRED => Step.REFUSE_TRANSITION { reason: 4 },
+    };
+}
+
+// Single-edge acceptance: the requested stage must be exactly the named
+// successor.
+fn require_edge(requested: Stage, successor: Stage) -> (result: Step) {
+    if same_stage(requested, successor) {
+        return Step.ADVANCE { following: successor };
+    }
+    return Step.REFUSE_TRANSITION { reason: 1 };
+}
+
+// An episode may advance to a hypothesis, but never directly to a global
+// strategy: that would let one observation certify itself.
+fn refuse_skip_to_global(requested: Stage, successor: Stage) -> (result: Step) {
+    if same_stage(requested, Stage.SUPPORTED_STRATEGY) {
+        return Step.REFUSE_TRANSITION { reason: 2 };
+    }
+    return require_edge(requested, successor);
+}
+
+// Principle minting requires supported attribution; contradicting or
+// inconclusive attribution cannot promote.
+fn gate_principle(requested: Stage, attribution: AttributionKind) -> (result: Step) {
+    if same_stage(requested, Stage.PROVISIONAL_PRINCIPLE) {
+        return match attribution {
+            AttributionKind.SUPPORTED => Step.ADVANCE { following: requested },
+            AttributionKind.CONTRADICTED => Step.REFUSE_TRANSITION { reason: 3 },
+            AttributionKind.INCONCLUSIVE => Step.REFUSE_TRANSITION { reason: 3 },
+        };
+    }
+    return accept_any(requested, Stage.COUNTEREXAMPLE, Stage.RETIRED, Stage.RETIRED);
+}
+
+// Up to three named successors; the third slot may repeat the second when a
+// stage has fewer legal successors.
+fn accept_any(requested: Stage, a: Stage, b: Stage, c: Stage) -> (result: Step) {
+    if same_stage(requested, a) {
+        return Step.ADVANCE { following: a };
+    }
+    if same_stage(requested, b) {
+        return Step.ADVANCE { following: b };
+    }
+    if same_stage(requested, c) {
+        return Step.ADVANCE { following: c };
+    }
+    return Step.REFUSE_TRANSITION { reason: 1 };
+}
+
+// Finite variants have ordinal identity, not equality operators; stage
+// agreement is decided by exhaustive discrimination.
+fn same_stage(left: Stage, right: Stage) -> (result: bool) {
+    let left_code: i32 = code_of(left);
+    let right_code: i32 = code_of(right);
+    return left_code == right_code;
+}
+
+fn code_of(stage: Stage) -> (result: i32) {
+    return match stage {
+        OBSERVATION => 0,
+        EPISODE => 1,
+        OPEN_HYPOTHESIS => 2,
+        INTERVENTION => 3,
+        ATTRIBUTION => 4,
+        PROVISIONAL_PRINCIPLE => 5,
+        TRANSFER_TESTED_PRINCIPLE => 6,
+        RESTRICTED_STRATEGY => 7,
+        SUPPORTED_STRATEGY => 8,
+        COUNTEREXAMPLE => 9,
+        RETIRED => 10,
+    };
+}
+
+// Advisory readiness only: a fully supported strategy whose gates stayed
+// clean is eligible for *evaluation* elsewhere; this module cannot promote
+// anything by itself.
+fn evaluation_ready(current: Stage, hard_gate: Status) -> (result: bool) {
+    let supported: bool = match current {
+        SUPPORTED_STRATEGY => true,
+        OBSERVATION => false,
+        EPISODE => false,
+        OPEN_HYPOTHESIS => false,
+        INTERVENTION => false,
+        ATTRIBUTION => false,
+        PROVISIONAL_PRINCIPLE => false,
+        TRANSFER_TESTED_PRINCIPLE => false,
+        RESTRICTED_STRATEGY => false,
+        COUNTEREXAMPLE => false,
+        RETIRED => false,
+    };
+    let gate_clean: bool = is_pass(hard_gate);
+    return supported && gate_clean;
+}
+
+fn is_pass(status: Status) -> (result: bool) {
+    return match status {
+        PASS => true,
+        FAIL => false,
+        UNKNOWN => false,
+    };
+}

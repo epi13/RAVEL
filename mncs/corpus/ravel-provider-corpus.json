@@ -1,0 +1,902 @@
+{
+ "schema_version": "0.1",
+ "name": "ravel-provider-v1",
+ "cases": [
+  {
+   "id": "dispatch-receives-pass",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.provider.v1",
+     "function": "dispatch"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.provider.v1::EvidenceRequest::determinism_required%3Abool%3Bverifier_contract%3Ai64%3Bwitness_kind%3Ai64%3B",
+       "name": "EvidenceRequest",
+       "fields": [
+        [
+         "determinism_required",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "verifier_contract",
+         {
+          "integer": {
+           "value": 50,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "witness_kind",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.provider.v1::Capability::deterministic%3Abool%3Boperation%3Ai64%3Bwitness_kind%3Ai64%3B",
+       "name": "Capability",
+       "fields": [
+        [
+         "deterministic",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "operation",
+         {
+          "integer": {
+           "value": 50,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "witness_kind",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.provider.v1::Receipt",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.provider.v1::Receipt::RECEIVED",
+      "discriminant": 0,
+      "payload": [
+       [
+        "status",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+          "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+          "discriminant": 0
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "dispatch-receives-fail-and-retains-negative",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.provider.v1",
+     "function": "dispatch"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.provider.v1::EvidenceRequest::determinism_required%3Abool%3Bverifier_contract%3Ai64%3Bwitness_kind%3Ai64%3B",
+       "name": "EvidenceRequest",
+       "fields": [
+        [
+         "determinism_required",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "verifier_contract",
+         {
+          "integer": {
+           "value": 50,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "witness_kind",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.provider.v1::Capability::deterministic%3Abool%3Boperation%3Ai64%3Bwitness_kind%3Ai64%3B",
+       "name": "Capability",
+       "fields": [
+        [
+         "deterministic",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "operation",
+         {
+          "integer": {
+           "value": 50,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "witness_kind",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+       "discriminant": 1
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.provider.v1::Receipt",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.provider.v1::Receipt::RECEIVED",
+      "discriminant": 0,
+      "payload": [
+       [
+        "status",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+          "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+          "discriminant": 1
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "dispatch-receives-unknown-stays-unknown",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.provider.v1",
+     "function": "dispatch"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.provider.v1::EvidenceRequest::determinism_required%3Abool%3Bverifier_contract%3Ai64%3Bwitness_kind%3Ai64%3B",
+       "name": "EvidenceRequest",
+       "fields": [
+        [
+         "determinism_required",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "verifier_contract",
+         {
+          "integer": {
+           "value": 50,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "witness_kind",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.provider.v1::Capability::deterministic%3Abool%3Boperation%3Ai64%3Bwitness_kind%3Ai64%3B",
+       "name": "Capability",
+       "fields": [
+        [
+         "deterministic",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "operation",
+         {
+          "integer": {
+           "value": 50,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "witness_kind",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+       "discriminant": 2
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.provider.v1::Receipt",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.provider.v1::Receipt::RECEIVED",
+      "discriminant": 0,
+      "payload": [
+       [
+        "status",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+          "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+          "discriminant": 2
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "unavailable-operation-is-explicit",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.provider.v1",
+     "function": "dispatch"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.provider.v1::EvidenceRequest::determinism_required%3Abool%3Bverifier_contract%3Ai64%3Bwitness_kind%3Ai64%3B",
+       "name": "EvidenceRequest",
+       "fields": [
+        [
+         "determinism_required",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "verifier_contract",
+         {
+          "integer": {
+           "value": 51,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "witness_kind",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.provider.v1::Capability::deterministic%3Abool%3Boperation%3Ai64%3Bwitness_kind%3Ai64%3B",
+       "name": "Capability",
+       "fields": [
+        [
+         "deterministic",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "operation",
+         {
+          "integer": {
+           "value": 50,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "witness_kind",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+       "discriminant": 2
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.provider.v1::Receipt",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.provider.v1::Receipt::UNAVAILABLE",
+      "discriminant": 1,
+      "payload": [
+       [
+        "reason",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "wrong-witness-kind-is-explicit",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.provider.v1",
+     "function": "dispatch"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.provider.v1::EvidenceRequest::determinism_required%3Abool%3Bverifier_contract%3Ai64%3Bwitness_kind%3Ai64%3B",
+       "name": "EvidenceRequest",
+       "fields": [
+        [
+         "determinism_required",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "verifier_contract",
+         {
+          "integer": {
+           "value": 50,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "witness_kind",
+         {
+          "integer": {
+           "value": 8,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.provider.v1::Capability::deterministic%3Abool%3Boperation%3Ai64%3Bwitness_kind%3Ai64%3B",
+       "name": "Capability",
+       "fields": [
+        [
+         "deterministic",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "operation",
+         {
+          "integer": {
+           "value": 50,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "witness_kind",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+       "discriminant": 2
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.provider.v1::Receipt",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.provider.v1::Receipt::UNAVAILABLE",
+      "discriminant": 1,
+      "payload": [
+       [
+        "reason",
+        {
+         "integer": {
+          "value": 2,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "nondeterministic-provider-refused-for-determinism-request",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.provider.v1",
+     "function": "dispatch"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.provider.v1::EvidenceRequest::determinism_required%3Abool%3Bverifier_contract%3Ai64%3Bwitness_kind%3Ai64%3B",
+       "name": "EvidenceRequest",
+       "fields": [
+        [
+         "determinism_required",
+         {
+          "boolean": {
+           "value": true
+          }
+         }
+        ],
+        [
+         "verifier_contract",
+         {
+          "integer": {
+           "value": 50,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "witness_kind",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.provider.v1::Capability::deterministic%3Abool%3Boperation%3Ai64%3Bwitness_kind%3Ai64%3B",
+       "name": "Capability",
+       "fields": [
+        [
+         "deterministic",
+         {
+          "boolean": {
+           "value": false
+          }
+         }
+        ],
+        [
+         "operation",
+         {
+          "integer": {
+           "value": 50,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "witness_kind",
+         {
+          "integer": {
+           "value": 7,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+       "discriminant": 2
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.provider.v1::Receipt",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.provider.v1::Receipt::UNAVAILABLE",
+      "discriminant": 1,
+      "payload": [
+       [
+        "reason",
+        {
+         "integer": {
+          "value": 3,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "unavailable-governs-as-unknown",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.provider.v1",
+     "function": "governed_status"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.provider.v1::Receipt",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.provider.v1::Receipt::UNAVAILABLE",
+       "discriminant": 1,
+       "payload": [
+        [
+         "reason",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 32,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "received-pass-governs-as-pass",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.provider.v1",
+     "function": "governed_status"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.provider.v1::Receipt",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.provider.v1::Receipt::RECEIVED",
+       "discriminant": 0,
+       "payload": [
+        [
+         "status",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+      "discriminant": 0
+     }
+    }
+   ]
+  },
+  {
+   "id": "failed-execution-retains-negative",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.provider.v1",
+     "function": "retains_negative"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.provider.v1::Receipt",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.provider.v1::Receipt::FAILED",
+       "discriminant": 2,
+       "payload": [
+        [
+         "reason",
+         {
+          "integer": {
+           "value": 4,
+           "type": {
+            "bits": 32,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "received-pass-retains-nothing-negative",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.provider.v1",
+     "function": "retains_negative"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.provider.v1::Receipt",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.provider.v1::Receipt::RECEIVED",
+       "discriminant": 0,
+       "payload": [
+        [
+         "status",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  }
+ ]
+}

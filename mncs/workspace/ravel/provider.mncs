@@ -1,0 +1,92 @@
+mncs 0.6;
+
+// MNCS-native RAVEL Forge provider boundary.
+//
+// A Forge capability is the only thing that may turn an evidence request
+// into raw evidence. This module models the fail-closed dispatch: when no
+// offered capability matches the request — wrong operation, wrong witness
+// kind, or a determinism requirement the provider cannot meet — the receipt
+// says so explicitly. A missing capability is never represented as PASS and
+// never silently dropped; it becomes an explicit UNAVAILABLE receipt whose
+// downstream status is UNKNOWN.
+//
+// Provider failures (the capability exists but execution failed) are also
+// explicit: FAILED receipts retain negative evidence instead of vanishing.
+module ravel.provider.v1;
+
+use mncs.core.status.v1;
+use mncs.core.logic.v1;
+
+record Capability {
+    operation: i64,
+    witness_kind: i64,
+    deterministic: bool,
+}
+
+record EvidenceRequest {
+    verifier_contract: i64,
+    witness_kind: i64,
+    determinism_required: bool,
+}
+
+enum Receipt {
+    RECEIVED { status: Status },
+    UNAVAILABLE { reason: i32 },
+    FAILED { reason: i32 },
+}
+
+// Dispatch an evidence request against one offered capability with its
+// observed outcome. Reason codes are contract:
+// 1 = operation mismatch (no such verifier contract was offered);
+// 2 = witness-kind mismatch;
+// 3 = determinism required but the offered capability is not deterministic;
+// 4 = provider executed and failed internally.
+fn dispatch(
+    request: EvidenceRequest,
+    offered: Capability,
+    observed: Status,
+) -> (result: Receipt)
+    capability ravel_evidence_request
+{
+    let operation_matches: bool = request.verifier_contract == offered.operation;
+    if bool_not(operation_matches) {
+        return Receipt.UNAVAILABLE { reason: 1 };
+    }
+    let witness_matches: bool = request.witness_kind == offered.witness_kind;
+    if bool_not(witness_matches) {
+        return Receipt.UNAVAILABLE { reason: 2 };
+    }
+    if request.determinism_required && bool_not(offered.deterministic) {
+        return Receipt.UNAVAILABLE { reason: 3 };
+    }
+    return match observed {
+        PASS => Receipt.RECEIVED { status: Status.PASS },
+        FAIL => Receipt.RECEIVED { status: Status.FAIL },
+        UNKNOWN => Receipt.RECEIVED { status: Status.UNKNOWN },
+    };
+}
+
+// The governing status of a receipt: what downstream combination may use.
+// Absence of authority is UNKNOWN, never PASS; failures stay FAIL so they
+// are retained as negative experience.
+fn governed_status(receipt: Receipt) -> (result: Status) {
+    return match receipt {
+        RECEIVED { status } => status,
+        UNAVAILABLE { .. } => Status.UNKNOWN,
+        FAILED { .. } => Status.FAIL,
+    };
+}
+
+// Whether this receipt represents retained negative knowledge: failed
+// executions leave a trace that later successes cannot erase.
+fn retains_negative(receipt: Receipt) -> (result: bool) {
+    return match receipt {
+        RECEIVED { status } => match status {
+            FAIL => true,
+            PASS => false,
+            UNKNOWN => false,
+        },
+        UNAVAILABLE { .. } => false,
+        FAILED { .. } => true,
+    };
+}

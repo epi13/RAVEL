@@ -1,0 +1,28 @@
+mncs 0.6;
+
+// ravel.types — shared RAVEL identity vocabulary.
+//
+// Snapshot identities are opaque two-half digests at this layer. Host
+// boundaries (the language service, Forge receipts) bind them to full
+// content identities; inside RAVEL reasoning they are only ever compared,
+// never re-derived from text or reassembled from parts.
+//
+// This module exists so every RAVEL module binds to ONE snapshot identity
+// definition. Cross-module type identity guarantees that a TaskContext
+// built in ravel.task.v1 and a live snapshot named by the host are the
+// same logical type everywhere.
+module ravel.types.v1;
+
+record SnapshotId { hi: i64, lo: i64 }
+
+// Identity agreement: both halves must match. A mismatch in either half
+// makes the whole identity stale; there is no partial freshness.
+fn same_snapshot(left: SnapshotId, right: SnapshotId) -> (result: bool) {
+    return left.hi == right.hi && left.lo == right.lo;
+}
+
+// The zero identity marks an intentionally dead context: refused requests
+// name it so callers can see exactly which semantic state was abandoned.
+fn dead_snapshot() -> (result: SnapshotId) {
+    return SnapshotId { hi: 0, lo: 0 };
+}

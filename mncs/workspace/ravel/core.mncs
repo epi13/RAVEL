@@ -1,17 +1,21 @@
-mncs 0.5;
+mncs 0.6;
 
 // MNCS-native RAVEL core: the status lattice, evidence combination, and
-// candidate disposition. This module is a direct logical reconstruction of
-// RAVEL's authority boundary: RAVEL may combine and interpret bounded
-// evidence, but it can never convert UNKNOWN into PASS, never delete FAIL,
-// and never certify its own candidates.
+// candidate disposition, bound to the authoritative mncs.core.status
+// standard-library module.
+//
+// RAVEL may combine and interpret bounded evidence, but it can never convert
+// UNKNOWN into PASS, never delete FAIL, and never certify its own candidates.
+// Dominance semantics are no longer re-declared here: they are imported from
+// mncs.core.status.v1, whose identity-bound lattice is the standard-library
+// definition of the three-valued status domain.
 //
 // Identities are opaque i64 digest halves. Host boundaries bind them to full
 // content identities; inside RAVEL reasoning they are ordered, comparable,
 // and never re-derived from text.
 module ravel.core.v1;
 
-enum Status { PASS, FAIL, UNKNOWN }
+use mncs.core.status.v1;
 
 enum Disposition { COMMIT, REJECT, HOLD }
 
@@ -22,20 +26,6 @@ record EvidenceRef {
 }
 
 record GateSet { a: Status, b: Status, c: Status, d: Status }
-
-// Lattice join of evidence status under MNCS dominance:
-// FAIL dominates UNKNOWN dominates PASS.
-fn dominate(left: Status, right: Status) -> (result: Status) {
-    return match left {
-        PASS => right,
-        FAIL => Status.FAIL,
-        UNKNOWN => match right {
-            PASS => Status.UNKNOWN,
-            FAIL => Status.FAIL,
-            UNKNOWN => Status.UNKNOWN,
-        },
-    };
-}
 
 fn combine_evidence(left: EvidenceRef, right: EvidenceRef) -> (result: Status) {
     return dominate(left.status, right.status);

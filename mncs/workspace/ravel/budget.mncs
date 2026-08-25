@@ -1,0 +1,69 @@
+mncs 0.6;
+
+// MNCS-native RAVEL resource accounting.
+//
+// Every bounded episode spends from an explicit budget. Spending is
+// fail-closed: a request larger than the remaining budget is refused with
+// the untouched budget returned, never a negative or silently overdrawn
+// value. Budgets merge by saturating aggregation so combining plans cannot
+// manufacture unbounded capacity, and every merged total remains within the
+// representable domain.
+module ravel.budget.v1;
+
+record Budget {
+    steps: i64,
+    evidence_slots: i64,
+}
+
+enum Spend {
+    SPENT { budget: Budget },
+    REFUSE_BUDGET { budget: Budget, reason: i32 },
+}
+
+// Spend steps from the budget. The budget is returned either way so callers
+// can see exactly what remained when a refusal happened.
+fn spend_steps(budget: Budget, amount: i64) -> (result: Spend) {
+    if amount < 0 {
+        return Spend.REFUSE_BUDGET { budget: budget, reason: 1 };
+    }
+    if amount > budget.steps {
+        return Spend.REFUSE_BUDGET { budget: budget, reason: 2 };
+    }
+    let remaining: i64 = budget.steps -| amount;
+    return Spend.SPENT {
+        budget: Budget {
+            steps: remaining,
+            evidence_slots: budget.evidence_slots,
+        },
+    };
+}
+
+// Consume one evidence slot; slots are integral and never go negative.
+fn consume_evidence_slot(budget: Budget) -> (result: Spend) {
+    if budget.evidence_slots < 1 {
+        return Spend.REFUSE_BUDGET { budget: budget, reason: 3 };
+    }
+    let remaining: i64 = budget.evidence_slots -| 1;
+    return Spend.SPENT {
+        budget: Budget {
+            steps: budget.steps,
+            evidence_slots: remaining,
+        },
+    };
+}
+
+// Merge two plans under one budget: capacities add with saturation, which
+// discharges the overflow obligation by semantics.
+fn merge(left: Budget, right: Budget) -> (result: Budget) {
+    return Budget {
+        steps: left.steps +| right.steps,
+        evidence_slots: left.evidence_slots +| right.evidence_slots,
+    };
+}
+
+// Whether a plan is affordable inside a budget on both axes at once.
+fn affordable(budget: Budget, plan_steps: i64, plan_slots: i64) -> (result: bool) {
+    let steps_ok: bool = plan_steps <= budget.steps;
+    let slots_ok: bool = plan_slots <= budget.evidence_slots;
+    return steps_ok && slots_ok;
+}

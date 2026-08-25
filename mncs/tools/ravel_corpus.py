@@ -47,6 +47,19 @@ def finite(module, type_name, variant_name, discriminant):
     }
 
 
+def finite_payload(module, type_name, variant_name, discriminant, pairs):
+    """Payload-bearing finite value: fields in canonical (sorted) name order."""
+    ordered = sorted(pairs, key=lambda pair: pair[0])
+    return {
+        "finite": {
+            "type_identity": f"mncs:0.2:finite-type:{module}::{type_name}",
+            "variant_identity": f"mncs:0.2:finite-variant:{module}::{type_name}::{variant_name}",
+            "discriminant": discriminant,
+            "payload": [[name, value] for name, value in ordered],
+        }
+    }
+
+
 def record(module, type_name, canonical_fields_hash, pairs):
     """pairs: list of (field_name, encoded_value) in canonical (sorted) order."""
     return {
