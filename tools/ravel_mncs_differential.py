@@ -50,8 +50,15 @@ def mncs_binary() -> str | None:
         ROOT.parent / "mncs-language",
     ]
     for base in candidates:
-        if base and (base / "target/debug/mncs").is_file():
-            return str(base / "target/debug/mncs")
+        if not base:
+            continue
+        paths = [base / "target/debug/mncs"]
+        target_dir = os.environ.get("CARGO_TARGET_DIR")
+        if target_dir:
+            paths.append(Path(target_dir) / "debug/mncs")
+        for path in paths:
+            if path.is_file():
+                return str(path)
     return None
 
 

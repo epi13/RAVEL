@@ -150,6 +150,15 @@ def _library_root() -> Path | None:
     return None
 
 
+def _binary_paths(base: Path) -> list[Path]:
+    """Where `cargo build -p mncs-cli` may have placed the binary."""
+    paths = [base / "target/debug/mncs"]
+    target_dir = os.environ.get("CARGO_TARGET_DIR")
+    if target_dir:
+        paths.append(Path(target_dir) / "debug/mncs")
+    return paths
+
+
 def _mncs_cli(library_path: str) -> str | None:
     """Locate the sibling mncs-language CLI binary or build it."""
     base_candidates = [
@@ -161,10 +170,10 @@ def _mncs_cli(library_path: str) -> str | None:
     for base in base_candidates:
         if not base:
             continue
-        binary = base / "target/debug/mncs"
-        if binary.is_file():
-            if _probe_ok(str(binary), library_path):
-                return str(binary)
+        binaries = [path for path in _binary_paths(base) if path.is_file()]
+        if binaries:
+            if _probe_ok(str(binaries[0]), library_path):
+                return str(binaries[0])
             # Stale or wrong toolchain: keep searching rather than fail.
             continue
         if (base / "Cargo.toml").is_file():
@@ -175,8 +184,9 @@ def _mncs_cli(library_path: str) -> str | None:
                 text=True,
                 check=False,
             )
-            if result.returncode == 0 and binary.is_file() and _probe_ok(str(binary), library_path):
-                return str(binary)
+            built = [path for path in _binary_paths(base) if path.is_file()]
+            if result.returncode == 0 and built and _probe_ok(str(built[0]), library_path):
+                return str(built[0])
     return None
 
 
