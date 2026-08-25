@@ -23,10 +23,11 @@ def record(module, name, type_pairs, values):
 
 # ---------------------------------------------------------------- checkpoint
 CM = "ravel.checkpoint.v1"
+CS = "mncs.core.status.v1"
 
 
 def status(v, d):
-    return finite(CM, "Status", v, d)
+    return finite(CS, "Status", v, d)
 
 
 def gates(a, b, c):
@@ -128,7 +129,6 @@ emit(os.path.join(CORPUS_DIR, "ravel-checkpoint-corpus.json"), "ravel-checkpoint
 
 # -------------------------------------------------------------------- memory
 MM = "ravel.memory.v1"
-MS = lambda v, d: finite(MM, "Status", v, d)  # noqa: E731
 
 
 def principle(sid, scope, support, counter):

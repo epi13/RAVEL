@@ -3,330 +3,6 @@
  "name": "ravel-core-v1",
  "cases": [
   {
-   "id": "dominate-0-0",
-   "request": {
-    "schema_version": "0.1",
-    "target": {
-     "module": "ravel.core.v1",
-     "function": "dominate"
-    },
-    "arguments": [
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
-       "discriminant": 0
-      }
-     },
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
-       "discriminant": 0
-      }
-     }
-    ],
-    "step_budget": 1024
-   },
-   "expected": [
-    {
-     "finite": {
-      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
-      "discriminant": 0
-     }
-    }
-   ]
-  },
-  {
-   "id": "dominate-0-1",
-   "request": {
-    "schema_version": "0.1",
-    "target": {
-     "module": "ravel.core.v1",
-     "function": "dominate"
-    },
-    "arguments": [
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
-       "discriminant": 0
-      }
-     },
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
-       "discriminant": 1
-      }
-     }
-    ],
-    "step_budget": 1024
-   },
-   "expected": [
-    {
-     "finite": {
-      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
-      "discriminant": 1
-     }
-    }
-   ]
-  },
-  {
-   "id": "dominate-0-2",
-   "request": {
-    "schema_version": "0.1",
-    "target": {
-     "module": "ravel.core.v1",
-     "function": "dominate"
-    },
-    "arguments": [
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
-       "discriminant": 0
-      }
-     },
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
-       "discriminant": 2
-      }
-     }
-    ],
-    "step_budget": 1024
-   },
-   "expected": [
-    {
-     "finite": {
-      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
-      "discriminant": 2
-     }
-    }
-   ]
-  },
-  {
-   "id": "dominate-1-0",
-   "request": {
-    "schema_version": "0.1",
-    "target": {
-     "module": "ravel.core.v1",
-     "function": "dominate"
-    },
-    "arguments": [
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
-       "discriminant": 1
-      }
-     },
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
-       "discriminant": 0
-      }
-     }
-    ],
-    "step_budget": 1024
-   },
-   "expected": [
-    {
-     "finite": {
-      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
-      "discriminant": 1
-     }
-    }
-   ]
-  },
-  {
-   "id": "dominate-1-1",
-   "request": {
-    "schema_version": "0.1",
-    "target": {
-     "module": "ravel.core.v1",
-     "function": "dominate"
-    },
-    "arguments": [
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
-       "discriminant": 1
-      }
-     },
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
-       "discriminant": 1
-      }
-     }
-    ],
-    "step_budget": 1024
-   },
-   "expected": [
-    {
-     "finite": {
-      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
-      "discriminant": 1
-     }
-    }
-   ]
-  },
-  {
-   "id": "dominate-1-2",
-   "request": {
-    "schema_version": "0.1",
-    "target": {
-     "module": "ravel.core.v1",
-     "function": "dominate"
-    },
-    "arguments": [
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
-       "discriminant": 1
-      }
-     },
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
-       "discriminant": 2
-      }
-     }
-    ],
-    "step_budget": 1024
-   },
-   "expected": [
-    {
-     "finite": {
-      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
-      "discriminant": 1
-     }
-    }
-   ]
-  },
-  {
-   "id": "dominate-2-0",
-   "request": {
-    "schema_version": "0.1",
-    "target": {
-     "module": "ravel.core.v1",
-     "function": "dominate"
-    },
-    "arguments": [
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
-       "discriminant": 2
-      }
-     },
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
-       "discriminant": 0
-      }
-     }
-    ],
-    "step_budget": 1024
-   },
-   "expected": [
-    {
-     "finite": {
-      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
-      "discriminant": 2
-     }
-    }
-   ]
-  },
-  {
-   "id": "dominate-2-1",
-   "request": {
-    "schema_version": "0.1",
-    "target": {
-     "module": "ravel.core.v1",
-     "function": "dominate"
-    },
-    "arguments": [
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
-       "discriminant": 2
-      }
-     },
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
-       "discriminant": 1
-      }
-     }
-    ],
-    "step_budget": 1024
-   },
-   "expected": [
-    {
-     "finite": {
-      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
-      "discriminant": 1
-     }
-    }
-   ]
-  },
-  {
-   "id": "dominate-2-2",
-   "request": {
-    "schema_version": "0.1",
-    "target": {
-     "module": "ravel.core.v1",
-     "function": "dominate"
-    },
-    "arguments": [
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
-       "discriminant": 2
-      }
-     },
-     {
-      "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
-       "discriminant": 2
-      }
-     }
-    ],
-    "step_budget": 1024
-   },
-   "expected": [
-    {
-     "finite": {
-      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
-      "discriminant": 2
-     }
-    }
-   ]
-  },
-  {
    "id": "combine-fail-dominates-pass",
    "request": {
     "schema_version": "0.1",
@@ -356,8 +32,8 @@
          "status",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
            "discriminant": 0
           }
          }
@@ -398,8 +74,8 @@
          "status",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
            "discriminant": 1
           }
          }
@@ -425,8 +101,8 @@
    "expected": [
     {
      "finite": {
-      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+      "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
       "discriminant": 1
      }
     }
@@ -462,8 +138,8 @@
          "status",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
            "discriminant": 0
           }
          }
@@ -504,8 +180,8 @@
          "status",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
            "discriminant": 2
           }
          }
@@ -531,8 +207,8 @@
    "expected": [
     {
      "finite": {
-      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+      "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
       "discriminant": 2
      }
     }
@@ -556,8 +232,8 @@
          "a",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
            "discriminant": 0
           }
          }
@@ -566,8 +242,8 @@
          "b",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
            "discriminant": 0
           }
          }
@@ -576,8 +252,8 @@
          "c",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
            "discriminant": 0
           }
          }
@@ -586,8 +262,8 @@
          "d",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
            "discriminant": 0
           }
          }
@@ -626,8 +302,8 @@
          "a",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
            "discriminant": 0
           }
          }
@@ -636,8 +312,8 @@
          "b",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
            "discriminant": 1
           }
          }
@@ -646,8 +322,8 @@
          "c",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
            "discriminant": 0
           }
          }
@@ -656,8 +332,8 @@
          "d",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
            "discriminant": 0
           }
          }
@@ -696,8 +372,8 @@
          "a",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
            "discriminant": 0
           }
          }
@@ -706,8 +382,8 @@
          "b",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
            "discriminant": 2
           }
          }
@@ -716,8 +392,8 @@
          "c",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
            "discriminant": 0
           }
          }
@@ -726,8 +402,8 @@
          "d",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
            "discriminant": 0
           }
          }
@@ -766,8 +442,8 @@
          "a",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
            "discriminant": 2
           }
          }
@@ -776,8 +452,8 @@
          "b",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
            "discriminant": 1
           }
          }
@@ -786,8 +462,8 @@
          "c",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
            "discriminant": 2
           }
          }
@@ -796,8 +472,8 @@
          "d",
          {
           "finite": {
-           "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-           "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::UNKNOWN",
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
            "discriminant": 2
           }
          }
@@ -847,15 +523,15 @@
      },
      {
       "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+       "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
        "discriminant": 0
       }
      },
      {
       "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+       "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
        "discriminant": 0
       }
      }
@@ -903,15 +579,15 @@
      },
      {
       "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::FAIL",
+       "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
        "discriminant": 1
       }
      },
      {
       "finite": {
-       "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Status",
-       "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Status::PASS",
+       "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+       "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
        "discriminant": 0
       }
      }

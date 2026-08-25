@@ -8,7 +8,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 from ravel_corpus import case, emit, fields_hash, finite, integer  # noqa: E402
 
 M = "ravel.loop.v1"
-S = lambda v, d: finite(M, "Status", v, d)  # noqa: E731
+CS = "mncs.core.status.v1"
+S = lambda v, d: finite(CS, "Status", v, d)  # noqa: E731
 A = lambda v, d: finite(M, "Attribution", v, d)  # noqa: E731
 P, F, U = S("PASS", 0), S("FAIL", 1), S("UNKNOWN", 2)
 C, R, I = A("CONFIRMED", 0), A("REFUTED", 1), A("INCONCLUSIVE", 2)
@@ -33,28 +34,6 @@ for predicted, observed, kind in [
             "attribute",
             [predicted, observed],
             kind,
-        )
-    )
-
-# dominates(): MNCS status dominance lattice.
-for left, right, result in [
-    (P, P, P),
-    (P, F, F),
-    (P, U, U),
-    (F, P, F),
-    (F, F, F),
-    (F, U, F),
-    (U, P, U),
-    (U, F, F),
-    (U, U, U),
-]:
-    cases.append(
-        case(
-            f"dominates-{left['finite']['discriminant']}-{right['finite']['discriminant']}",
-            M,
-            "dominates",
-            [left, right],
-            result,
         )
     )
 

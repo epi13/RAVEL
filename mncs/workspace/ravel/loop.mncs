@@ -1,4 +1,4 @@
-mncs 0.5;
+mncs 0.6;
 
 // MNCS-native RAVEL learning loop: hypothesis, prediction, bounded
 // observation, governed disposition, causal attribution, and experience
@@ -11,9 +11,12 @@ mncs 0.5;
 //   negative experience that a later success cannot erase;
 // - commit eligibility requires every hard gate PASS *and* a confirmed
 //   prediction, so a candidate can never certify itself.
+//
+// Status semantics are imported from mncs.core.status.v1; strict boolean
+// operators (Profile 0.6) replace the pre-operator both/either helpers.
 module ravel.loop.v1;
 
-enum Status { PASS, FAIL, UNKNOWN }
+use mncs.core.status.v1;
 
 enum Attribution { CONFIRMED, REFUTED, INCONCLUSIVE }
 
@@ -32,20 +35,6 @@ record LoopOutcome {
     retain_negative: bool,
 }
 
-fn both(left: bool, right: bool) -> (result: bool) {
-    if left {
-        return right;
-    }
-    return false;
-}
-
-fn either(left: bool, right: bool) -> (result: bool) {
-    if left {
-        return true;
-    }
-    return right;
-}
-
 fn attribute(predicted: Status, observed: Status) -> (result: Attribution) {
     return match predicted {
         PASS => match observed {
@@ -62,21 +51,9 @@ fn attribute(predicted: Status, observed: Status) -> (result: Attribution) {
     };
 }
 
-fn dominates(left: Status, right: Status) -> (result: Status) {
-    return match left {
-        PASS => right,
-        FAIL => Status.FAIL,
-        UNKNOWN => match right {
-            PASS => Status.UNKNOWN,
-            FAIL => Status.FAIL,
-            UNKNOWN => Status.UNKNOWN,
-        },
-    };
-}
-
 fn gate_status(gates: GateSet) -> (result: Status) {
-    let ab: Status = dominates(gates.a, gates.b);
-    return dominates(ab, gates.c);
+    let ab: Status = dominate(gates.a, gates.b);
+    return dominate(ab, gates.c);
 }
 
 fn evaluate(hypothesis: Hypothesis, gates: GateSet, observed: Status) -> (result: LoopOutcome)
@@ -107,7 +84,7 @@ fn evaluate(hypothesis: Hypothesis, gates: GateSet, observed: Status) -> (result
     };
     return LoopOutcome {
         attribution_kind: kind,
-        commit_eligible: both(confirmed, gates_clean),
-        retain_negative: either(observed_bad, refuted),
+        commit_eligible: confirmed && gates_clean,
+        retain_negative: observed_bad || refuted,
     };
 }
