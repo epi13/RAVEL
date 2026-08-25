@@ -1,0 +1,775 @@
+{
+ "schema_version": "0.1",
+ "name": "ravel-budget-v1",
+ "cases": [
+  {
+   "id": "spend-within-budget",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.budget.v1",
+     "function": "spend_steps"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+       "name": "Budget",
+       "fields": [
+        [
+         "evidence_slots",
+         {
+          "integer": {
+           "value": 4,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "steps",
+         {
+          "integer": {
+           "value": 100,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 60,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.budget.v1::Spend",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.budget.v1::Spend::SPENT",
+      "discriminant": 0,
+      "payload": [
+       [
+        "budget",
+        {
+         "record": {
+          "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+          "name": "Budget",
+          "fields": [
+           [
+            "evidence_slots",
+            {
+             "integer": {
+              "value": 4,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "steps",
+            {
+             "integer": {
+              "value": 40,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ]
+          ]
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "spend-overdraw-refuses-with-budget-intact",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.budget.v1",
+     "function": "spend_steps"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+       "name": "Budget",
+       "fields": [
+        [
+         "evidence_slots",
+         {
+          "integer": {
+           "value": 4,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "steps",
+         {
+          "integer": {
+           "value": 100,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 120,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.budget.v1::Spend",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.budget.v1::Spend::REFUSE_BUDGET",
+      "discriminant": 1,
+      "payload": [
+       [
+        "budget",
+        {
+         "record": {
+          "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+          "name": "Budget",
+          "fields": [
+           [
+            "evidence_slots",
+            {
+             "integer": {
+              "value": 4,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "steps",
+            {
+             "integer": {
+              "value": 100,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ]
+          ]
+         }
+        }
+       ],
+       [
+        "reason",
+        {
+         "integer": {
+          "value": 2,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "negative-spend-refused",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.budget.v1",
+     "function": "spend_steps"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+       "name": "Budget",
+       "fields": [
+        [
+         "evidence_slots",
+         {
+          "integer": {
+           "value": 4,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "steps",
+         {
+          "integer": {
+           "value": 100,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": -5,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.budget.v1::Spend",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.budget.v1::Spend::REFUSE_BUDGET",
+      "discriminant": 1,
+      "payload": [
+       [
+        "budget",
+        {
+         "record": {
+          "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+          "name": "Budget",
+          "fields": [
+           [
+            "evidence_slots",
+            {
+             "integer": {
+              "value": 4,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "steps",
+            {
+             "integer": {
+              "value": 100,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ]
+          ]
+         }
+        }
+       ],
+       [
+        "reason",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "last-evidence-slot-consumable",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.budget.v1",
+     "function": "consume_evidence_slot"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+       "name": "Budget",
+       "fields": [
+        [
+         "evidence_slots",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "steps",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.budget.v1::Spend",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.budget.v1::Spend::SPENT",
+      "discriminant": 0,
+      "payload": [
+       [
+        "budget",
+        {
+         "record": {
+          "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+          "name": "Budget",
+          "fields": [
+           [
+            "evidence_slots",
+            {
+             "integer": {
+              "value": 0,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "steps",
+            {
+             "integer": {
+              "value": 10,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ]
+          ]
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "exhausted-slots-refuse",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.budget.v1",
+     "function": "consume_evidence_slot"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+       "name": "Budget",
+       "fields": [
+        [
+         "evidence_slots",
+         {
+          "integer": {
+           "value": 0,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "steps",
+         {
+          "integer": {
+           "value": 10,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.budget.v1::Spend",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.budget.v1::Spend::REFUSE_BUDGET",
+      "discriminant": 1,
+      "payload": [
+       [
+        "budget",
+        {
+         "record": {
+          "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+          "name": "Budget",
+          "fields": [
+           [
+            "evidence_slots",
+            {
+             "integer": {
+              "value": 0,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "steps",
+            {
+             "integer": {
+              "value": 10,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ]
+          ]
+         }
+        }
+       ],
+       [
+        "reason",
+        {
+         "integer": {
+          "value": 3,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "merge-adds-capacity",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.budget.v1",
+     "function": "merge"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+       "name": "Budget",
+       "fields": [
+        [
+         "evidence_slots",
+         {
+          "integer": {
+           "value": 2,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "steps",
+         {
+          "integer": {
+           "value": 30,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+       "name": "Budget",
+       "fields": [
+        [
+         "evidence_slots",
+         {
+          "integer": {
+           "value": 5,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "steps",
+         {
+          "integer": {
+           "value": 12,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+      "name": "Budget",
+      "fields": [
+       [
+        "evidence_slots",
+        {
+         "integer": {
+          "value": 7,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "steps",
+        {
+         "integer": {
+          "value": 42,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "plan-affordable-on-both-axes",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.budget.v1",
+     "function": "affordable"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+       "name": "Budget",
+       "fields": [
+        [
+         "evidence_slots",
+         {
+          "integer": {
+           "value": 4,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "steps",
+         {
+          "integer": {
+           "value": 100,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 90,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 4,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "plan-over-one-axis-unaffordable",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.budget.v1",
+     "function": "affordable"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.budget.v1::Budget::evidence_slots%3Ai64%3Bsteps%3Ai64%3B",
+       "name": "Budget",
+       "fields": [
+        [
+         "evidence_slots",
+         {
+          "integer": {
+           "value": 4,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "steps",
+         {
+          "integer": {
+           "value": 100,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 90,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 5,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  }
+ ]
+}

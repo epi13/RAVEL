@@ -1,0 +1,399 @@
+{
+ "schema_version": "0.1",
+ "name": "ravel-lifecycle-v1",
+ "cases": [
+  {
+   "id": "observation-to-episode",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.lifecycle.v1",
+     "function": "transition"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::OBSERVATION",
+       "discriminant": 0
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::EPISODE",
+       "discriminant": 1
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::AttributionKind",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::AttributionKind::SUPPORTED",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Step",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Step::ADVANCE",
+      "discriminant": 0,
+      "payload": [
+       [
+        "following",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+          "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::EPISODE",
+          "discriminant": 1
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "episode-to-hypothesis",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.lifecycle.v1",
+     "function": "transition"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::EPISODE",
+       "discriminant": 1
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::OPEN_HYPOTHESIS",
+       "discriminant": 2
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::AttributionKind",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::AttributionKind::SUPPORTED",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Step",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Step::ADVANCE",
+      "discriminant": 0,
+      "payload": [
+       [
+        "following",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+          "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::OPEN_HYPOTHESIS",
+          "discriminant": 2
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "episode-cannot-skip-to-global-strategy",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.lifecycle.v1",
+     "function": "transition"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::EPISODE",
+       "discriminant": 1
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::SUPPORTED_STRATEGY",
+       "discriminant": 8
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::AttributionKind",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::AttributionKind::SUPPORTED",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Step",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Step::REFUSE_TRANSITION",
+      "discriminant": 1,
+      "payload": [
+       [
+        "reason",
+        {
+         "integer": {
+          "value": 2,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "attribution-supported-mints-principle",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.lifecycle.v1",
+     "function": "transition"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::ATTRIBUTION",
+       "discriminant": 4
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::PROVISIONAL_PRINCIPLE",
+       "discriminant": 5
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::AttributionKind",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::AttributionKind::SUPPORTED",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Step",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Step::ADVANCE",
+      "discriminant": 0,
+      "payload": [
+       [
+        "following",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+          "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::PROVISIONAL_PRINCIPLE",
+          "discriminant": 5
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "attribution-contradicted-cannot-mint-principle",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.lifecycle.v1",
+     "function": "transition"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::ATTRIBUTION",
+       "discriminant": 4
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::PROVISIONAL_PRINCIPLE",
+       "discriminant": 5
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::AttributionKind",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::AttributionKind::CONTRADICTED",
+       "discriminant": 1
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Step",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Step::REFUSE_TRANSITION",
+      "discriminant": 1,
+      "payload": [
+       [
+        "reason",
+        {
+         "integer": {
+          "value": 3,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "counterexample-is-terminal",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.lifecycle.v1",
+     "function": "transition"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::COUNTEREXAMPLE",
+       "discriminant": 9
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::OPEN_HYPOTHESIS",
+       "discriminant": 2
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::AttributionKind",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::AttributionKind::SUPPORTED",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Step",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Step::REFUSE_TRANSITION",
+      "discriminant": 1,
+      "payload": [
+       [
+        "reason",
+        {
+         "integer": {
+          "value": 4,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "observation-cannot-leap-to-intervention",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.lifecycle.v1",
+     "function": "transition"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::OBSERVATION",
+       "discriminant": 0
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Stage",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Stage::INTERVENTION",
+       "discriminant": 3
+      }
+     },
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::AttributionKind",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::AttributionKind::SUPPORTED",
+       "discriminant": 0
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.lifecycle.v1::Step",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.lifecycle.v1::Step::REFUSE_TRANSITION",
+      "discriminant": 1,
+      "payload": [
+       [
+        "reason",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

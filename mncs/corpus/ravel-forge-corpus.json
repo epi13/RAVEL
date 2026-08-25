@@ -1,0 +1,1266 @@
+{
+ "schema_version": "0.1",
+ "name": "ravel-forge-v1",
+ "cases": [
+  {
+   "id": "matching-receipt-binds",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.forge.v1",
+     "function": "bind"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.forge.v1::ForgeRequest::max_steps%3Ai64%3Bobligation%3Ai64%3Bsnapshot%3ASnapshotId%3Btask_id%3Ai64%3B",
+       "name": "ForgeRequest",
+       "fields": [
+        [
+         "max_steps",
+         {
+          "integer": {
+           "value": 256,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 900,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 111,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 222,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.forge.v1::ForgeReceipt::obligation%3Ai64%3Bsnapshot%3ASnapshotId%3Bstatus%3AStatus%3Bsteps_used%3Ai64%3Btask_id%3Ai64%3B",
+       "name": "ForgeReceipt",
+       "fields": [
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 900,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 111,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 222,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "status",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "steps_used",
+         {
+          "integer": {
+           "value": 200,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.forge.v1::Binding",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.forge.v1::Binding::MATCHES",
+      "discriminant": 0
+     }
+    }
+   ]
+  },
+  {
+   "id": "stale-receipt-refused-even-when-passing",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.forge.v1",
+     "function": "bind"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.forge.v1::ForgeRequest::max_steps%3Ai64%3Bobligation%3Ai64%3Bsnapshot%3ASnapshotId%3Btask_id%3Ai64%3B",
+       "name": "ForgeRequest",
+       "fields": [
+        [
+         "max_steps",
+         {
+          "integer": {
+           "value": 256,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 900,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 111,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 222,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.forge.v1::ForgeReceipt::obligation%3Ai64%3Bsnapshot%3ASnapshotId%3Bstatus%3AStatus%3Bsteps_used%3Ai64%3Btask_id%3Ai64%3B",
+       "name": "ForgeReceipt",
+       "fields": [
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 900,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 999,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 222,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "status",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "steps_used",
+         {
+          "integer": {
+           "value": 200,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.forge.v1::Binding",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.forge.v1::Binding::STALE_RECEIPT",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "wrong-obligation-mismatches",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.forge.v1",
+     "function": "bind"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.forge.v1::ForgeRequest::max_steps%3Ai64%3Bobligation%3Ai64%3Bsnapshot%3ASnapshotId%3Btask_id%3Ai64%3B",
+       "name": "ForgeRequest",
+       "fields": [
+        [
+         "max_steps",
+         {
+          "integer": {
+           "value": 256,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 900,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 111,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 222,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.forge.v1::ForgeReceipt::obligation%3Ai64%3Bsnapshot%3ASnapshotId%3Bstatus%3AStatus%3Bsteps_used%3Ai64%3Btask_id%3Ai64%3B",
+       "name": "ForgeReceipt",
+       "fields": [
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 901,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 111,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 222,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "status",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "steps_used",
+         {
+          "integer": {
+           "value": 200,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.forge.v1::Binding",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.forge.v1::Binding::MISMATCH",
+      "discriminant": 2,
+      "payload": [
+       [
+        "field",
+        {
+         "integer": {
+          "value": 2,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "wrong-task-mismatches",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.forge.v1",
+     "function": "bind"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.forge.v1::ForgeRequest::max_steps%3Ai64%3Bobligation%3Ai64%3Bsnapshot%3ASnapshotId%3Btask_id%3Ai64%3B",
+       "name": "ForgeRequest",
+       "fields": [
+        [
+         "max_steps",
+         {
+          "integer": {
+           "value": 256,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 900,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 111,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 222,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.forge.v1::ForgeReceipt::obligation%3Ai64%3Bsnapshot%3ASnapshotId%3Bstatus%3AStatus%3Bsteps_used%3Ai64%3Btask_id%3Ai64%3B",
+       "name": "ForgeReceipt",
+       "fields": [
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 900,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 111,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 222,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "status",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "steps_used",
+         {
+          "integer": {
+           "value": 200,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 2,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.forge.v1::Binding",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.forge.v1::Binding::MISMATCH",
+      "discriminant": 2,
+      "payload": [
+       [
+        "field",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 32,
+           "signed": true
+          }
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "unknown-status-survives-binding",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.forge.v1",
+     "function": "governed_status"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.forge.v1::Binding",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.forge.v1::Binding::MATCHES",
+       "discriminant": 0
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.forge.v1::ForgeReceipt::obligation%3Ai64%3Bsnapshot%3ASnapshotId%3Bstatus%3AStatus%3Bsteps_used%3Ai64%3Btask_id%3Ai64%3B",
+       "name": "ForgeReceipt",
+       "fields": [
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 900,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 111,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 222,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "status",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+           "discriminant": 2
+          }
+         }
+        ],
+        [
+         "steps_used",
+         {
+          "integer": {
+           "value": 200,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "pass-status-governs-as-pass-when-bound",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.forge.v1",
+     "function": "governed_status"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.forge.v1::Binding",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.forge.v1::Binding::MATCHES",
+       "discriminant": 0
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.forge.v1::ForgeReceipt::obligation%3Ai64%3Bsnapshot%3ASnapshotId%3Bstatus%3AStatus%3Bsteps_used%3Ai64%3Btask_id%3Ai64%3B",
+       "name": "ForgeReceipt",
+       "fields": [
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 900,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 111,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 222,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "status",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "steps_used",
+         {
+          "integer": {
+           "value": 200,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+      "discriminant": 0
+     }
+    }
+   ]
+  },
+  {
+   "id": "stale-pass-degrades-to-unknown-never-upgrades",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.forge.v1",
+     "function": "governed_status"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.forge.v1::Binding",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.forge.v1::Binding::STALE_RECEIPT",
+       "discriminant": 1
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.forge.v1::ForgeReceipt::obligation%3Ai64%3Bsnapshot%3ASnapshotId%3Bstatus%3AStatus%3Bsteps_used%3Ai64%3Btask_id%3Ai64%3B",
+       "name": "ForgeReceipt",
+       "fields": [
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 900,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 111,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 222,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "status",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+           "discriminant": 0
+          }
+         }
+        ],
+        [
+         "steps_used",
+         {
+          "integer": {
+           "value": 200,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "failed-status-remains-fail-when-stale",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.forge.v1",
+     "function": "governed_status"
+    },
+    "arguments": [
+     {
+      "finite": {
+       "type_identity": "mncs:0.2:finite-type:ravel.forge.v1::Binding",
+       "variant_identity": "mncs:0.2:finite-variant:ravel.forge.v1::Binding::STALE_RECEIPT",
+       "discriminant": 1
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.forge.v1::ForgeReceipt::obligation%3Ai64%3Bsnapshot%3ASnapshotId%3Bstatus%3AStatus%3Bsteps_used%3Ai64%3Btask_id%3Ai64%3B",
+       "name": "ForgeReceipt",
+       "fields": [
+        [
+         "obligation",
+         {
+          "integer": {
+           "value": 900,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 111,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 222,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "status",
+         {
+          "finite": {
+           "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+           "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+           "discriminant": 1
+          }
+         }
+        ],
+        [
+         "steps_used",
+         {
+          "integer": {
+           "value": 200,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "task_id",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+      "discriminant": 1
+     }
+    }
+   ]
+  }
+ ]
+}

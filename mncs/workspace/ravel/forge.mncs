@@ -1,0 +1,84 @@
+mncs 0.6;
+
+// MNCS-native RAVEL Forge request/receipt binding.
+//
+// Every receipt must name the exact task, semantic snapshot, and obligation
+// its request named. A receipt from a different snapshot is stale and is
+// refused no matter how favorable its status: evidence cannot be laundered
+// across semantic drift by wishing it matched. Statuses pass through
+// untouched — UNKNOWN receipts stay UNKNOWN, FAIL receipts stay FAIL — so
+// this module can never upgrade what Forge reported.
+module ravel.forge.v1;
+
+use ravel.types.v1;
+use mncs.core.status.v1;
+use mncs.core.logic.v1;
+
+record ForgeRequest {
+    task_id: i64,
+    snapshot: SnapshotId,
+    obligation: i64,
+    max_steps: i64,
+}
+
+record ForgeReceipt {
+    task_id: i64,
+    snapshot: SnapshotId,
+    obligation: i64,
+    steps_used: i64,
+    status: Status,
+}
+
+enum Binding {
+    MATCHES,
+    STALE_RECEIPT,
+    MISMATCH { field: i32 },
+}
+
+// Bind a receipt to its request. Field mismatch codes are contract:
+// 1 = task identity differs;
+// 2 = obligation differs.
+// Snapshot drift is not an ordinary mismatch: it is staleness, refused as
+// its own verdict so callers can distinguish "wrong experiment" from
+// "experiment against drifted semantics".
+fn bind(request: ForgeRequest, receipt: ForgeReceipt) -> (result: Binding) {
+    let same_task: bool = request.task_id == receipt.task_id;
+    if bool_not(same_task) {
+        return Binding.MISMATCH { field: 1 };
+    }
+    let same_obligation: bool = request.obligation == receipt.obligation;
+    if bool_not(same_obligation) {
+        return Binding.MISMATCH { field: 2 };
+    }
+    let fresh: bool = same_snapshot(request.snapshot, receipt.snapshot);
+    if bool_not(fresh) {
+        return Binding.STALE_RECEIPT;
+    }
+    return Binding.MATCHES;
+}
+
+// Whether the bound pair may be recorded as experience at all: only a
+// matching, fresh receipt carries reportable status; everything else is
+// advisory noise that must not enter the evidence stream.
+fn reportable(binding: Binding) -> (result: bool) {
+    return match binding {
+        MATCHES => true,
+        STALE_RECEIPT => false,
+        MISMATCH { .. } => false,
+    };
+}
+
+// The governed status of a bound pair: only a reportable binding exposes a
+// status, and even then it passes through unchanged. Unbound or stale pairs
+// are UNKNOWN: absence of valid evidence is never PASS.
+fn governed_status(binding: Binding, receipt: ForgeReceipt) -> (result: Status) {
+    let reportable_binding: bool = reportable(binding);
+    if reportable_binding {
+        return receipt.status;
+    }
+    return match receipt.status {
+        PASS => Status.UNKNOWN,
+        FAIL => Status.FAIL,
+        UNKNOWN => Status.UNKNOWN,
+    };
+}

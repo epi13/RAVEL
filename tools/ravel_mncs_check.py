@@ -57,6 +57,26 @@ MODULES: dict[str, dict[str, object]] = {
         "source": "ravel/task.mncs",
         "corpus": "ravel-task-corpus.json",
     },
+    "lifecycle": {
+        "module": "ravel.lifecycle.v1",
+        "source": "ravel/lifecycle.mncs",
+        "corpus": "ravel-lifecycle-corpus.json",
+    },
+    "provider": {
+        "module": "ravel.provider.v1",
+        "source": "ravel/provider.mncs",
+        "corpus": "ravel-provider-corpus.json",
+    },
+    "budget": {
+        "module": "ravel.budget.v1",
+        "source": "ravel/budget.mncs",
+        "corpus": "ravel-budget-corpus.json",
+    },
+    "forge": {
+        "module": "ravel.forge.v1",
+        "source": "ravel/forge.mncs",
+        "corpus": "ravel-forge-corpus.json",
+    },
 }
 
 # Backends whose declared envelope realizes composite values end to end;
