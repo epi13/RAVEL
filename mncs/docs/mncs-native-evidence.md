@@ -130,3 +130,29 @@ case by case:
 3. WASM record realization through block parameters (removes CGN302 refusals
    for checkpoint/loop modules).
 4. Executable differential harness vs. legacy Rust knowledge-store flows.
+
+---
+
+## Addendum — Ox Alpha standard-library tranche (2026-08-24)
+
+`mncs-language` gained `mncs.core` (standard library) and Source Profile 0.6
+(payload-bearing sums, strict `&&`/`||`, checked `/` and `%`). Direct impact on
+this reconstruction:
+
+- **Friction log items 1, 3 resolved at language level**: boolean operators
+  exist (strict semantics), qualified patterns (`Type.VARIANT`) and payload
+  binders (`Some { value }`, `{ .. }`) exist. Item 5 (strings/collections) and
+  6 (widening-intent expressions) remain open.
+- **Result-with-reason shapes**: `mncs.core.result.v1` defines Ok/Err with real
+  payloads; ravel's wide-record encodings can migrate after module linking.
+- **Binding status**: until RFC 0014 linking lands, this workspace binds to the
+  library through the frozen snapshot
+  `mncs-language:examples/consumers/ravel-core-snapshot.mncs`, which is
+  canonically identical to `ravel_core.mncs` here; a differential test asserts
+  case-by-case agreement of `dominate` with `mncs.core.status.v1`.
+- These are local commits on `lineage/language-integration` in mncs-language,
+  not yet merged to `main`; the language service still pins git `main` and will
+  pick them up only after merge.
+
+No RAVEL workspace file was changed by the tranche; this addendum records the
+binding and the migration path.
