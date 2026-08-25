@@ -90,14 +90,14 @@ lifecycle_cases = [
         "observation-to-episode",
         LM,
         "transition",
-        [stage("OBSERVATION"), stage("EPISODE"), attr("SUPPORTED")],
+        [stage("OBSERVATION"), stage("EPISODE"), attr("SUPPORTED"), boolean(True), boolean(True)],
         step("ADVANCE", following="EPISODE"),
     ),
     case(
         "episode-to-hypothesis",
         LM,
         "transition",
-        [stage("EPISODE"), stage("OPEN_HYPOTHESIS"), attr("SUPPORTED")],
+        [stage("EPISODE"), stage("OPEN_HYPOTHESIS"), attr("SUPPORTED"), boolean(True), boolean(True)],
         step("ADVANCE", following="OPEN_HYPOTHESIS"),
     ),
     # Evidence-skip attack refused: an episode cannot become a strategy.
@@ -105,7 +105,7 @@ lifecycle_cases = [
         "episode-cannot-skip-to-global-strategy",
         LM,
         "transition",
-        [stage("EPISODE"), stage("SUPPORTED_STRATEGY"), attr("SUPPORTED")],
+        [stage("EPISODE"), stage("SUPPORTED_STRATEGY"), attr("SUPPORTED"), boolean(True), boolean(True)],
         step("REFUSE", reason=2),
     ),
     # Principle minting requires supported attribution.
@@ -113,22 +113,37 @@ lifecycle_cases = [
         "attribution-supported-mints-principle",
         LM,
         "transition",
-        [stage("ATTRIBUTION"), stage("PROVISIONAL_PRINCIPLE"), attr("SUPPORTED")],
+        [stage("ATTRIBUTION"), stage("PROVISIONAL_PRINCIPLE"), attr("SUPPORTED"), boolean(True), boolean(True)],
         step("ADVANCE", following="PROVISIONAL_PRINCIPLE"),
     ),
     case(
         "attribution-contradicted-cannot-mint-principle",
         LM,
         "transition",
-        [stage("ATTRIBUTION"), stage("PROVISIONAL_PRINCIPLE"), attr("CONTRADICTED")],
+        [stage("ATTRIBUTION"), stage("PROVISIONAL_PRINCIPLE"), attr("CONTRADICTED"), boolean(True), boolean(True)],
         step("REFUSE", reason=3),
+    ),
+    # Transfer requires evidence: an untested principle cannot authorize it.
+    case(
+        "transfer-without-evidence-refused",
+        LM,
+        "transition",
+        [stage("PROVISIONAL_PRINCIPLE"), stage("TRANSFER_TESTED_PRINCIPLE"), attr("SUPPORTED"), boolean(False), boolean(True)],
+        step("REFUSE", reason=5),
+    ),
+    case(
+        "transfer-with-evidence-accepted",
+        LM,
+        "transition",
+        [stage("PROVISIONAL_PRINCIPLE"), stage("TRANSFER_TESTED_PRINCIPLE"), attr("SUPPORTED"), boolean(True), boolean(True)],
+        step("ADVANCE", following="TRANSFER_TESTED_PRINCIPLE"),
     ),
     # Counterexamples are terminal; negative knowledge is never unpromoted.
     case(
         "counterexample-is-terminal",
         LM,
         "transition",
-        [stage("COUNTEREXAMPLE"), stage("OPEN_HYPOTHESIS"), attr("SUPPORTED")],
+        [stage("COUNTEREXAMPLE"), stage("OPEN_HYPOTHESIS"), attr("SUPPORTED"), boolean(True), boolean(True)],
         step("REFUSE", reason=4),
     ),
     # Unsupported edges are refused.
@@ -136,8 +151,23 @@ lifecycle_cases = [
         "observation-cannot-leap-to-intervention",
         LM,
         "transition",
-        [stage("OBSERVATION"), stage("INTERVENTION"), attr("SUPPORTED")],
+        [stage("OBSERVATION"), stage("INTERVENTION"), attr("SUPPORTED"), boolean(True), boolean(True)],
         step("REFUSE", reason=1),
+    ),
+    # Final promotion requires a supported transfer test.
+    case(
+        "final-promotion-without-supported-transfer-refused",
+        LM,
+        "transition",
+        [stage("RESTRICTED_STRATEGY"), stage("SUPPORTED_STRATEGY"), attr("SUPPORTED"), boolean(True), boolean(False)],
+        step("REFUSE", reason=6),
+    ),
+    case(
+        "final-promotion-with-supported-transfer-accepted",
+        LM,
+        "transition",
+        [stage("RESTRICTED_STRATEGY"), stage("SUPPORTED_STRATEGY"), attr("SUPPORTED"), boolean(True), boolean(True)],
+        step("ADVANCE", following="SUPPORTED_STRATEGY"),
     ),
 ]
 emit(

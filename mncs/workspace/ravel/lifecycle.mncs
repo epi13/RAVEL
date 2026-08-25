@@ -41,11 +41,15 @@ enum AttributionKind { SUPPORTED, CONTRADICTED, INCONCLUSIVE }
 // 1 = edge not present in the stage graph;
 // 2 = evidence-skip attack (an episode may not become a global strategy);
 // 3 = principle minted without supported attribution;
-// 4 = source stage is terminal.
+// 4 = source stage is terminal;
+// 5 = transfer authorized without any supporting evidence;
+// 6 = final strategy promotion without a supported transfer test.
 fn transition(
     current: Stage,
     requested: Stage,
     attribution: AttributionKind,
+    evidence_present: bool,
+    transfer_supported: bool,
 ) -> (result: Step) {
     return match current {
         OBSERVATION => require_edge(requested, Stage.EPISODE),
@@ -53,9 +57,9 @@ fn transition(
         OPEN_HYPOTHESIS => accept_any(requested, Stage.INTERVENTION, Stage.COUNTEREXAMPLE, Stage.RETIRED),
         INTERVENTION => accept_any(requested, Stage.ATTRIBUTION, Stage.COUNTEREXAMPLE, Stage.RETIRED),
         ATTRIBUTION => gate_principle(requested, attribution),
-        PROVISIONAL_PRINCIPLE => accept_any(requested, Stage.TRANSFER_TESTED_PRINCIPLE, Stage.COUNTEREXAMPLE, Stage.RETIRED),
+        PROVISIONAL_PRINCIPLE => gate_transfer(requested, evidence_present),
         TRANSFER_TESTED_PRINCIPLE => accept_any(requested, Stage.RESTRICTED_STRATEGY, Stage.COUNTEREXAMPLE, Stage.RETIRED),
-        RESTRICTED_STRATEGY => accept_any(requested, Stage.SUPPORTED_STRATEGY, Stage.COUNTEREXAMPLE, Stage.RETIRED),
+        RESTRICTED_STRATEGY => gate_final(requested, transfer_supported),
         SUPPORTED_STRATEGY => accept_any(requested, Stage.COUNTEREXAMPLE, Stage.RETIRED, Stage.RETIRED),
         // Terminal stages: negative knowledge and retirement survive.
         COUNTEREXAMPLE => Step.REFUSE_TRANSITION { reason: 4 },
@@ -90,6 +94,30 @@ fn gate_principle(requested: Stage, attribution: AttributionKind) -> (result: St
             AttributionKind.CONTRADICTED => Step.REFUSE_TRANSITION { reason: 3 },
             AttributionKind.INCONCLUSIVE => Step.REFUSE_TRANSITION { reason: 3 },
         };
+    }
+    return accept_any(requested, Stage.COUNTEREXAMPLE, Stage.RETIRED, Stage.RETIRED);
+}
+
+// Final strategy promotion requires the transfer test to have succeeded: a
+// restricted strategy becomes supported only on a supported transfer.
+fn gate_final(requested: Stage, transfer_supported: bool) -> (result: Step) {
+    if same_stage(requested, Stage.SUPPORTED_STRATEGY) {
+        if transfer_supported {
+            return Step.ADVANCE { following: requested };
+        }
+        return Step.REFUSE_TRANSITION { reason: 6 };
+    }
+    return accept_any(requested, Stage.COUNTEREXAMPLE, Stage.RETIRED, Stage.RETIRED);
+}
+
+// A principle may only be transfer-tested when at least one supporting
+// evidence identity exists: an untested principle cannot authorize transfer.
+fn gate_transfer(requested: Stage, evidence_present: bool) -> (result: Step) {
+    if same_stage(requested, Stage.TRANSFER_TESTED_PRINCIPLE) {
+        if evidence_present {
+            return Step.ADVANCE { following: requested };
+        }
+        return Step.REFUSE_TRANSITION { reason: 5 };
     }
     return accept_any(requested, Stage.COUNTEREXAMPLE, Stage.RETIRED, Stage.RETIRED);
 }
