@@ -16,7 +16,7 @@ behavioral references for this reconstruction, not its architecture.
 
 ## Status
 
-**Implemented / exercised (research).** Nine cooperating MNCS modules form one
+**Implemented / exercised (research).** Ten cooperating MNCS modules form one
 linked program: they import each other (`ravel.types.v1`) and the standard
 library (`mncs.core.status.v1`, `mncs.core.logic.v1`). Every module runs end to
 end through semantic → HIR → SSA → backend realization with layered agreement
@@ -43,6 +43,9 @@ mncs/
     provider.mncs             ravel.provider.v1  Forge capability dispatch; UNAVAILABLE ≠ PASS
     budget.mncs               ravel.budget.v1    refusable spends; saturating plan merging
     forge.mncs                ravel.forge.v1     request/receipt binding; stale receipts refused
+    identity.mncs             ravel.identity.v1  content digests as bounded byte sequences
+                                                 (Profile 0.7): bytewise agreement, dead-digest
+                                                 round-trip, SnapshotId migration path
   corpus/                     typed corpora with expected values per case
   tools/                      corpus generators + Forge check + differential harness
   docs/                       this document set

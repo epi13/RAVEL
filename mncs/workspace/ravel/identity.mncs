@@ -1,0 +1,96 @@
+mncs 0.7;
+
+// ravel.identity — content identities as bounded byte digests.
+//
+// ravel.types.v1 models snapshot identities as opaque two-half integers and
+// defers full content binding to host boundaries. Now that the language has
+// a byte substrate (Source Profile 0.7), this module closes part of that gap
+// inside RAVEL itself: a ContentDigest is eight real bytes, compared bytewise
+// over a traversal whose bounds are discharged by traversal semantics, and
+// derived deterministically from the legacy two-half SnapshotId so old and
+// new identities stay cross-checkable during migration.
+//
+// Derivation uses division/remainder by exact powers of two (big-endian),
+// so no host endianness participates in meaning. The zero digest marks the
+// intentionally dead context, mirroring ravel.types.v1's dead_snapshot.
+
+module ravel.identity.v1;
+
+use ravel.types.v1;
+
+
+record ContentDigest { bytes: [byte; 8] }
+
+// The zero digest: the intentionally dead content identity. Refused or
+// abandoned contexts name it so callers can see exactly which semantic
+// state was abandoned.
+fn dead_digest() -> (result: ContentDigest) {
+    let zeros: [byte; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
+    return ContentDigest { bytes: zeros };
+}
+
+// Bytewise agreement over the full digest. Traversal discharges element
+// bounds by semantics; there are no index obligations here.
+fn same_content(left: ContentDigest, right: ContentDigest) -> (result: bool) {
+    iterate i over left.bytes carrying same: bool = true {
+        next same = same && left.bytes[i] == right.bytes[i];
+    }
+    return same;
+}
+
+// Whether a digest names live content: anything other than the all-zero
+// pattern is live. Negative knowledge (a dead digest) stays visible.
+fn is_live(digest: ContentDigest) -> (result: bool) {
+    iterate i over digest.bytes carrying seen_nonzero: bool = false {
+        next seen_nonzero = seen_nonzero || digest.bytes[i] != 0;
+    }
+    return seen_nonzero;
+}
+
+// Deterministic migration path: derive the big-endian content digest of a
+// legacy two-half snapshot identity. High half occupies bytes 0..4, low half
+// bytes 4..8, most-significant byte first within each half.
+fn from_snapshot(snapshot: SnapshotId) -> (result: ContentDigest) {
+    let h0: byte = (snapshot.hi / 16777216) as byte;
+    let h1: byte = ((snapshot.hi % 16777216) / 65536) as byte;
+    let h2: byte = ((snapshot.hi % 65536) / 256) as byte;
+    let h3: byte = (snapshot.hi % 256) as byte;
+    let l0: byte = (snapshot.lo / 16777216) as byte;
+    let l1: byte = ((snapshot.lo % 16777216) / 65536) as byte;
+    let l2: byte = ((snapshot.lo % 65536) / 256) as byte;
+    let l3: byte = (snapshot.lo % 256) as byte;
+    let bytes: [byte; 8] = [h0, h1, h2, h3, l0, l1, l2, l3];
+    return ContentDigest { bytes: bytes };
+}
+
+// Round-trip law: deriving a digest from the dead snapshot yields the dead
+// digest exactly.
+fn dead_roundtrip() -> (result: bool) {
+    let dead: SnapshotId = dead_snapshot();
+    let derived: ContentDigest = from_snapshot(dead);
+    let expected: ContentDigest = dead_digest();
+    return same_content(derived, expected);
+}
+
+// Window view over the high half of a digest; demonstrates views inside
+// RAVEL semantics without exposing any storage shape.
+fn high_half(digest: ContentDigest) -> (result: [byte; up_to 8]) {
+    return digest.bytes[0..4];
+}
+
+// Probe entry points taking scalar halves so the differential corpus can
+// cross scalar-only backend boundaries; reasoning modules consume the
+// digest-typed surface above.
+fn agree_probe(hi: i64, lo: i64) -> (result: bool) {
+    let left: SnapshotId = SnapshotId { hi: hi, lo: lo };
+    let right: SnapshotId = SnapshotId { hi: hi, lo: lo };
+    let left_digest: ContentDigest = from_snapshot(left);
+    let right_digest: ContentDigest = from_snapshot(right);
+    return same_content(left_digest, right_digest);
+}
+
+fn live_probe(hi: i64, lo: i64) -> (result: bool) {
+    let snapshot: SnapshotId = SnapshotId { hi: hi, lo: lo };
+    let digest: ContentDigest = from_snapshot(snapshot);
+    return is_live(digest);
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": "0.2",
+  "name": "ravel-identity",
+  "cases": [
+    {
+      "id": "dead-roundtrip",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "dead_roundtrip" },
+        "arguments": [],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "boolean": { "value": true } } ]
+    },
+    {
+      "id": "digest-agreement",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "agree_probe" },
+        "arguments": [
+          { "integer": { "value": 305419896, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": -559038737, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "boolean": { "value": true } } ]
+    },
+    {
+      "id": "live-digest",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "live_probe" },
+        "arguments": [
+          { "integer": { "value": 1, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 0, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "boolean": { "value": true } } ]
+    },
+    {
+      "id": "dead-not-live",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "live_probe" },
+        "arguments": [
+          { "integer": { "value": 0, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 0, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "boolean": { "value": false } } ]
+    }
+  ],
+  "properties": []
+}
