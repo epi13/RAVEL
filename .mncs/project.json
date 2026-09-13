@@ -1,0 +1,12 @@
+{
+  "schema_version": "mncs-family.repository-manifest/v0alpha1",
+  "repository": "ravel",
+  "revision": 1,
+  "manifest_location": "in-repository",
+  "authority": {"note": "RAVEL owns adaptive evidence strategy and scoped learning beneath MNCS/MNCDS authority; it cannot promote evidence."},
+  "contracts": {
+    "provides": [{"contract": "adaptive-evidence-strategy", "version": "1", "kind": "research-service", "stability": "experimental", "fingerprint_sources": ["src/ravel/", "mncs/"]}],
+    "consumes": [],
+    "tests": [{"test": "ravel-tests", "covers": ["adaptive-evidence-strategy"], "obligation": "self", "command": {"argv": ["python", "-m", "pytest", "tests", "-q"]}}]
+  }
+}
