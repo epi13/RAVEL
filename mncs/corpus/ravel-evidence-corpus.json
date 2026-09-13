@@ -1,0 +1,2802 @@
+{
+ "schema_version": "0.1",
+ "name": "ravel-evidence-v1",
+ "cases": [
+  {
+   "id": "summary-conflict-visible",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "summarize_envelope"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 8
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:mncs.core.status.v1::StatusSummary::fail_count%3Ai64%3Bobserved_count%3Ai64%3Bpass_count%3Ai64%3Bstatus%3AStatus%3Bunknown_count%3Ai64%3Bvalid%3Abool%3B",
+      "name": "StatusSummary",
+      "fields": [
+       [
+        "fail_count",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "observed_count",
+        {
+         "integer": {
+          "value": 8,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "pass_count",
+        {
+         "integer": {
+          "value": 6,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "status",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+          "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+          "discriminant": 1
+         }
+        }
+       ],
+       [
+        "unknown_count",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": true
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "summary-unused-lanes-unobserved",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "summarize_envelope"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 2
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:mncs.core.status.v1::StatusSummary::fail_count%3Ai64%3Bobserved_count%3Ai64%3Bpass_count%3Ai64%3Bstatus%3AStatus%3Bunknown_count%3Ai64%3Bvalid%3Abool%3B",
+      "name": "StatusSummary",
+      "fields": [
+       [
+        "fail_count",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "observed_count",
+        {
+         "integer": {
+          "value": 2,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "pass_count",
+        {
+         "integer": {
+          "value": 2,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "status",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+          "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+          "discriminant": 2
+         }
+        }
+       ],
+       [
+        "unknown_count",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": true
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "summary-empty-envelope",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "summarize_envelope"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 0
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:mncs.core.status.v1::StatusSummary::fail_count%3Ai64%3Bobserved_count%3Ai64%3Bpass_count%3Ai64%3Bstatus%3AStatus%3Bunknown_count%3Ai64%3Bvalid%3Abool%3B",
+      "name": "StatusSummary",
+      "fields": [
+       [
+        "fail_count",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "observed_count",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "pass_count",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "status",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+          "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+          "discriminant": 2
+         }
+        }
+       ],
+       [
+        "unknown_count",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": true
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "governing-fail",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "governing_status"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 8
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "governing-invalid-degrades",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "governing_status"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 9
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "governing-all-pass-undecided",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "governing_status"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 8
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "committable-all-pass",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "committable"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 8
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "committable-fail-refuses",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "committable"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 8
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "committable-unknown-refuses",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "committable"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 8
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "committable-invalid-refuses",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "committable"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 9
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "committable-empty-refuses",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "committable"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 0
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "committable-prefix-only",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "committable"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 2
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "conflict-mixed",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "has_conflict"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 8
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "conflict-clean",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "has_conflict"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 8
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "conflict-fail-only",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "has_conflict"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 8
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "ask-carries-missing",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "ask_for_more"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 3
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "integer": {
+       "value": 7,
+       "type": {
+        "bits": 64,
+        "signed": true
+       }
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::EvidenceAsk::missing%3Ai64%3Bpriority%3Ai64%3Bsnapshot%3ASnapshotId%3B",
+      "name": "EvidenceAsk",
+      "fields": [
+       [
+        "missing",
+        {
+         "integer": {
+          "value": 2,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "priority",
+        {
+         "integer": {
+          "value": 7,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "snapshot",
+        {
+         "record": {
+          "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+          "name": "SnapshotId",
+          "fields": [
+           [
+            "hi",
+            {
+             "integer": {
+              "value": 1,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ],
+           [
+            "lo",
+            {
+             "integer": {
+              "value": 2,
+              "type": {
+               "bits": 64,
+               "signed": true
+              }
+             }
+            }
+           ]
+          ]
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "fresh-same",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "envelope_fresh"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 2
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+       "name": "SnapshotId",
+       "fields": [
+        [
+         "hi",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "lo",
+         {
+          "integer": {
+           "value": 2,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "stale-drift",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.evidence.v1",
+     "function": "envelope_fresh"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.evidence.v1::Envelope::active%3Abyte%3Bsnapshot%3ASnapshotId%3Bstatuses%3A%5BStatus%3B%208%5D%3B",
+       "name": "Envelope",
+       "fields": [
+        [
+         "active",
+         {
+          "byte": {
+           "value": 2
+          }
+         }
+        ],
+        [
+         "snapshot",
+         {
+          "record": {
+           "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+           "name": "SnapshotId",
+           "fields": [
+            [
+             "hi",
+             {
+              "integer": {
+               "value": 1,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ],
+            [
+             "lo",
+             {
+              "integer": {
+               "value": 2,
+               "type": {
+                "bits": 64,
+                "signed": true
+               }
+              }
+             }
+            ]
+           ]
+          }
+         }
+        ],
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     },
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.types.v1::SnapshotId::hi%3Ai64%3Blo%3Ai64%3B",
+       "name": "SnapshotId",
+       "fields": [
+        [
+         "hi",
+         {
+          "integer": {
+           "value": 1,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ],
+        [
+         "lo",
+         {
+          "integer": {
+           "value": 3,
+           "type": {
+            "bits": 64,
+            "signed": true
+           }
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": false
+     }
+    }
+   ]
+  }
+ ]
+}

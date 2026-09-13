@@ -44,6 +44,44 @@ def gate_set(a, b, c, d):
     }
 
 
+def envelope(*statuses):
+    pairs = [("statuses", "[Status; 4]")]
+    return {
+        "record": {
+            "type_identity": f"mncs:0.2:record-type:{M}::EvidenceEnvelope::{fields_hash(pairs)}",
+            "name": "EvidenceEnvelope",
+            "fields": [["statuses", {"sequence": {"values": list(statuses)}}]],
+        }
+    }
+
+
+def summary_record(status, passed, failed, unknown, observed, valid):
+    # Canonical field order is sorted; the StatusSummary identity is declared
+    # by mncs.core.status.v1 even when observed through a RAVEL envelope.
+    pairs = [
+        ("fail_count", "i64"),
+        ("observed_count", "i64"),
+        ("pass_count", "i64"),
+        ("status", "Status"),
+        ("unknown_count", "i64"),
+        ("valid", "bool"),
+    ]
+    return {
+        "record": {
+            "type_identity": f"mncs:0.2:record-type:{CS}::StatusSummary::{fields_hash(pairs)}",
+            "name": "StatusSummary",
+            "fields": [
+                ["fail_count", integer(failed, bits=64)],
+                ["observed_count", integer(observed, bits=64)],
+                ["pass_count", integer(passed, bits=64)],
+                ["status", status],
+                ["unknown_count", integer(unknown, bits=64)],
+                ["valid", {"boolean": {"value": valid}}],
+            ],
+        }
+    }
+
+
 cases = []
 # combine_evidence(): status join over two evidence references.
 cases.append(
@@ -71,6 +109,36 @@ cases.append(case("disposition-commit", M, "disposition", [gate_set(P, P, P, P)]
 cases.append(case("disposition-reject", M, "disposition", [gate_set(P, F, P, P)], REJECT))
 cases.append(case("disposition-hold", M, "disposition", [gate_set(P, U, P, P)], HOLD))
 cases.append(case("disposition-fail-beats-unknown", M, "disposition", [gate_set(U, F, U, U)], REJECT))
+
+# envelope_disposition(): the same authority boundary through the generic
+# fold — FAIL rejects even beside UNKNOWN, UNKNOWN holds, all-PASS commits.
+cases.append(case("envelope-commit", M, "envelope_disposition", [envelope(P, P, P, P)], COMMIT))
+cases.append(case("envelope-reject", M, "envelope_disposition", [envelope(P, F, P, P)], REJECT))
+cases.append(case("envelope-hold", M, "envelope_disposition", [envelope(P, U, P, P)], HOLD))
+cases.append(case("envelope-fail-beats-unknown", M, "envelope_disposition", [envelope(U, F, U, U)], REJECT))
+cases.append(case("envelope-all-unknown-holds", M, "envelope_disposition", [envelope(U, U, U, U)], HOLD))
+cases.append(case("envelope-mixed-rejects", M, "envelope_disposition", [envelope(P, F, U, P)], REJECT))
+
+# envelope_summary(): conflict stays visible in the counts — the mixed
+# envelope reports PASS, FAIL, and UNKNOWN lanes together with the total.
+cases.append(
+    case(
+        "envelope-summary-conflict-visible",
+        M,
+        "envelope_summary",
+        [envelope(P, F, U, P)],
+        summary_record(F, 2, 1, 1, 4, True),
+    )
+)
+cases.append(
+    case(
+        "envelope-summary-all-pass",
+        M,
+        "envelope_summary",
+        [envelope(P, P, P, P)],
+        summary_record(U, 4, 0, 0, 4, True),
+    )
+)
 
 # confidence_ranked(): advisory ranking only; failed subjects are skipped.
 cases.append(

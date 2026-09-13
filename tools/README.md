@@ -29,6 +29,36 @@ Other support modules in this directory should follow the same separation:
 mechanism execution emits facts; evaluators derive results; digest tools bind
 identity; orchestration scripts do not silently expand claims.
 
+## MNCS-native verification
+
+`ravel_mncs_check.py` runs the language-owned experiment flow for every
+executable MNCS-native module (`mncs-experiments` Forge workflow): each of
+the eleven corpus-backed modules under `mncs/workspace/ravel/` executes its
+typed corpus on all five backends (research bytecode, portable WASM, C11,
+LLVM, Cranelift) with layered translation validation and per-module
+cross-backend agreement. The checker cross-verifies its module table
+against the workspace directory (only `ravel.types.v1` is excluded by
+design: shared vocabulary, no entry points, no corpus), probes the
+toolchain for the Profile 0.10 capabilities RAVEL consumes (linked
+imports, bounded generics, saturating intents), and asserts a
+wrong-nominal-type program is refused at elaboration. Overall PASS
+requires every module, every backend, coverage, and the negative probe;
+`ravel.identity.v1` honestly reports UNKNOWN while meeting all
+expectations. Evidence: `build/mncs-ravel/mncs-experiments.json`
+(development evidence only; git-ignored).
+
+`ravel_mncs_differential.py` compares three explicit legacy-vs-MNCS scopes
+(lifecycle edges, provider receipts, hard-gate disposition) case by case
+and classifies newer semantics (stale-snapshot refusal, refusable spends,
+payload-bearing refusals, transact/promotion gates, envelopes, digests)
+as extension-only with direct corpus-invariant coverage rather than
+fabricated equivalence. Evidence:
+`build/mncs-ravel/differential.json`.
+
+MNCS corpora regenerate with `python3 mncs/tools/gen_*.py`
+(`ravel-identity-corpus.json` is hand-authored scalar-probe JSON and has
+no generator).
+
 ## Verification before generation
 
 Prefer read-only or temporary-output targets first:
