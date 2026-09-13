@@ -495,6 +495,676 @@
    ]
   },
   {
+   "id": "envelope-commit",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "envelope_disposition"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::EvidenceEnvelope::statuses%3A%5BStatus%3B%204%5D%3B",
+       "name": "EvidenceEnvelope",
+       "fields": [
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Disposition",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Disposition::COMMIT",
+      "discriminant": 0
+     }
+    }
+   ]
+  },
+  {
+   "id": "envelope-reject",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "envelope_disposition"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::EvidenceEnvelope::statuses%3A%5BStatus%3B%204%5D%3B",
+       "name": "EvidenceEnvelope",
+       "fields": [
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Disposition",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Disposition::REJECT",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "envelope-hold",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "envelope_disposition"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::EvidenceEnvelope::statuses%3A%5BStatus%3B%204%5D%3B",
+       "name": "EvidenceEnvelope",
+       "fields": [
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Disposition",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Disposition::HOLD",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "envelope-fail-beats-unknown",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "envelope_disposition"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::EvidenceEnvelope::statuses%3A%5BStatus%3B%204%5D%3B",
+       "name": "EvidenceEnvelope",
+       "fields": [
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Disposition",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Disposition::REJECT",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "envelope-all-unknown-holds",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "envelope_disposition"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::EvidenceEnvelope::statuses%3A%5BStatus%3B%204%5D%3B",
+       "name": "EvidenceEnvelope",
+       "fields": [
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Disposition",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Disposition::HOLD",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "envelope-mixed-rejects",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "envelope_disposition"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::EvidenceEnvelope::statuses%3A%5BStatus%3B%204%5D%3B",
+       "name": "EvidenceEnvelope",
+       "fields": [
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:ravel.core.v1::Disposition",
+      "variant_identity": "mncs:0.2:finite-variant:ravel.core.v1::Disposition::REJECT",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "envelope-summary-conflict-visible",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "envelope_summary"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::EvidenceEnvelope::statuses%3A%5BStatus%3B%204%5D%3B",
+       "name": "EvidenceEnvelope",
+       "fields": [
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+              "discriminant": 1
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+              "discriminant": 2
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:mncs.core.status.v1::StatusSummary::fail_count%3Ai64%3Bobserved_count%3Ai64%3Bpass_count%3Ai64%3Bstatus%3AStatus%3Bunknown_count%3Ai64%3Bvalid%3Abool%3B",
+      "name": "StatusSummary",
+      "fields": [
+       [
+        "fail_count",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "observed_count",
+        {
+         "integer": {
+          "value": 4,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "pass_count",
+        {
+         "integer": {
+          "value": 2,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "status",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+          "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::FAIL",
+          "discriminant": 1
+         }
+        }
+       ],
+       [
+        "unknown_count",
+        {
+         "integer": {
+          "value": 1,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": true
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "envelope-summary-all-pass",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "ravel.core.v1",
+     "function": "envelope_summary"
+    },
+    "arguments": [
+     {
+      "record": {
+       "type_identity": "mncs:0.2:record-type:ravel.core.v1::EvidenceEnvelope::statuses%3A%5BStatus%3B%204%5D%3B",
+       "name": "EvidenceEnvelope",
+       "fields": [
+        [
+         "statuses",
+         {
+          "sequence": {
+           "values": [
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            },
+            {
+             "finite": {
+              "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+              "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::PASS",
+              "discriminant": 0
+             }
+            }
+           ]
+          }
+         }
+        ]
+       ]
+      }
+     }
+    ],
+    "step_budget": 1024
+   },
+   "expected": [
+    {
+     "record": {
+      "type_identity": "mncs:0.2:record-type:mncs.core.status.v1::StatusSummary::fail_count%3Ai64%3Bobserved_count%3Ai64%3Bpass_count%3Ai64%3Bstatus%3AStatus%3Bunknown_count%3Ai64%3Bvalid%3Abool%3B",
+      "name": "StatusSummary",
+      "fields": [
+       [
+        "fail_count",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "observed_count",
+        {
+         "integer": {
+          "value": 4,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "pass_count",
+        {
+         "integer": {
+          "value": 4,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "status",
+        {
+         "finite": {
+          "type_identity": "mncs:0.2:finite-type:mncs.core.status.v1::Status",
+          "variant_identity": "mncs:0.2:finite-variant:mncs.core.status.v1::Status::UNKNOWN",
+          "discriminant": 2
+         }
+        }
+       ],
+       [
+        "unknown_count",
+        {
+         "integer": {
+          "value": 0,
+          "type": {
+           "bits": 64,
+           "signed": true
+          }
+         }
+        }
+       ],
+       [
+        "valid",
+        {
+         "boolean": {
+          "value": true
+         }
+        }
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  {
    "id": "confidence-prefers-stronger",
    "request": {
     "schema_version": "0.1",

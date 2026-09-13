@@ -30,7 +30,11 @@ WORKSPACE = MNCS_DIR / "workspace"
 CORPUS = MNCS_DIR / "corpus"
 
 # Linked modules under workspace/ravel/. The corpus file name is explicit
-# because stems no longer map 1:1 onto flat file names.
+# because stems no longer map 1:1 onto flat file names. Every module with an
+# executable corpus MUST appear here: the checker cross-verifies this table
+# against the workspace directory and fails when a module is omitted.
+# ravel.types.v1 is the only intentional exclusion — it declares shared
+# identity vocabulary with no entry-point functions and no corpus.
 MODULES: dict[str, dict[str, object]] = {
     "core": {
         "module": "ravel.core.v1",
@@ -77,26 +81,38 @@ MODULES: dict[str, dict[str, object]] = {
         "source": "ravel/forge.mncs",
         "corpus": "ravel-forge-corpus.json",
     },
+    "identity": {
+        "module": "ravel.identity.v1",
+        "source": "ravel/identity.mncs",
+        "corpus": "ravel-identity-corpus.json",
+    },
+    "evidence": {
+        "module": "ravel.evidence.v1",
+        "source": "ravel/evidence.mncs",
+        "corpus": "ravel-evidence-corpus.json",
+    },
 }
 
-# Backends whose declared envelope realizes composite values end to end;
-# each RAVEL module carries records and payload sums.
+# Every backend below executes RAVEL's composite entrypoints end to end
+# (records, payload sums, exact sequences, bounded views, nested
+# composites). The pre-2026-09 scalar-envelope limitation is obsolete:
+# native C11/LLVM/Cranelift realizations now carry the same composite
+# shapes, so all five backends run the full semantic matrix.
 EXECUTION_BACKENDS: list[str] = [
     "mncs-research-bytecode",
     "mncs-portable-wasm-mvp",
+    "c11",
+    "llvm",
+    "cranelift",
 ]
 
-# Backends with a scalar process/object envelope: compilation is attempted
-# so the recorded refusal (composite values outside the scalar boundary) is
-# evidence-backed rather than assumed.
-ARTIFACT_TARGETS: list[str] = ["c11", "llvm", "cranelift"]
+PROBE_SOURCE = """mncs 0.10;
 
-PROBE_SOURCE = """mncs 0.6;
-
-// Forge probe: requires profile 0.6 use-resolution of the status lattice,
-// payload-free finite matching, strict booleans, and explicit saturating
-// arithmetic intents. A toolchain missing any of these refuses honestly and
-// this check reports BLOCKED instead of trusting stale semantics.
+// Forge probe: requires profile 0.10 use-resolution of the status lattice,
+// explicit bounded polymorphism (generic N: Nat functions over imported
+// nominal sequence types), and explicit saturating arithmetic intents. A
+// toolchain missing any of these refuses honestly and this check reports
+// BLOCKED instead of trusting stale semantics.
 module ravel.forge.probe;
 
 use mncs.core.status.v1;
@@ -105,14 +121,53 @@ fn bump(count: i64) -> (result: i64) {
     return count +| 1;
 }
 
+fn first<T, N: Nat>(xs: [T; N]) -> (result: T) {
+    return xs[0];
+}
+
+fn first_status(pair: [Status; 2]) -> (result: Status) {
+    return first<Status, 2>(pair);
+}
+
 fn soften(left: Status, right: Status) -> (result: bool) {
     return is_decided(dominate(left, right)) && bump(0) == 0;
 }
 """
 
+# Nominal-type negative probe: a RAVEL ContentDigest passed where the
+# authoritative Digest32 is expected must be refused at elaboration. Same
+# bytes under the wrong semantic role are a type error, not an identity.
+NEGATIVE_PROBE_SOURCE = """mncs 0.10;
+
+module ravel.forge.negative_probe;
+
+use ravel.identity.v1;
+use mncs.core.identity as idlib;
+
+fn typed_crossing(digest: ContentDigest) -> (result: bool) {
+    return idlib.is_zero(digest);
+}
+"""
+
+
+def _study_ok(document: object) -> bool:
+    """A study passes when elaboration completes (obligations may stay
+    honestly UNKNOWN) with no error-severity diagnostic."""
+    if not isinstance(document, dict):
+        return False
+    if document.get("compilation_status") not in (
+        "completed",
+        "completed_with_unresolved_obligations",
+    ):
+        return False
+    for diagnostic in document.get("diagnostics") or []:
+        if isinstance(diagnostic, dict) and diagnostic.get("severity") == "error":
+            return False
+    return True
+
 
 def _probe_ok(binary: str, library_path: str) -> bool:
-    """The binary must elaborate the 0.6 probe (imports + intents)."""
+    """The binary must elaborate the capability probe (imports + generics)."""
     import tempfile
 
     env = dict(os.environ)
@@ -128,12 +183,54 @@ def _probe_ok(binary: str, library_path: str) -> bool:
             check=False,
             env=env,
         )
-        document = json.loads(result.stdout or "{}")
-        return not document.get("diagnostics")
+        document = json.loads(result.stdout or "null")
+        return _study_ok(document)
     except Exception:
         return False
     finally:
         os.unlink(path)
+
+
+def _negative_probe_ok(binary: str, library_path: str) -> tuple[bool, dict]:
+    """Wrong-nominal-type programs must be refused, not executed."""
+    probe_path = WORKSPACE / "ravel" / "__negative_probe.mncs"
+    env = dict(os.environ)
+    env["MNCS_LIBRARY_PATH"] = library_path
+    try:
+        probe_path.write_text(NEGATIVE_PROBE_SOURCE)
+        result = subprocess.run(
+            [binary, "source-study", str(probe_path), "--node-id", "forge-negative-probe"],
+            capture_output=True,
+            text=True,
+            check=False,
+            env=env,
+        )
+        try:
+            document = json.loads(result.stdout or "null")
+        except json.JSONDecodeError:
+            return False, {"error": "non-JSON study output"}
+        refused = not _study_ok(document)
+        codes: list[str] = []
+
+        def walk(node: object) -> None:
+            if isinstance(node, dict):
+                if "code" in node and "severity" in node:
+                    codes.append(str(node.get("code")))
+                for value in node.values():
+                    walk(value)
+            elif isinstance(node, list):
+                for value in node:
+                    walk(value)
+
+        walk(document)
+        return refused, {"refused": refused, "diagnostics": sorted(set(codes))[:6]}
+    except Exception as exc:
+        return False, {"error": str(exc)[:200]}
+    finally:
+        try:
+            probe_path.unlink()
+        except OSError:
+            pass
 
 
 def _library_root() -> Path | None:
@@ -243,45 +340,6 @@ def run_experiment(
     return ("PASS" if overall_ok else "FAIL"), detail
 
 
-def compile_artifact(
-    binary: str, source: Path, target: str, library_path: str
-) -> tuple[str, dict]:
-    """Artifact-realization probe: record realized vs honest refusal."""
-    output_dir = f"/tmp/ravel-mncs-forge/artifact-{source.stem}-{target}"
-    result = subprocess.run(
-        [
-            binary,
-            "compile",
-            str(source),
-            "--emit",
-            "backend",
-            "--target",
-            target,
-            "--output-dir",
-            output_dir,
-        ],
-        capture_output=True,
-        text=True,
-        check=False,
-        env=_environment(library_path),
-    )
-    try:
-        document = json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return "FAIL", {"error": "non-JSON CLI output", "stderr": result.stderr[-800:]}
-    # Refusals print a bare diagnostics list; successes print a result object.
-    if isinstance(document, list):
-        codes = [d.get("code") for d in document][:6]
-        return "UNKNOWN", {"status": "refused", "diagnostics": codes}
-    status = document.get("status")
-    diagnostics = [d.get("code") for d in document.get("diagnostics", [])][:6]
-    if status == "completed":
-        return "PASS", {"artifact": True}
-    # Honest refusal (unsupported envelope, unresolved target evidence) is
-    # recorded as UNKNOWN evidence, never silently ignored.
-    return "UNKNOWN", {"status": status, "diagnostics": diagnostics}
-
-
 def main() -> int:
     name = sys.argv[1] if len(sys.argv) > 1 else ""
     if name != "mncs-experiments":
@@ -309,35 +367,66 @@ def main() -> int:
                     "status": "BLOCKED",
                     "reason": (
                         "sibling mncs-language checkout with a built mncs-cli "
-                        "supporting profile 0.6 imports and arithmetic intents "
-                        "is required"
+                        "supporting profile 0.10 imports, generics, and "
+                        "arithmetic intents is required"
                     ),
                 }
             )
         )
         return 0
 
+    # Coverage cross-check: every workspace module with an executable corpus
+    # must be enumerated in MODULES. Only ravel.types.v1 (shared vocabulary,
+    # no entry points, no corpus) may be absent.
+    workspace_sources = sorted(
+        path.name
+        for path in (WORKSPACE / "ravel").glob("*.mncs")
+        if not path.name.startswith("__")
+    )
+    covered_sources = sorted(str(spec["source"]).split("/")[-1] for spec in MODULES.values())
+    uncovered = [
+        name
+        for name in workspace_sources
+        if name not in covered_sources and name != "types.mncs"
+    ]
+    negative_ok, negative_detail = _negative_probe_ok(binary, str(library))
+
     report: dict[str, object] = {
         "check": "mncs-experiments",
         "interpretation": "bounded local development evidence; not equivalence, conformance, or promotion",
         "toolchain": {"binary": binary, "library_root": str(library)},
+        "coverage": {
+            "workspace_modules": workspace_sources,
+            "covered": covered_sources,
+            "uncovered": uncovered,
+        },
+        "negative_nominal_type": negative_detail,
         "modules": {},
     }
     failed = False
+    if uncovered:
+        failed = True
+    if not negative_ok:
+        failed = True
     for stem, spec in MODULES.items():
         source = WORKSPACE / str(spec["source"])
         corpus = CORPUS / str(spec["corpus"])
         module_report: dict[str, object] = {}
+        agreements: list[bool] = []
         for backend in EXECUTION_BACKENDS:
             status, detail = run_experiment(binary, source, corpus, backend, str(library))
             module_report[backend] = {"kind": "execution", "status": status, **detail}
             if status != "PASS":
                 failed = True
-        for target in ARTIFACT_TARGETS:
-            status, detail = compile_artifact(binary, source, target, str(library))
-            module_report[target] = {"kind": "artifact", "status": status, **detail}
-            if status == "FAIL":
-                failed = True
+            agreements.append(
+                status == "PASS"
+                and detail.get("cases_met") == detail.get("cases_total")
+            )
+        # Case-by-case semantic agreement across backends: every execution
+        # backend must meet the same expectations on the same corpus.
+        module_report["cross_backend_agreement"] = all(agreements) and len(agreements) > 0
+        if not module_report["cross_backend_agreement"]:
+            failed = True
         report["modules"][spec["module"]] = module_report  # type: ignore[index]
 
     report["overall"] = "FAIL" if failed else "PASS"

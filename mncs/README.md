@@ -16,22 +16,32 @@ behavioral references for this reconstruction, not its architecture.
 
 ## Status
 
-**Implemented / exercised (research).** Ten cooperating MNCS modules form one
-linked program: they import each other (`ravel.types.v1`) and the standard
-library (`mncs.core.status.v1`, `mncs.core.logic.v1`). Every module runs end to
-end through semantic → HIR → SSA → backend realization with layered agreement
-validation, **PASS** with zero unresolved obligations on both executable
-backends. All experiments are local development evidence; nothing here is
+**Implemented / exercised (research).** Twelve MNCS source modules form one
+linked program: eleven executable modules import each other
+(`ravel.types.v1`) and the standard library (`mncs.core.status.v1`,
+`mncs.core.logic.v1`, `mncs.core.identity.v1`, `mncs.core.lineage.v1`).
+Source profiles are the lowest each module justifies: nine modules at
+Profile 0.6 (linked imports, strict booleans, payload sums, saturating
+intents, capabilities/effects) and three at Profile 0.10
+(`ravel.core.v1`, `ravel.identity.v1`, `ravel.evidence.v1`: explicit
+bounded polymorphism over imported nominal sequence types). Every module
+runs end to end through semantic → HIR → SSA → backend realization with
+layered agreement validation on all five executable backends; overall
+statuses are honest (ten modules PASS, `ravel.identity.v1` UNKNOWN from
+retained iteration-cost/view-range obligations with all expectations met).
+All experiments are local development evidence; nothing here is
 independently evaluated, frozen, promoted, or production software.
 
 ## Layout
 
 ```text
 mncs/
-  workspace/ravel/            a linked multi-module program (Profile 0.6)
+  workspace/ravel/            a linked multi-module program (Profiles 0.6 / 0.10)
     types.mncs                ravel.types.v1      shared SnapshotId identity vocabulary
+                                                 (no entry points; no corpus by design)
     core.mncs                 ravel.core.v1      status lattice use, evidence combination,
-                                                 dispositions (imports mncs.core.status.v1)
+                                                 GateSet + generic EvidenceEnvelope
+                                                 dispositions (0.10; imports mncs.core.status.v1)
     loop.mncs                 ravel.loop.v1      hypothesis → prediction → observation →
                                                  attribution → commit-eligibility / retention
     checkpoint.mncs           ravel.checkpoint.v1 immutable checkpoints, candidates,
@@ -44,8 +54,13 @@ mncs/
     budget.mncs               ravel.budget.v1    refusable spends; saturating plan merging
     forge.mncs                ravel.forge.v1     request/receipt binding; stale receipts refused
     identity.mncs             ravel.identity.v1  content digests as bounded byte sequences
-                                                 (Profile 0.7): bytewise agreement, dead-digest
-                                                 round-trip, SnapshotId migration path
+                                                 (0.10): bytewise agreement, dead-digest
+                                                 round-trip, SnapshotId migration path,
+                                                 Digest32 embedding, stdlib lineage/staleness
+    evidence.mncs             ravel.evidence.v1  bounded 8-lane evidence envelopes with
+                                                 provenance (0.10): prefix-fold aggregation,
+                                                 fail-closed active counts, advisory asks,
+                                                 freshness binding
   corpus/                     typed corpora with expected values per case
   tools/                      corpus generators + Forge check + differential harness
   docs/                       this document set
@@ -59,8 +74,14 @@ Consumes the authoritative status lattice from `mncs.core.status.v1`
 (dominance: `FAIL` ⊒ `UNKNOWN` ⊒ `PASS`); `EvidenceRef` records combining by
 dominance; four-gate `disposition()` where any `FAIL` rejects, unresolved gates
 hold, and only all-PASS commits; advisory confidence ranking that never alters
-governing status. The authority boundary is structural: there is no function in
-this module that can turn UNKNOWN into PASS.
+governing status. The same boundary additionally travels as a generic
+`EvidenceEnvelope` (`[Status; 4]`) aggregated by the authoritative
+`summarize<4>` fold: `envelope_summary()` preserves pass/fail/unknown counts
+so conflict stays visible, and `envelope_disposition()` reproduces the
+GateSet semantics (FAIL dominates, UNKNOWN holds, all-PASS commits from the
+counts — never by promoting the fold's UNKNOWN floor). The authority boundary
+is structural: there is no function in this module that can turn UNKNOWN
+into PASS.
 
 ### ravel.loop.v1
 
@@ -131,6 +152,32 @@ snapshot as its request; snapshot drift is refused as its own verdict
 (`STALE_RECEIPT`) even when the receipt is favorable; statuses pass through
 untouched — an unbound PASS degrades to UNKNOWN, a FAIL remains FAIL.
 
+### ravel.identity.v1
+
+Content identities as bounded byte sequences bound to the authoritative
+substrates: every 8-byte `ContentDigest` embeds explicitly into the
+stdlib `Digest32` (big-endian content bytes, zero-padded; dead maps to
+dead), and parent/lineage judgements delegate to `mncs.core.lineage.v1`
+(`Root` / `Successor` / `Conflict`) instead of re-declaring them. Replay
+across snapshots is a `Conflict` value, never silent reuse; staleness is an
+explicit verdict callers must refuse. Comparison stays nominally type-safe:
+`ContentDigest` and `Digest32` are distinct types crossed only by the
+documented embedding — the Forge check asserts a mistyped crossing is
+refused at elaboration. No identity is derived from display text.
+
+### ravel.evidence.v1
+
+Bounded evidence envelopes with provenance: up to eight status lanes with
+an explicit active count and one bound snapshot, aggregated by the
+authoritative `summarize_prefix<8>` fold. Out-of-range counts are
+fail-closed (`valid` false, status UNKNOWN); unused lanes are never
+observed; the empty envelope commits nothing (absent is not PASS);
+`committable` requires every observed lane PASS; advisory asks carry the
+unresolved count with a priority that changes no authority; freshness
+binding makes cross-snapshot replay detectably stale. Identities,
+verifier bindings, statuses, counts, provenance, conflicts, and unresolved
+items travel as one typed value.
+
 ## Verification
 
 Each module is executed by the language-owned experiment flow:
@@ -153,20 +200,34 @@ python3 tools/ravel_mncs_differential.py
 ```
 
 (registered Forge workflow: `mncs-experiments`; requires the sibling
-`mncs-language` checkout; the checker probes toolchains for Profile 0.6
-imports, strict booleans, and explicit arithmetic intents before trusting
-them).
+`mncs-language` checkout; the checker probes toolchains for Profile 0.10
+imports, bounded generics, and explicit arithmetic intents before trusting
+them, cross-verifies its module table against the workspace so no module is
+silently omitted, and asserts a wrong-nominal-type program is refused).
 
-## Backend matrix (observed 2026-08-25)
+## Backend matrix (observed 2026-09-13)
 
-| Module | research bytecode | portable WASM | C11 / LLVM / Cranelift |
-| --- | --- | --- | --- |
-| all nine modules | **PASS** | **PASS** | artifact emitted; execution outside scalar envelope |
+| Module | research bytecode | portable WASM | C11 | LLVM | Cranelift |
+| --- | --- | --- | --- | --- | --- |
+| core (16 cases) | **PASS** | **PASS** | **PASS** | **PASS** | **PASS** |
+| loop (13) | **PASS** | **PASS** | **PASS** | **PASS** | **PASS** |
+| checkpoint (5) | **PASS** | **PASS** | **PASS** | **PASS** | **PASS** |
+| memory (11) | **PASS** | **PASS** | **PASS** | **PASS** | **PASS** |
+| task (5) | **PASS** | **PASS** | **PASS** | **PASS** | **PASS** |
+| lifecycle (11) | **PASS** | **PASS** | **PASS** | **PASS** | **PASS** |
+| provider (10) | **PASS** | **PASS** | **PASS** | **PASS** | **PASS** |
+| budget (8) | **PASS** | **PASS** | **PASS** | **PASS** | **PASS** |
+| forge (8) | **PASS** | **PASS** | **PASS** | **PASS** | **PASS** |
+| evidence (18) | **PASS** | **PASS** | **PASS** | **PASS** | **PASS** |
+| identity (16) | **UNKNOWN** | **UNKNOWN** | **UNKNOWN** | **UNKNOWN** | **UNKNOWN** |
 
-Composite values (records, payload sums) execute end to end on research
-bytecode and portable WASM. The scalar backends realize artifacts but their
-process/object envelope does not admit composite arguments; refusals are
-recorded per module as evidence by the checker rather than assumed.
+Composite values (records, payload sums, exact sequences, bounded views,
+nested composites) execute end to end on all five backends with identical
+per-case expectations met on each — the pre-2026-09 scalar-envelope
+limitation is obsolete. `ravel.identity.v1` meets 16/16 expectations on
+every backend; its overall UNKNOWN honestly retains iteration-cost and
+view-range obligations (the same obligation classes the stdlib's own folds
+retain).
 
 ## Legacy differential
 

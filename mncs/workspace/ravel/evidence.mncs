@@ -1,0 +1,106 @@
+mncs 0.10;
+
+// ravel.evidence — bounded evidence envelopes with provenance.
+//
+// A bounded set of evidence travelling as one value: up to eight status
+// lanes (the process-boundary capacity heritage shared with the stdlib
+// `summarize8` compatibility envelope), an explicit active count saying how
+// many leading lanes are observed evidence, and the snapshot whose
+// semantics the evidence was gathered under.
+//
+// RAVEL may rank and request more evidence but can never convert missing
+// evidence into PASS, and that boundary is structural here:
+// - aggregation delegates to the authoritative generic bounded-prefix fold
+//   `summarize_prefix<8>`; unused lanes are never observed and an
+//   out-of-range active count is fail-closed (`valid` false);
+// - `governing_status` passes the fold through unchanged and degrades an
+//   invalid envelope to UNKNOWN: absence of valid evidence is never PASS,
+//   while FAIL stays FAIL;
+// - `committable` requires every active lane observed PASS with zero
+//   failures and zero unknowns — the same all-PASS rule as the core
+//   envelope, decided from the counts rather than by promoting UNKNOWN;
+// - the envelope is bound to one snapshot: `envelope_fresh` detects replay
+//   across snapshots so stale evidence cannot be silently reused;
+// - `ask_for_more` carries the unresolved count and an advisory priority,
+//   but priority is advisory only: it cannot change authority, and refusal
+//   paths elsewhere preserve the original budget untouched;
+// - conflict stays visible: `has_conflict` reports mixed PASS/FAIL lanes
+//   instead of letting the fold's single status hide the disagreement.
+module ravel.evidence.v1;
+
+use mncs.core.status.v1;
+use ravel.types.v1;
+
+record Envelope {
+    snapshot: SnapshotId,
+    statuses: [Status; 8],
+    active: byte,
+}
+
+record EvidenceAsk {
+    snapshot: SnapshotId,
+    missing: i64,
+    priority: i64,
+}
+
+// Authoritative aggregation: the leading `active` lanes fold once through
+// the stdlib bounded-prefix form; counts stay visible for callers.
+fn summarize_envelope(input: Envelope) -> (result: StatusSummary) {
+    return summarize_prefix<8>(input.statuses, input.active);
+}
+
+// The governed status of the envelope: the fold passes through unchanged,
+// and an invalid envelope (active count outside the fixed capacity)
+// degrades to UNKNOWN. FAIL is never deleted; UNKNOWN is never promoted.
+fn governing_status(input: Envelope) -> (result: Status) {
+    let summary: StatusSummary = summarize_prefix<8>(input.statuses, input.active);
+    if summary.valid {
+        return summary.status;
+    }
+    return Status.UNKNOWN;
+}
+
+// Whether the envelope authorizes commitment: valid, at least one lane
+// observed, and every observed lane PASS — zero failures and zero unknowns.
+// An absent lane is not PASS: the empty envelope (active zero) commits
+// nothing, and missing evidence cannot satisfy this gate.
+fn committable(input: Envelope) -> (result: bool) {
+    let summary: StatusSummary = summarize_prefix<8>(input.statuses, input.active);
+    if summary.valid {
+        if summary.observed_count > 0 {
+            if summary.fail_count == 0 {
+                return summary.unknown_count == 0;
+            }
+        }
+    }
+    return false;
+}
+
+// Whether the observed lanes disagree: PASS and FAIL both present. The
+// conflict is reported instead of reduced away.
+fn has_conflict(input: Envelope) -> (result: bool) {
+    let summary: StatusSummary = summarize_prefix<8>(input.statuses, input.active);
+    if summary.pass_count > 0 {
+        return summary.fail_count > 0;
+    }
+    return false;
+}
+
+// Advisory request for more evidence: the unresolved lane count travels
+// with the bound snapshot and a caller-chosen priority. Priority may order
+// work but changes no status and grants no authority.
+fn ask_for_more(input: Envelope, priority: i64) -> (result: EvidenceAsk) {
+    let summary: StatusSummary = summarize_prefix<8>(input.statuses, input.active);
+    return EvidenceAsk {
+        snapshot: input.snapshot,
+        missing: summary.unknown_count,
+        priority: priority,
+    };
+}
+
+// Freshness: the envelope may be used only while the workspace still names
+// the snapshot it was gathered under. Drift makes it stale — detectably,
+// as false here — rather than accidentally reusable.
+fn envelope_fresh(input: Envelope, live: SnapshotId) -> (result: bool) {
+    return same_snapshot(input.snapshot, live);
+}

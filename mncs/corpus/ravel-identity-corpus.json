@@ -54,6 +54,206 @@
       },
       "expected_status": "returned",
       "expected": [ { "boolean": { "value": false } } ]
+    },
+    {
+      "id": "embedded-dead-is-dead",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "embedded_dead_probe" },
+        "arguments": [
+          { "integer": { "value": 0, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 0, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "boolean": { "value": true } } ]
+    },
+    {
+      "id": "embedded-live-not-dead",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "embedded_dead_probe" },
+        "arguments": [
+          { "integer": { "value": 1, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 0, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "boolean": { "value": false } } ]
+    },
+    {
+      "id": "embedded-same-agrees",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "embedded_same_probe" },
+        "arguments": [
+          { "integer": { "value": 305419896, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 287454020, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 305419896, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 287454020, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "boolean": { "value": true } } ]
+    },
+    {
+      "id": "embedded-mismatch-refused",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "embedded_same_probe" },
+        "arguments": [
+          { "integer": { "value": 305419896, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 287454020, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 305419896, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 287454021, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "boolean": { "value": false } } ]
+    },
+    {
+      "id": "lineage-root",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "lineage_probe" },
+        "arguments": [
+          { "integer": { "value": 0, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 0, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 0, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 0, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "finite": {
+        "type_identity": "mncs:0.2:finite-type:mncs.core.lineage.v1::Relation",
+        "variant_identity": "mncs:0.2:finite-variant:mncs.core.lineage.v1::Relation::Root",
+        "discriminant": 0 } } ]
+    },
+    {
+      "id": "lineage-successor",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "lineage_probe" },
+        "arguments": [
+          { "integer": { "value": 5, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 7, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 5, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 7, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "finite": {
+        "type_identity": "mncs:0.2:finite-type:mncs.core.lineage.v1::Relation",
+        "variant_identity": "mncs:0.2:finite-variant:mncs.core.lineage.v1::Relation::Successor",
+        "discriminant": 1 } } ]
+    },
+    {
+      "id": "lineage-conflict",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "lineage_probe" },
+        "arguments": [
+          { "integer": { "value": 5, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 7, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 5, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 8, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "finite": {
+        "type_identity": "mncs:0.2:finite-type:mncs.core.lineage.v1::Relation",
+        "variant_identity": "mncs:0.2:finite-variant:mncs.core.lineage.v1::Relation::Conflict",
+        "discriminant": 2 } } ]
+    },
+    {
+      "id": "lineage-live-against-dead-conflicts",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "lineage_probe" },
+        "arguments": [
+          { "integer": { "value": 1, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 0, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 0, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 0, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "finite": {
+        "type_identity": "mncs:0.2:finite-type:mncs.core.lineage.v1::Relation",
+        "variant_identity": "mncs:0.2:finite-variant:mncs.core.lineage.v1::Relation::Conflict",
+        "discriminant": 2 } } ]
+    },
+    {
+      "id": "lineage-ok-successor",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "lineage_ok_probe" },
+        "arguments": [
+          { "integer": { "value": 5, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 7, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 5, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 7, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "boolean": { "value": true } } ]
+    },
+    {
+      "id": "lineage-ok-conflict-fails-closed",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "lineage_ok_probe" },
+        "arguments": [
+          { "integer": { "value": 5, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 7, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 5, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 8, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "boolean": { "value": false } } ]
+    },
+    {
+      "id": "stale-same-not-stale",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "stale_probe" },
+        "arguments": [
+          { "integer": { "value": 5, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 7, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 5, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 7, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "boolean": { "value": false } } ]
+    },
+    {
+      "id": "stale-drift-detected",
+      "request": {
+        "schema_version": "0.1",
+        "target": { "module": "ravel.identity.v1", "function": "stale_probe" },
+        "arguments": [
+          { "integer": { "value": 5, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 7, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 9, "type": { "bits": 64, "signed": true } } },
+          { "integer": { "value": 7, "type": { "bits": 64, "signed": true } } }
+        ],
+        "step_budget": 10000
+      },
+      "expected_status": "returned",
+      "expected": [ { "boolean": { "value": true } } ]
     }
   ],
   "properties": []
