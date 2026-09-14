@@ -9,6 +9,7 @@ __all__ = [
     "fabric",
     "fabric_agent",
     "fabric_persistent",
+    "impact",
     "knowledge",
     "lifecycle",
     "matched_compute",

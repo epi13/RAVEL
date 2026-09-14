@@ -12,6 +12,7 @@ dependencies = []
 
 [project.scripts]
 ravel-fabric-agent = "ravel.fabric_agent:main"
+ravel-impact = "ravel.impact:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
