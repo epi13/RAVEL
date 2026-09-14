@@ -122,6 +122,13 @@ A bounded RAVEL episode should follow this sequence:
 8. **Evaluate without reinterpretation.** Preserve raw verifier status and derive a separate hypothesis disposition.
 9. **Choose the next action.** Repair, gather more evidence, abstain, reject, or freeze the candidate.
 10. **Record the episode.** Store identities, actions, outcomes, costs, governing contracts, and unresolved alternatives.
+
+For MNCS source changes, the bounded probe begins with `ravel-impact`, not a
+repository dump. It consumes the compiler-owned `mncs.semantic-impact/1`
+projection and emits a source-bound `mncs.verification-plan/1`. The plan's
+level and typed escalation reasons make the stop/escalate decision explicit;
+Forge and Actions execute the selected proof and preserve the plan reference.
+See [Selective MNCS verification](SELECTIVE_VERIFICATION.md).
 11. **Extract provisional knowledge.** Create principles or strategies only when attribution and scope support them.
 12. **Test transfer.** Reuse remains restricted until separate contexts support the declared scope.
 
