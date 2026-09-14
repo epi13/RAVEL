@@ -15,6 +15,15 @@ mncs-test exact test-case execution
 Forge and Actions orchestration
 ```
 
+The transport contract is family-owned by MNCS-Commons at
+`src/mncs_commons/verification_plan.py` and
+`schemas/mncs-verification-plan-1.schema.json`. RAVEL does not carry a second
+schema or vocabulary. Its normal entrypoint invokes the MNCS-native
+`mncs.family.verification_plan.v1::select_codes` policy module; the small
+Python policy function remains only as a compatibility adapter for callers
+that cannot provide the native runtime. Plan identity is lower-case SHA-256 of
+canonical JSON with `plan_id` removed.
+
 The policy is deliberately fail-closed:
 
 - a known implementation root with no dependent edges selects the changed
@@ -27,9 +36,23 @@ The policy is deliberately fail-closed:
 
 The plan binds the exact source digest, subject identity/fingerprint, graph
 identity, selected test-case identities, level, risk flags, escalation reasons,
-and proof stop condition. `mncs-test` rejects stale plans and does not broaden
-selection implicitly. The full impact graph remains retrievable as a compiler
-artifact, but the normal reasoning interface is the compact plan.
+and proof stop condition. A source/module test inventory is not a
+`repository_canonical` proof: that level requires a repository-scoped executor
+and canonical-suite evidence. A `family` plan is routing evidence until the
+family proof boundary is established. `mncs-test` rejects stale plans and does
+not broaden selection implicitly. The full impact graph remains retrievable as
+a compiler artifact, but the normal reasoning interface is the compact plan.
+
+Cross-repository contract changes use the Commons digest-bound family overlay:
+the local compiler graph supplies semantic impact, while the overlay supplies
+declared producer/consumer edges with contract identity, revision, consuming
+identity, provenance, and edge fingerprint. RAVEL selects only the declared
+consumer repositories. An incomplete overlay adds
+`cross_repository_graph_incomplete` and keeps the plan non-stopping.
+
+Plan provenance records the source, semantic graph, inventory subject, family
+graph, selected identities, and contract revision so Actions receipts and
+Forge can invalidate only evidence whose dependencies changed.
 
 Example:
 
@@ -42,6 +65,7 @@ ravel-impact tests/self_suite.mncs \
 mncs-test run --verification-plan .mncs/verification-plan.json ...
 ```
 
-`ravel-impact` is a transport adapter around compiler and inventory commands;
-selection policy is deterministic and no outside-language implementation is
-claimed as semantic authority.
+`ravel-impact` remains the process/filesystem adapter around compiler and
+inventory commands. Selection policy is deterministic and native in the normal
+path; the adapter does not become semantic authority merely because it
+serializes or validates the result.

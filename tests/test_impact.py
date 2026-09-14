@@ -6,7 +6,8 @@ from unittest.mock import patch
 import json
 from pathlib import Path
 
-from ravel.impact import build_verification_plan, request_verification_plan, select_level
+from ravel.impact import _native_selection_policy, build_verification_plan, request_verification_plan, select_level
+from ravel.family_contract import load_family_graph
 
 
 def _impact(**overrides: object) -> dict[str, object]:
@@ -42,6 +43,49 @@ def _inventory() -> dict[str, object]:
 
 
 class ImpactPlanTests(unittest.TestCase):
+    def test_native_selection_policy_matches_bounded_local_cases(self) -> None:
+        runtime = Path("/home/epi13/Documents/Projects/mncs-language/target/debug/mncs")
+        if not runtime.is_file():
+            self.skipTest("mncs runtime is not built")
+        level, reasons = _native_selection_policy(
+            mncs=str(runtime),
+            impact=_impact(direct_dependents=["mncs:operation:caller"]),
+            change_class="implementation",
+            cross_repository=False,
+            selected_tests=1,
+            cwd=Path(__file__).resolve().parents[1],
+            libraries=(),
+            timeout=30.0,
+        )
+        assert level == "direct_dependents"
+        assert reasons == ["direct_dependents_affected"]
+
+    def test_cross_repository_contract_selects_declared_consumers_only(self) -> None:
+        graph = load_family_graph(
+            Path(__file__).resolve().parents[2] / "MNCS-Commons" / "family" / "semantic-edges-v1.json"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "source.mncs"
+            source.write_text("current", encoding="utf-8")
+            plan = build_verification_plan(
+                _impact(),
+                _inventory(),
+                source_path=source,
+                cross_repository=True,
+                family_graph=graph,
+                producer_repository="ravel",
+                contract_identity="mncs.verification-plan/1",
+            )
+        assert plan["selection"]["level"] == "family"
+        assert plan["selection"]["selected_repositories"] == [
+            "mncs-actions",
+            "mncs-forge-mcp",
+            "mncs-test",
+        ]
+        assert plan["selection"]["available_repository_count"] == 6
+        assert plan["proof"]["sufficient_to_stop"] is False
+        assert "family_verification_pass" in plan["proof"]["required_evidence"]
+
     def test_narrow_plan_joins_only_compiler_reported_test_identities(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "source.mncs"
@@ -122,7 +166,8 @@ class ImpactPlanTests(unittest.TestCase):
         self.assertIn("impact_evidence_truncated", plan["selection"]["escalation_reasons"])
         self.assertIn("unknown_changed_identity", plan["selection"]["escalation_reasons"])
         self.assertEqual(plan["selection"]["selected_test_identities"], ["mncs:test-case:one"])
-        self.assertTrue(plan["proof"]["sufficient_to_stop"])
+        self.assertFalse(plan["proof"]["sufficient_to_stop"])
+        self.assertFalse(plan["proof"]["boundary"]["established"])
         self.assertIsNotNone(plan["provenance"]["impact_provider_error"])
 
 

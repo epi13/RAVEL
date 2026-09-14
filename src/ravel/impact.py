@@ -20,19 +20,18 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any, Sequence
+
+try:
+    from .family_contract import consumers_for, load_family_graph, plan_identity, validate_plan
+except ImportError:  # direct ``python src/ravel/impact.py`` transport entrypoint
+    from family_contract import consumers_for, load_family_graph, plan_identity, validate_plan
 
 
 IMPACT_SCHEMA = "mncs.semantic-impact/1"
 PLAN_SCHEMA = "mncs.verification-plan/1"
-PLAN_LEVELS = (
-    "changed_item",
-    "direct_dependents",
-    "affected_subsystem",
-    "repository_canonical",
-    "family",
-)
 CHANGE_CLASSES = {
     "implementation",
     "public_contract",
@@ -45,36 +44,12 @@ CHANGE_CLASSES = {
     "language_profile",
     "cross_repository_contract",
 }
-ESCALATION_REASONS = {
-    "direct_dependents_affected",
-    "public_contract_changed",
-    "shared_type_changed",
-    "parser_semantics_changed",
-    "serialization_format_changed",
-    "effect_semantics_changed",
-    "abi_boundary_changed",
-    "canonical_fixture_changed",
-    "high_connectivity_definition_changed",
-    "dependent_targeted_test_failed",
-    "insufficient_diagnostic_evidence",
-    "migration_broad_semantic_surface",
-    "language_profile_changed",
-    "cross_repository_contract_changed",
-    "impact_evidence_truncated",
-    "unknown_changed_identity",
-}
-
-
 class ImpactError(ValueError):
     """Impact evidence or plan input was malformed or unavailable."""
 
 
 def sha256_bytes(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
-
-
-def canonical_bytes(value: Any) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
 
 
 def _strings(value: Any, field: str) -> list[str]:
@@ -124,6 +99,113 @@ def _inventory_tests(inventory_document: Any) -> tuple[dict[str, Any], list[dict
     return inventory, tests
 
 
+_NATIVE_LEVELS = {
+    0: "changed_item",
+    1: "direct_dependents",
+    2: "affected_subsystem",
+    3: "repository_canonical",
+    4: "family",
+}
+_NATIVE_REASON_BITS = {
+    1: "cross_repository_contract_changed",
+    2: "impact_evidence_truncated",
+    4: "unknown_changed_identity",
+    8: "impact_evidence_truncated",
+    16: "public_contract_changed",
+    32: "shared_type_changed",
+    64: "parser_semantics_changed",
+    128: "serialization_format_changed",
+    256: "effect_semantics_changed",
+    512: "abi_boundary_changed",
+    1024: "canonical_fixture_changed",
+    2048: "language_profile_changed",
+    4096: "high_connectivity_definition_changed",
+    8192: "direct_dependents_affected",
+}
+_CHANGE_CLASS_CODES = {
+    "implementation": 0,
+    "public_contract": 1,
+    "shared_type": 2,
+    "parser_semantics": 3,
+    "serialization_format": 4,
+    "effect_semantics": 5,
+    "abi_boundary": 6,
+    "canonical_fixture": 7,
+    "language_profile": 8,
+    "cross_repository_contract": 9,
+}
+
+
+def _native_selection_policy(
+    *,
+    mncs: str,
+    impact: dict[str, Any],
+    change_class: str,
+    cross_repository: bool,
+    selected_tests: int,
+    cwd: Path,
+    libraries: Sequence[Path],
+    timeout: float,
+) -> tuple[str, list[str]]:
+    """Ask the MNCS-native policy module for level and reason-mask semantics."""
+
+    policy_path = Path(
+        os.environ.get(
+            "MNCS_VERIFICATION_POLICY",
+            str(Path(__file__).resolve().parents[3] / "mncs-language" / "library" / "family" / "verification_plan.mncs"),
+        )
+    )
+    if not policy_path.is_file():
+        raise ImpactError(f"native verification policy is unavailable: {policy_path}")
+    fields = {
+        "cross_repository": int(cross_repository),
+        "impact_complete": int(bool(impact.get("complete"))),
+        "unknown_root": int("unknown_root" in set(impact.get("risk_flags", []))),
+        "truncated": int("truncated" in set(impact.get("risk_flags", []))),
+        "change_class": _CHANGE_CLASS_CODES[change_class],
+        "high_connectivity": int("high_connectivity" in set(impact.get("risk_flags", []))),
+        "shared_type": int("shared_type" in set(impact.get("risk_flags", []))),
+        "effect_semantics": int("effect_semantics" in set(impact.get("risk_flags", []))),
+        "abi_boundary": int("abi_boundary" in set(impact.get("risk_flags", []))),
+        "public_contract": int("public_contract" in set(impact.get("risk_flags", []))),
+        "direct_dependents": int(bool(impact.get("direct_dependents"))),
+        "selected_tests": selected_tests,
+    }
+    request = {
+        "schema_version": "0.1",
+        "target": {"module": "mncs.family.verification_plan.v1", "function": "select_codes"},
+        "arguments": [
+            {"integer": {"value": value, "type": {"bits": 32, "signed": True}}}
+            for value in fields.values()
+        ],
+        "step_budget": 512,
+    }
+    with tempfile.TemporaryDirectory(prefix="ravel-verification-policy-") as directory:
+        request_path = Path(directory) / "request.json"
+        request_path.write_text(json.dumps(request), encoding="utf-8")
+        command = [mncs, "execute", str(policy_path), str(request_path)]
+        environment = dict(os.environ)
+        if libraries:
+            environment["MNCS_LIBRARY_PATH"] = os.pathsep.join(str(path.resolve()) for path in libraries)
+        raw = _run_json(command, cwd=cwd, environment=environment, timeout=timeout)
+    if not isinstance(raw, dict) or raw.get("status") != "returned":
+        raise ImpactError(f"native verification policy did not return a decision: {raw!r}")
+    returned = raw.get("returned")
+    fields_value = returned[0].get("record", {}).get("fields") if isinstance(returned, list) and returned else None
+    values: dict[str, int] = {}
+    for pair in fields_value if isinstance(fields_value, list) else []:
+        if isinstance(pair, list) and len(pair) == 2 and isinstance(pair[0], str):
+            integer = pair[1].get("integer") if isinstance(pair[1], dict) else None
+            if isinstance(integer, dict) and isinstance(integer.get("value"), int):
+                values[pair[0]] = integer["value"]
+    level = _NATIVE_LEVELS.get(values.get("level_code"))
+    if level is None:
+        raise ImpactError(f"native verification policy returned an unknown level: {values!r}")
+    mask = values.get("reason_mask", 0)
+    reasons = sorted({reason for bit, reason in _NATIVE_REASON_BITS.items() if mask & bit})
+    return level, reasons
+
+
 def _reason_for_change(change_class: str) -> str | None:
     mapping = {
         "public_contract": "public_contract_changed",
@@ -145,6 +227,13 @@ def select_level(
     change_class: str,
     cross_repository: bool = False,
 ) -> tuple[str, list[str]]:
+    """Compatibility fallback for offline callers without the MNCS runtime.
+
+    The normal ``request_verification_plan`` path supplies the native policy
+    module.  This pure helper remains only for bounded provider-failure and
+    unit-fixture paths, where it fails closed to the same canonical scopes.
+    """
+
     reasons: list[str] = []
     explicit_reason = _reason_for_change(change_class)
     if cross_repository or change_class == "cross_repository_contract":
@@ -189,6 +278,13 @@ def build_verification_plan(
     source_sha256: str | None = None,
     change_class: str = "implementation",
     cross_repository: bool = False,
+    family_graph: dict[str, Any] | None = None,
+    producer_repository: str = "ravel",
+    contract_identity: str | None = None,
+    policy_runtime: str | None = None,
+    policy_cwd: Path | None = None,
+    policy_libraries: Sequence[Path] = (),
+    policy_timeout: float = 60.0,
     provenance: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Join compiler evidence into a deterministic minimum-proof plan."""
@@ -206,24 +302,67 @@ def build_verification_plan(
     source_sha256 = actual_source_sha256
     test_by_id = {test["test_case_identity"]: test for test in tests}
     impacted_tests = [identity for identity in impact["test_identities"] if identity in test_by_id]
-    level, reasons = select_level(
-        impact,
-        change_class=change_class,
-        cross_repository=cross_repository,
-    )
+    if policy_runtime is not None:
+        level, reasons = _native_selection_policy(
+            mncs=policy_runtime,
+            impact=impact,
+            change_class=change_class,
+            cross_repository=cross_repository,
+            selected_tests=len(impacted_tests),
+            cwd=(policy_cwd or source_path.parent).resolve(),
+            libraries=policy_libraries,
+            timeout=policy_timeout,
+        )
+    else:
+        level, reasons = select_level(
+            impact,
+            change_class=change_class,
+            cross_repository=cross_repository,
+        )
     # A neighborhood with no joinable tests cannot establish a narrow
     # behavioral proof. Run the canonical inventory in that case, and make
     # the uncertainty visible in the plan.
-    if not impacted_tests and tests:
+    if not impacted_tests and tests and not cross_repository:
         level = "repository_canonical"
-        reasons = sorted(set(reasons + ["insufficient_diagnostic_evidence"]))
+        reasons = sorted(set(reasons + ["test_selection_unresolved"]))
         selected = sorted(test_by_id)
     else:
         selected = sorted(impacted_tests)
-    # A local plan can establish a stop condition after its selected proof.
-    # Family selection is only a routing decision: the local inventory cannot
-    # establish family-wide proof by itself.
-    sufficient = bool(selected) and level != "family"
+    if family_graph is None:
+        cross_repository_projection: dict[str, Any] = {
+            "graph_identity": sha256_bytes(b"no-cross-repository-overlay"),
+            "edges": [],
+            "selected_repositories": [],
+            "complete": not cross_repository,
+            "limitations": [
+                "cross-repository topology was not requested"
+                if not cross_repository
+                else "cross-repository topology was requested but no family overlay was supplied"
+            ],
+        }
+    else:
+        edges = consumers_for(
+            family_graph,
+            producer_repository=producer_repository,
+            contract_identity=contract_identity,
+        )
+        cross_repository_projection = {
+            "graph_identity": family_graph["graph_identity"],
+            "edges": edges,
+            "selected_repositories": sorted({edge["consumer_repository"] for edge in edges}),
+            "complete": bool(family_graph.get("complete")),
+            "limitations": list(family_graph.get("limitations", [])),
+        }
+    if cross_repository and not cross_repository_projection["complete"]:
+        reasons = sorted(set(reasons + ["cross_repository_graph_incomplete"]))
+
+    # A source inventory is not a repository-wide canonical proof.  The
+    # compiler currently reports a source/module inventory, so a canonical
+    # request remains non-stopping until an executor supplies repository scope.
+    inventory_scope = str(inventory.get("scope", "source"))
+    sufficient = bool(selected) and level != "family" and (
+        level != "repository_canonical" or inventory_scope == "repository"
+    )
     required_evidence = [
         "selected_test_cases_pass" if level != "family" else "family_verification_pass",
     ]
@@ -234,8 +373,6 @@ def build_verification_plan(
         "source": {
             "path": str(source_path.resolve()),
             "sha256": source_sha256,
-            "subject_identity": inventory.get("subject_identity"),
-            "subject_fingerprint": inventory.get("subject_fingerprint"),
         },
         "impact": {
             "graph_identity": impact["graph_identity"],
@@ -246,27 +383,50 @@ def build_verification_plan(
             "risk_flags": impact["risk_flags"],
             "complete": impact["complete"],
             "limitations": impact["limitations"],
+            "cross_repository": cross_repository_projection,
         },
         "selection": {
             "level": level,
             "selected_test_identities": selected,
             "available_test_count": len(tests),
             "escalation_reasons": reasons,
+            "selected_repositories": cross_repository_projection["selected_repositories"],
+            "available_repository_count": len(family_graph.get("repositories", [])) if family_graph else 0,
         },
         "proof": {
             "sufficient_to_stop": sufficient,
             "required_evidence": required_evidence,
+            "boundary": {
+                "claimed_scope": "family" if level == "family" else ("repository" if level == "repository_canonical" else level),
+                "established": sufficient,
+                "executor": "family-router" if level == "family" else "mncs-test",
+                "stop_condition": required_evidence[0],
+            },
         },
         "provenance": {
             "provider": "ravel",
             "policy": "bounded-impact-v1",
             "compiler_impact_schema": IMPACT_SCHEMA,
             **(provenance or {}),
+            "dependencies": {
+                "source_sha256": source_sha256,
+                "semantic_graph_identity": impact["graph_identity"],
+                "inventory_subject_identity": inventory.get("subject_identity"),
+                "inventory_subject_fingerprint": inventory.get("subject_fingerprint"),
+                "family_graph_identity": cross_repository_projection["graph_identity"],
+                "selected_test_identities": selected,
+                "contract_revision": PLAN_SCHEMA,
+            },
         },
     }
-    plan_id = sha256_bytes(canonical_bytes(payload))
-    payload["plan_id"] = plan_id
-    return payload
+    for field in ("subject_identity", "subject_fingerprint"):
+        if isinstance(inventory.get(field), str) and inventory[field]:
+            payload["source"][field] = inventory[field]
+    payload["plan_id"] = plan_identity(payload)
+    try:
+        return validate_plan(payload, source_path=source_path)
+    except ValueError as error:
+        raise ImpactError(str(error)) from error
 
 
 def _run_json(command: Sequence[str], *, cwd: Path, environment: dict[str, str], timeout: float) -> Any:
@@ -321,12 +481,16 @@ def request_verification_plan(
     timeout: float = 60.0,
     change_class: str = "implementation",
     cross_repository: bool = False,
+    family_graph_path: Path | None = None,
+    producer_repository: str = "ravel",
+    contract_identity: str | None = None,
 ) -> dict[str, Any]:
     if not roots:
         raise ImpactError("at least one changed semantic identity is required")
     if max_depth < 1 or max_nodes < 1:
         raise ImpactError("impact bounds must be positive")
     source_path = source_path.resolve()
+    family_graph = load_family_graph(family_graph_path) if family_graph_path else None
     base = (cwd or source_path.parent).resolve()
     environment = dict(os.environ)
     if libraries:
@@ -369,6 +533,13 @@ def request_verification_plan(
         source_path=source_path,
         change_class=change_class,
         cross_repository=cross_repository,
+        family_graph=family_graph,
+        producer_repository=producer_repository,
+        contract_identity=contract_identity,
+        policy_runtime=mncs if impact_error is None and inventory_error is None else None,
+        policy_cwd=base,
+        policy_libraries=libraries,
+        policy_timeout=timeout,
         provenance={
             "mncs": str(Path(mncs).resolve()) if Path(mncs).exists() else mncs,
             "roots_requested": sorted(set(roots)),
@@ -376,6 +547,9 @@ def request_verification_plan(
             "max_nodes": max_nodes,
             "change_class": change_class,
             "cross_repository": cross_repository,
+            "producer_repository": producer_repository,
+            "contract_identity": contract_identity,
+            "family_graph_identity": family_graph.get("graph_identity") if family_graph else None,
             "impact_provider_error": str(impact_error) if impact_error is not None else None,
             "inventory_provider_error": str(inventory_error) if inventory_error is not None else None,
         },
@@ -394,6 +568,9 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--timeout", type=float, default=60.0)
     parser.add_argument("--change-class", choices=sorted(CHANGE_CLASSES), default="implementation")
     parser.add_argument("--cross-repository", action="store_true")
+    parser.add_argument("--family-graph", type=Path)
+    parser.add_argument("--repository", default="ravel")
+    parser.add_argument("--contract-identity")
     parser.add_argument("--output", type=Path)
     return parser
 
@@ -412,6 +589,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             timeout=args.timeout,
             change_class=args.change_class,
             cross_repository=args.cross_repository,
+            family_graph_path=args.family_graph,
+            producer_repository=args.repository,
+            contract_identity=args.contract_identity,
         )
     except (ImpactError, OSError, ValueError) as error:
         print(json.dumps({"schema_version": PLAN_SCHEMA, "status": "UNKNOWN", "error": str(error)}, indent=2, sort_keys=True), file=sys.stderr)
