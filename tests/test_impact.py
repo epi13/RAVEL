@@ -59,6 +59,48 @@ def _graph_path() -> Path:
 
 
 class ImpactPlanTests(unittest.TestCase):
+    def test_explicit_commons_root_binds_graph_and_plan_validation(self) -> None:
+        configured_root = os.environ.get("MNCS_COMMONS_ROOT")
+        candidates = [Path(configured_root)] if configured_root else []
+        candidates.append(Path(__file__).resolve().parents[2] / "MNCS-Commons")
+        commons_root = next(
+            (
+                candidate
+                for candidate in candidates
+                if (candidate / "src" / "mncs_commons" / "verification_plan.py").is_file()
+                and (candidate / "family" / "semantic-edges-v1.json").is_file()
+            ),
+            None,
+        )
+        if commons_root is None:
+            self.skipTest("a checked-out MNCS-Commons contract and family graph are required")
+
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "source.mncs"
+            source.write_text("current", encoding="utf-8")
+            with patch.dict(
+                os.environ,
+                {"MNCS_COMMONS_ROOT": str(Path(directory) / "wrong-commons-root")},
+                clear=False,
+            ):
+                graph = load_family_graph(
+                    commons_root / "family" / "semantic-edges-v1.json",
+                    commons_root=commons_root,
+                )
+                plan = build_verification_plan(
+                    _impact(),
+                    _inventory(),
+                    source_path=source,
+                    cross_repository=True,
+                    family_graph=graph,
+                    commons_root=commons_root,
+                    producer_repository="ravel",
+                    contract_identity="mncs.verification-plan/1",
+                )
+
+        self.assertEqual(plan["impact"]["cross_repository"]["graph_identity"], graph["graph_identity"])
+        self.assertEqual(plan["selection"]["routing_scope"], "selected_repositories")
+
     def test_native_selection_policy_matches_bounded_local_cases(self) -> None:
         runtime = Path("/home/epi13/Documents/Projects/mncs-language/target/debug/mncs")
         if not runtime.is_file():

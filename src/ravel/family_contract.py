@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import os
 import sys
@@ -10,15 +11,25 @@ from types import ModuleType
 from typing import Any, Mapping
 
 
-def _commons_module() -> ModuleType:
-    configured = os.environ.get("MNCS_COMMONS_ROOT")
-    candidates = [Path(configured)] if configured else []
-    candidates.append(Path(__file__).resolve().parents[3] / "MNCS-Commons")
+def _module_name(prefix: str, module_path: Path) -> str:
+    """Keep independently selected Commons checkouts isolated in one process."""
+
+    identity = hashlib.sha256(str(module_path.resolve()).encode("utf-8")).hexdigest()[:16]
+    return f"{prefix}_{identity}"
+
+
+def _commons_module(*, commons_root: Path | None = None) -> ModuleType:
+    if commons_root is not None:
+        candidates = [Path(commons_root)]
+    else:
+        configured = os.environ.get("MNCS_COMMONS_ROOT")
+        candidates = [Path(configured)] if configured else []
+        candidates.append(Path(__file__).resolve().parents[3] / "MNCS-Commons")
     for root in candidates:
         source = root / "src"
         module_path = source / "mncs_commons" / "verification_plan.py"
         if module_path.is_file():
-            name = "_mncs_commons_verification_plan_canonical"
+            name = _module_name("_mncs_commons_verification_plan_canonical", module_path)
             existing = sys.modules.get(name)
             if existing is not None:
                 return existing
@@ -35,31 +46,36 @@ def _commons_module() -> ModuleType:
     )
 
 
-def plan_identity(value: Mapping[str, Any]) -> str:
-    return _commons_module().plan_identity(value)
+def plan_identity(value: Mapping[str, Any], *, commons_root: Path | None = None) -> str:
+    return _commons_module(commons_root=commons_root).plan_identity(value)
 
 
-def contract_vocab() -> tuple[tuple[str, ...], set[str]]:
-    module = _commons_module()
+def contract_vocab(*, commons_root: Path | None = None) -> tuple[tuple[str, ...], set[str]]:
+    module = _commons_module(commons_root=commons_root)
     return tuple(module.VERIFICATION_LEVELS), set(module.ESCALATION_REASONS)
 
 
-def validate_plan(value: Any, **kwargs: Any) -> dict[str, Any]:
+def validate_plan(
+    value: Any, *, commons_root: Path | None = None, **kwargs: Any
+) -> dict[str, Any]:
     try:
-        return _commons_module().validate_plan(value, **kwargs)
+        return _commons_module(commons_root=commons_root).validate_plan(value, **kwargs)
     except ValueError:
         raise
     except RuntimeError:
         raise
 
 
-def load_family_graph(path: Path) -> dict[str, Any]:
-    return _commons_module_from_graph().load_graph(path)
+def load_family_graph(path: Path, *, commons_root: Path | None = None) -> dict[str, Any]:
+    return _commons_module_from_graph(commons_root=commons_root).load_graph(path)
 
 
-def default_family_graph_path() -> Path | None:
+def default_family_graph_path(*, commons_root: Path | None = None) -> Path | None:
     """Locate the checked-in Commons graph without regenerating it."""
 
+    if commons_root is not None:
+        candidate = Path(commons_root) / "family" / "semantic-edges-v1.json"
+        return candidate if candidate.is_file() else None
     configured = os.environ.get("MNCS_FAMILY_GRAPH_PATH")
     candidates = [Path(configured)] if configured else []
     configured_root = os.environ.get("MNCS_COMMONS_ROOT")
@@ -77,10 +93,10 @@ def default_family_graph_path() -> Path | None:
     return None
 
 
-def _commons_module_from_graph() -> ModuleType:
-    verification_module = _commons_module()
+def _commons_module_from_graph(*, commons_root: Path | None = None) -> ModuleType:
+    verification_module = _commons_module(commons_root=commons_root)
     module_path = Path(verification_module.__file__).with_name("family_graph.py")
-    name = "_mncs_commons_family_graph_canonical"
+    name = _module_name("_mncs_commons_family_graph_canonical", module_path)
     existing = sys.modules.get(name)
     if existing is not None:
         return existing
@@ -94,9 +110,13 @@ def _commons_module_from_graph() -> ModuleType:
 
 
 def consumers_for(
-    graph: Mapping[str, Any], *, producer_repository: str, contract_identity: str | None = None
+    graph: Mapping[str, Any],
+    *,
+    producer_repository: str,
+    contract_identity: str | None = None,
+    commons_root: Path | None = None,
 ) -> list[dict[str, Any]]:
-    return _commons_module_from_graph().consumers_for(
+    return _commons_module_from_graph(commons_root=commons_root).consumers_for(
         graph,
         producer_repository=producer_repository,
         contract_identity=contract_identity,
