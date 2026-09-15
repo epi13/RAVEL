@@ -8,9 +8,9 @@
     "typed_call_schema_version": "mncs.typed-call/1",
     "generator_version": "ravel-provider-facts/0.1",
     "binding_content_identity": "08591a70c4e81e830df9a3d48598f940b6e7ce7d017f5ffcf6deafde1def1679",
-    "provider_fact_identity": "8b401d3727ceb3eb6d61aee7c3957d6b4b6be2190816a2ae101ebcee21f4d46a",
+    "provider_fact_identity": "e37f3f234b9ac3b8796e96885de2bacaed84c1a15b02fc6548bcdbd92adc4c02",
     "evidence_digests": {
-      "src/ravel/impact.py": "0fec4b7996ca31f666da22fcc650fd001c5e93aa613f95b747330b5f3743d13e"
+      "src/ravel/impact.py": "8f3d0c519f498e6be80dc0fb82ffe3aa06eeb089d25debd7084f7f74783025d2"
     }
   },
   "providers": [
