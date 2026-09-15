@@ -1,0 +1,21 @@
+{
+  "schema_version": "commons.mncs.semantic-contract-declarations/v1",
+  "repository_id": "ravel",
+  "revision": "1",
+  "provides": [
+    {
+      "contract_identity": "mncs.verification-plan/1",
+      "contract_revision": "1",
+      "exported_identity": "ravel:verification-plan",
+      "evidence": "src/ravel/impact.py"
+    }
+  ],
+  "consumes": [
+    {
+      "contract_identity": "mncs.semantic-impact/1",
+      "contract_revision": "1",
+      "consumer_identity": "ravel:impact-planner",
+      "evidence": "src/ravel/impact.py"
+    }
+  ]
+}
