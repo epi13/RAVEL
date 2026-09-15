@@ -21,13 +21,26 @@ import os
 import subprocess
 import sys
 import tempfile
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 try:
-    from .family_contract import consumers_for, load_family_graph, plan_identity, validate_plan
+    from .family_contract import (
+        consumers_for,
+        contract_vocab,
+        load_family_graph,
+        plan_identity,
+        validate_plan,
+    )
 except ImportError:  # direct ``python src/ravel/impact.py`` transport entrypoint
-    from family_contract import consumers_for, load_family_graph, plan_identity, validate_plan
+    from family_contract import (
+        consumers_for,
+        contract_vocab,
+        load_family_graph,
+        plan_identity,
+        validate_plan,
+    )
 
 
 IMPACT_SCHEMA = "mncs.semantic-impact/1"
@@ -99,29 +112,6 @@ def _inventory_tests(inventory_document: Any) -> tuple[dict[str, Any], list[dict
     return inventory, tests
 
 
-_NATIVE_LEVELS = {
-    0: "changed_item",
-    1: "direct_dependents",
-    2: "affected_subsystem",
-    3: "repository_canonical",
-    4: "family",
-}
-_NATIVE_REASON_BITS = {
-    1: "cross_repository_contract_changed",
-    2: "impact_evidence_truncated",
-    4: "unknown_changed_identity",
-    8: "impact_evidence_truncated",
-    16: "public_contract_changed",
-    32: "shared_type_changed",
-    64: "parser_semantics_changed",
-    128: "serialization_format_changed",
-    256: "effect_semantics_changed",
-    512: "abi_boundary_changed",
-    1024: "canonical_fixture_changed",
-    2048: "language_profile_changed",
-    4096: "high_connectivity_definition_changed",
-    8192: "direct_dependents_affected",
-}
 _CHANGE_CLASS_CODES = {
     "implementation": 0,
     "public_contract": 1,
@@ -146,8 +136,14 @@ def _native_selection_policy(
     cwd: Path,
     libraries: Sequence[Path],
     timeout: float,
-) -> tuple[str, list[str]]:
-    """Ask the MNCS-native policy module for level and reason-mask semantics."""
+) -> tuple[str, list[str], bool]:
+    """Ask the MNCS-native policy for typed level, reasons, and sufficiency.
+
+    The integer change-class argument remains a transport limitation of the
+    current runtime.  The returned level and reasons cross the membrane as
+    nominal finite values, so RAVEL does not maintain a second numeric ABI for
+    policy output.
+    """
 
     policy_path = Path(
         os.environ.get(
@@ -178,7 +174,9 @@ def _native_selection_policy(
             {"integer": {"value": value, "type": {"bits": 32, "signed": True}}}
             for value in fields.values()
         ],
-        "step_budget": 512,
+        # The policy deliberately returns a fixed-size typed reason sequence.
+        # This is a deterministic execution cap, not an open-ended retry.
+        "step_budget": 4096,
     }
     with tempfile.TemporaryDirectory(prefix="ravel-verification-policy-") as directory:
         request_path = Path(directory) / "request.json"
@@ -192,18 +190,49 @@ def _native_selection_policy(
         raise ImpactError(f"native verification policy did not return a decision: {raw!r}")
     returned = raw.get("returned")
     fields_value = returned[0].get("record", {}).get("fields") if isinstance(returned, list) and returned else None
-    values: dict[str, int] = {}
+    values: dict[str, Any] = {}
     for pair in fields_value if isinstance(fields_value, list) else []:
         if isinstance(pair, list) and len(pair) == 2 and isinstance(pair[0], str):
-            integer = pair[1].get("integer") if isinstance(pair[1], dict) else None
-            if isinstance(integer, dict) and isinstance(integer.get("value"), int):
-                values[pair[0]] = integer["value"]
-    level = _NATIVE_LEVELS.get(values.get("level_code"))
-    if level is None:
-        raise ImpactError(f"native verification policy returned an unknown level: {values!r}")
-    mask = values.get("reason_mask", 0)
-    reasons = sorted({reason for bit, reason in _NATIVE_REASON_BITS.items() if mask & bit})
-    return level, reasons
+            values[pair[0]] = pair[1]
+
+    levels, reasons_vocab = contract_vocab()
+
+    def finite_name(field: str) -> str:
+        value = values.get(field)
+        finite = value.get("finite") if isinstance(value, dict) else None
+        identity = finite.get("variant_identity") if isinstance(finite, dict) else None
+        if not isinstance(identity, str) or "::" not in identity:
+            raise ImpactError(f"native verification policy returned malformed {field}: {values!r}")
+        name = identity.rsplit("::", 1)[-1]
+        if field == "level" and name not in levels:
+            raise ImpactError(f"native verification policy returned unknown level: {name}")
+        if field == "reasons" and name not in reasons_vocab:
+            raise ImpactError(f"native verification policy returned unknown reason: {name}")
+        return name
+
+    level = finite_name("level")
+    reason_value = values.get("reasons")
+    sequence = reason_value.get("sequence") if isinstance(reason_value, dict) else None
+    raw_reasons = sequence.get("values") if isinstance(sequence, dict) else None
+    if not isinstance(raw_reasons, list):
+        raise ImpactError(f"native verification policy returned malformed reasons: {values!r}")
+    reasons = []
+    for item in raw_reasons:
+        finite = item.get("finite") if isinstance(item, dict) else None
+        identity = finite.get("variant_identity") if isinstance(finite, dict) else None
+        if not isinstance(identity, str) or "::" not in identity:
+            raise ImpactError(f"native verification policy returned malformed reason item: {item!r}")
+        name = identity.rsplit("::", 1)[-1]
+        if name != "none" and name not in reasons_vocab:
+            raise ImpactError(f"native verification policy returned unknown reason: {name}")
+        if name != "none" and name not in reasons:
+            reasons.append(name)
+    sufficient_value = values.get("sufficient_local")
+    boolean = sufficient_value.get("boolean") if isinstance(sufficient_value, dict) else None
+    sufficient = boolean.get("value") if isinstance(boolean, dict) else None
+    if not isinstance(sufficient, bool):
+        raise ImpactError(f"native verification policy returned malformed sufficiency: {values!r}")
+    return level, reasons, sufficient
 
 
 def _reason_for_change(change_class: str) -> str | None:
@@ -302,8 +331,9 @@ def build_verification_plan(
     source_sha256 = actual_source_sha256
     test_by_id = {test["test_case_identity"]: test for test in tests}
     impacted_tests = [identity for identity in impact["test_identities"] if identity in test_by_id]
+    policy_sufficient_local: bool | None = None
     if policy_runtime is not None:
-        level, reasons = _native_selection_policy(
+        level, reasons, policy_sufficient_local = _native_selection_policy(
             mncs=policy_runtime,
             impact=impact,
             change_class=change_class,
@@ -328,15 +358,16 @@ def build_verification_plan(
         selected = sorted(test_by_id)
     else:
         selected = sorted(impacted_tests)
-    if family_graph is None:
+    family_scope_requested = cross_repository or change_class == "cross_repository_contract"
+    if family_graph is None or not family_scope_requested:
         cross_repository_projection: dict[str, Any] = {
             "graph_identity": sha256_bytes(b"no-cross-repository-overlay"),
             "edges": [],
             "selected_repositories": [],
-            "complete": not cross_repository,
+            "complete": not family_scope_requested,
             "limitations": [
                 "cross-repository topology was not requested"
-                if not cross_repository
+                if not family_scope_requested
                 else "cross-repository topology was requested but no family overlay was supplied"
             ],
         }
@@ -360,7 +391,15 @@ def build_verification_plan(
     # compiler currently reports a source/module inventory, so a canonical
     # request remains non-stopping until an executor supplies repository scope.
     inventory_scope = str(inventory.get("scope", "source"))
-    sufficient = bool(selected) and level != "family" and (
+    # The native policy owns whether the selected local evidence is sufficient
+    # for the selected level.  RAVEL adds only facts it owns: the actual joined
+    # test set and the source-vs-repository proof boundary.  The offline
+    # fallback necessarily retains the old bounded policy calculation.
+    if policy_sufficient_local is None:
+        policy_sufficient_local = bool(selected) and level != "family" and (
+            level != "repository_canonical" or inventory_scope == "repository"
+        )
+    sufficient = bool(selected) and policy_sufficient_local and (
         level != "repository_canonical" or inventory_scope == "repository"
     )
     required_evidence = [
@@ -390,6 +429,11 @@ def build_verification_plan(
             "selected_test_identities": selected,
             "available_test_count": len(tests),
             "escalation_reasons": reasons,
+            "routing_scope": (
+                "selected_repositories"
+                if cross_repository_projection["selected_repositories"]
+                else ("family" if level == "family" else "local")
+            ),
             "selected_repositories": cross_repository_projection["selected_repositories"],
             "available_repository_count": len(family_graph.get("repositories", [])) if family_graph else 0,
         },

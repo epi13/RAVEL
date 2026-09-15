@@ -1,13 +1,18 @@
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
-from unittest.mock import patch
-import json
 from pathlib import Path
+from unittest.mock import patch
 
-from ravel.impact import _native_selection_policy, build_verification_plan, request_verification_plan, select_level
 from ravel.family_contract import load_family_graph
+from ravel.impact import (
+    _native_selection_policy,
+    build_verification_plan,
+    request_verification_plan,
+    select_level,
+)
 
 
 def _impact(**overrides: object) -> dict[str, object]:
@@ -47,7 +52,7 @@ class ImpactPlanTests(unittest.TestCase):
         runtime = Path("/home/epi13/Documents/Projects/mncs-language/target/debug/mncs")
         if not runtime.is_file():
             self.skipTest("mncs runtime is not built")
-        level, reasons = _native_selection_policy(
+        level, reasons, sufficient = _native_selection_policy(
             mncs=str(runtime),
             impact=_impact(direct_dependents=["mncs:operation:caller"]),
             change_class="implementation",
@@ -59,6 +64,7 @@ class ImpactPlanTests(unittest.TestCase):
         )
         assert level == "direct_dependents"
         assert reasons == ["direct_dependents_affected"]
+        assert sufficient is True
 
     def test_cross_repository_contract_selects_declared_consumers_only(self) -> None:
         graph = load_family_graph(
@@ -100,6 +106,25 @@ class ImpactPlanTests(unittest.TestCase):
         self.assertEqual(plan["selection"]["selected_test_identities"], ["mncs:test-case:one"])
         self.assertTrue(plan["proof"]["sufficient_to_stop"])
         self.assertEqual(len(plan["plan_id"]), 64)
+
+    def test_local_plan_does_not_project_family_consumers(self) -> None:
+        graph = load_family_graph(
+            Path(__file__).resolve().parents[2] / "MNCS-Commons" / "family" / "semantic-edges-v1.json"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "source.mncs"
+            source.write_text("source", encoding="utf-8")
+            plan = build_verification_plan(
+                _impact(),
+                _inventory(),
+                source_path=source,
+                family_graph=graph,
+                producer_repository="ravel",
+                contract_identity="mncs.verification-plan/1",
+            )
+        self.assertEqual(plan["selection"]["routing_scope"], "local")
+        self.assertEqual(plan["selection"]["selected_repositories"], [])
+        self.assertEqual(plan["impact"]["cross_repository"]["edges"], [])
 
     def test_dependents_expand_without_escalating_to_canonical(self) -> None:
         level, reasons = select_level(
