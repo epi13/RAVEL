@@ -1,0 +1,12 @@
+{
+  "schema_version": "commons.mncs.family-verification-checks/v1",
+  "repository_id": "ravel",
+  "checks": [
+    {
+      "identity": "ravel:semantic-impact-join",
+      "contract_identity": "mncs.semantic-impact/1",
+      "runner": "declaration",
+      "surface": "semantic-impact-to-plan"
+    }
+  ]
+}

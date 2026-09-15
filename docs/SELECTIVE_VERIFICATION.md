@@ -19,7 +19,8 @@ The transport contract is family-owned by MNCS-Commons at
 `src/mncs_commons/verification_plan.py` and
 `schemas/mncs-verification-plan-1.schema.json`. RAVEL does not carry a second
 schema or vocabulary. Its normal entrypoint invokes the MNCS-native
-`mncs.family.verification_plan.v1::select_codes` policy module; the small
+`mncs.family.verification_plan.v1::choose` policy module through the typed
+`SelectionInput` host boundary (`mncs.typed-call/1`); the small
 Python policy function remains only as a compatibility adapter for callers
 that cannot provide the native runtime. Plan identity is lower-case SHA-256 of
 canonical JSON with `plan_id` removed.

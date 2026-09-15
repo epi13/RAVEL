@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -47,6 +48,16 @@ def _inventory() -> dict[str, object]:
     }
 
 
+def _graph_path() -> Path:
+    configured = os.environ.get("MNCS_FAMILY_GRAPH_PATH")
+    if configured:
+        return Path(configured)
+    configured_root = os.environ.get("MNCS_COMMONS_ROOT")
+    if configured_root:
+        return Path(configured_root) / "family" / "semantic-edges-v1.json"
+    return Path(__file__).resolve().parents[2] / "MNCS-Commons" / "family" / "semantic-edges-v1.json"
+
+
 class ImpactPlanTests(unittest.TestCase):
     def test_native_selection_policy_matches_bounded_local_cases(self) -> None:
         runtime = Path("/home/epi13/Documents/Projects/mncs-language/target/debug/mncs")
@@ -68,7 +79,7 @@ class ImpactPlanTests(unittest.TestCase):
 
     def test_cross_repository_contract_selects_declared_consumers_only(self) -> None:
         graph = load_family_graph(
-            Path(__file__).resolve().parents[2] / "MNCS-Commons" / "family" / "semantic-edges-v1.json"
+            _graph_path()
         )
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "source.mncs"
@@ -90,7 +101,9 @@ class ImpactPlanTests(unittest.TestCase):
         ]
         assert plan["selection"]["available_repository_count"] == 6
         assert plan["proof"]["sufficient_to_stop"] is False
-        assert "family_verification_pass" in plan["proof"]["required_evidence"]
+        assert plan["selection"]["routing_scope"] == "selected_repositories"
+        assert plan["proof"]["boundary"]["claimed_scope"] == "selected_repositories"
+        assert "selected_consumer_proofs_pass" in plan["proof"]["required_evidence"]
 
     def test_narrow_plan_joins_only_compiler_reported_test_identities(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -109,7 +122,7 @@ class ImpactPlanTests(unittest.TestCase):
 
     def test_local_plan_does_not_project_family_consumers(self) -> None:
         graph = load_family_graph(
-            Path(__file__).resolve().parents[2] / "MNCS-Commons" / "family" / "semantic-edges-v1.json"
+            _graph_path()
         )
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "source.mncs"

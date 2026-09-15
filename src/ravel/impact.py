@@ -29,6 +29,7 @@ try:
     from .family_contract import (
         consumers_for,
         contract_vocab,
+        default_family_graph_path,
         load_family_graph,
         plan_identity,
         validate_plan,
@@ -37,6 +38,7 @@ except ImportError:  # direct ``python src/ravel/impact.py`` transport entrypoin
     from family_contract import (
         consumers_for,
         contract_vocab,
+        default_family_graph_path,
         load_family_graph,
         plan_identity,
         validate_plan,
@@ -112,20 +114,6 @@ def _inventory_tests(inventory_document: Any) -> tuple[dict[str, Any], list[dict
     return inventory, tests
 
 
-_CHANGE_CLASS_CODES = {
-    "implementation": 0,
-    "public_contract": 1,
-    "shared_type": 2,
-    "parser_semantics": 3,
-    "serialization_format": 4,
-    "effect_semantics": 5,
-    "abi_boundary": 6,
-    "canonical_fixture": 7,
-    "language_profile": 8,
-    "cross_repository_contract": 9,
-}
-
-
 def _native_selection_policy(
     *,
     mncs: str,
@@ -139,10 +127,10 @@ def _native_selection_policy(
 ) -> tuple[str, list[str], bool]:
     """Ask the MNCS-native policy for typed level, reasons, and sufficiency.
 
-    The integer change-class argument remains a transport limitation of the
-    current runtime.  The returned level and reasons cross the membrane as
-    nominal finite values, so RAVEL does not maintain a second numeric ABI for
-    policy output.
+    The request crosses the language-owned typed-call membrane.  RAVEL names
+    record fields and the enum variant; the compiler/runtime supplies scalar
+    widths, nominal identities, and canonical field order from the callable
+    interface metadata.
     """
 
     policy_path = Path(
@@ -153,27 +141,25 @@ def _native_selection_policy(
     )
     if not policy_path.is_file():
         raise ImpactError(f"native verification policy is unavailable: {policy_path}")
+    risk_flags = set(impact.get("risk_flags", []))
     fields = {
-        "cross_repository": int(cross_repository),
-        "impact_complete": int(bool(impact.get("complete"))),
-        "unknown_root": int("unknown_root" in set(impact.get("risk_flags", []))),
-        "truncated": int("truncated" in set(impact.get("risk_flags", []))),
-        "change_class": _CHANGE_CLASS_CODES[change_class],
-        "high_connectivity": int("high_connectivity" in set(impact.get("risk_flags", []))),
-        "shared_type": int("shared_type" in set(impact.get("risk_flags", []))),
-        "effect_semantics": int("effect_semantics" in set(impact.get("risk_flags", []))),
-        "abi_boundary": int("abi_boundary" in set(impact.get("risk_flags", []))),
-        "public_contract": int("public_contract" in set(impact.get("risk_flags", []))),
-        "direct_dependents": int(bool(impact.get("direct_dependents"))),
-        "selected_tests": selected_tests,
+        "cross_repository": {"boolean": {"value": cross_repository}},
+        "impact_complete": {"boolean": {"value": bool(impact.get("complete"))}},
+        "unknown_root": {"boolean": {"value": "unknown_root" in risk_flags}},
+        "truncated": {"boolean": {"value": "truncated" in risk_flags}},
+        "change_class": {"finite": {"type": "ChangeClass", "variant": change_class}},
+        "high_connectivity": {"boolean": {"value": "high_connectivity" in risk_flags}},
+        "shared_type": {"boolean": {"value": "shared_type" in risk_flags}},
+        "effect_semantics": {"boolean": {"value": "effect_semantics" in risk_flags}},
+        "abi_boundary": {"boolean": {"value": "abi_boundary" in risk_flags}},
+        "public_contract": {"boolean": {"value": "public_contract" in risk_flags}},
+        "direct_dependents": {"boolean": {"value": bool(impact.get("direct_dependents"))}},
+        "selected_tests": {"integer": {"value": selected_tests}},
     }
     request = {
         "schema_version": "0.1",
-        "target": {"module": "mncs.family.verification_plan.v1", "function": "select_codes"},
-        "arguments": [
-            {"integer": {"value": value, "type": {"bits": 32, "signed": True}}}
-            for value in fields.values()
-        ],
+        "target": {"module": "mncs.family.verification_plan.v1", "function": "choose"},
+        "typed_arguments": [{"record": {"type": "SelectionInput", "fields": fields}}],
         # The policy deliberately returns a fixed-size typed reason sequence.
         # This is a deterministic execution cap, not an open-ended retry.
         "step_budget": 4096,
@@ -402,11 +388,23 @@ def build_verification_plan(
     sufficient = bool(selected) and policy_sufficient_local and (
         level != "repository_canonical" or inventory_scope == "repository"
     )
-    required_evidence = [
-        "selected_test_cases_pass" if level != "family" else "family_verification_pass",
-    ]
-    if level == "repository_canonical":
+    selected_consumer_routing = bool(cross_repository_projection["selected_repositories"])
+    if selected_consumer_routing:
+        required_evidence = ["selected_consumer_proofs_pass"]
+        claimed_scope = "selected_repositories"
+        proof_executor = "mncs-actions"
+    elif level == "family":
+        required_evidence = ["family_verification_pass"]
+        claimed_scope = "family"
+        proof_executor = "family-router"
+    elif level == "repository_canonical":
         required_evidence = ["repository_canonical_suite_pass"]
+        claimed_scope = "repository"
+        proof_executor = "mncs-test"
+    else:
+        required_evidence = ["selected_test_cases_pass"]
+        claimed_scope = level
+        proof_executor = "mncs-test"
     payload: dict[str, Any] = {
         "schema_version": PLAN_SCHEMA,
         "source": {
@@ -441,9 +439,9 @@ def build_verification_plan(
             "sufficient_to_stop": sufficient,
             "required_evidence": required_evidence,
             "boundary": {
-                "claimed_scope": "family" if level == "family" else ("repository" if level == "repository_canonical" else level),
+                "claimed_scope": claimed_scope,
                 "established": sufficient,
-                "executor": "family-router" if level == "family" else "mncs-test",
+                "executor": proof_executor,
                 "stop_condition": required_evidence[0],
             },
         },
@@ -534,7 +532,10 @@ def request_verification_plan(
     if max_depth < 1 or max_nodes < 1:
         raise ImpactError("impact bounds must be positive")
     source_path = source_path.resolve()
-    family_graph = load_family_graph(family_graph_path) if family_graph_path else None
+    graph_path = family_graph_path
+    if graph_path is None and (cross_repository or change_class == "cross_repository_contract"):
+        graph_path = default_family_graph_path()
+    family_graph = load_family_graph(graph_path) if graph_path else None
     base = (cwd or source_path.parent).resolve()
     environment = dict(os.environ)
     if libraries:
