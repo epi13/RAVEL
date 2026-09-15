@@ -136,6 +136,7 @@ def _native_selection_policy(
     cwd: Path,
     libraries: Sequence[Path],
     timeout: float,
+    commons_root: Path | None = None,
 ) -> tuple[str, list[str], bool]:
     """Ask the MNCS-native policy for typed level, reasons, and sufficiency.
 
@@ -173,7 +174,7 @@ def _native_selection_policy(
         )
     except (ValueError, OSError, subprocess.SubprocessError) as error:
         raise ImpactError(f"native verification policy binding failed: {error}") from error
-    levels, reasons_vocab = contract_vocab()
+    levels, reasons_vocab = contract_vocab(commons_root=commons_root)
     level = decision.level.value
     reasons = [reason.value for reason in decision.reasons if reason.value != "none"]
     if level not in levels or any(reason not in reasons_vocab for reason in reasons):
@@ -254,6 +255,7 @@ def build_verification_plan(
     change_class: str = "implementation",
     cross_repository: bool = False,
     family_graph: dict[str, Any] | None = None,
+    commons_root: Path | None = None,
     producer_repository: str = "ravel",
     contract_identity: str | None = None,
     policy_runtime: str | None = None,
@@ -288,6 +290,7 @@ def build_verification_plan(
             cwd=(policy_cwd or source_path.parent).resolve(),
             libraries=policy_libraries,
             timeout=policy_timeout,
+            commons_root=commons_root,
         )
     else:
         level, reasons = select_level(
@@ -322,6 +325,7 @@ def build_verification_plan(
             family_graph,
             producer_repository=producer_repository,
             contract_identity=contract_identity,
+            commons_root=commons_root,
         )
         coverage = family_graph.get("coverage", {})
         if not isinstance(coverage, dict):
@@ -467,9 +471,9 @@ def build_verification_plan(
     for field in ("subject_identity", "subject_fingerprint"):
         if isinstance(inventory.get(field), str) and inventory[field]:
             payload["source"][field] = inventory[field]
-    payload["plan_id"] = plan_identity(payload)
+    payload["plan_id"] = plan_identity(payload, commons_root=commons_root)
     try:
-        return validate_plan(payload, source_path=source_path)
+        return validate_plan(payload, source_path=source_path, commons_root=commons_root)
     except ValueError as error:
         raise ImpactError(str(error)) from error
 
@@ -527,6 +531,7 @@ def request_verification_plan(
     change_class: str = "implementation",
     cross_repository: bool = False,
     family_graph_path: Path | None = None,
+    commons_root: Path | None = None,
     producer_repository: str = "ravel",
     contract_identity: str | None = None,
 ) -> dict[str, Any]:
@@ -537,8 +542,8 @@ def request_verification_plan(
     source_path = source_path.resolve()
     graph_path = family_graph_path
     if graph_path is None and (cross_repository or change_class == "cross_repository_contract"):
-        graph_path = default_family_graph_path()
-    family_graph = load_family_graph(graph_path) if graph_path else None
+        graph_path = default_family_graph_path(commons_root=commons_root)
+    family_graph = load_family_graph(graph_path, commons_root=commons_root) if graph_path else None
     base = (cwd or source_path.parent).resolve()
     environment = dict(os.environ)
     if libraries:
@@ -582,6 +587,7 @@ def request_verification_plan(
         change_class=change_class,
         cross_repository=cross_repository,
         family_graph=family_graph,
+        commons_root=commons_root,
         producer_repository=producer_repository,
         contract_identity=contract_identity,
         policy_runtime=mncs if impact_error is None and inventory_error is None else None,
@@ -617,6 +623,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--change-class", choices=sorted(CHANGE_CLASSES), default="implementation")
     parser.add_argument("--cross-repository", action="store_true")
     parser.add_argument("--family-graph", type=Path)
+    parser.add_argument("--commons-root", type=Path)
     parser.add_argument("--repository", default="ravel")
     parser.add_argument("--contract-identity")
     parser.add_argument("--output", type=Path)
@@ -638,6 +645,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             change_class=args.change_class,
             cross_repository=args.cross_repository,
             family_graph_path=args.family_graph,
+            commons_root=args.commons_root,
             producer_repository=args.repository,
             contract_identity=args.contract_identity,
         )

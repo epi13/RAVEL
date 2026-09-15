@@ -66,6 +66,11 @@ ravel-impact tests/self_suite.mncs \
 mncs-test run --verification-plan .mncs/verification-plan.json ...
 ```
 
+When a family graph is supplied from a specific Commons checkout, pass that
+checkout explicitly with `--commons-root`. This binds graph loading, plan
+identity, and plan validation to the same contract snapshot; Forge supplies
+the option automatically during post-repair replanning.
+
 `ravel-impact` remains the process/filesystem adapter around compiler and
 inventory commands. Selection policy is deterministic and native in the normal
 path; the adapter does not become semantic authority merely because it
