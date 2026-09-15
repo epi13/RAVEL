@@ -1,0 +1,21 @@
+{
+  "schema_version": "commons.mncs.generated-provider-metadata/v1",
+  "repository_id": "ravel",
+  "authority": {
+    "kind": "language-owned-abi",
+    "module_identity": "mncs.family.verification_plan.v1",
+    "interface_identity": "31c958b74518d2d4341b510e15dfd35c8f767bc2ae5ea159abc516a095e0e406",
+    "typed_call_schema_version": "mncs.typed-call/1",
+    "generator_version": "mncs-provider-facts/0.1",
+    "binding_content_identity": "08591a70c4e81e830df9a3d48598f940b6e7ce7d017f5ffcf6deafde1def1679",
+    "provider_fact_identity": "921fc222e8b061937a8dfafccb750daa302c93c7ae4ff82bb91bd1226aa2a568"
+  },
+  "providers": [
+    {
+      "contract_identity": "mncs.verification-plan/1",
+      "contract_revision": "1",
+      "exported_identity": "ravel:verification-plan",
+      "evidence": "src/ravel/impact.py"
+    }
+  ]
+}
