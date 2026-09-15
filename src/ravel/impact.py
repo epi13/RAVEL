@@ -20,7 +20,6 @@ import json
 import os
 import subprocess
 import sys
-import tempfile
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -42,6 +41,19 @@ except ImportError:  # direct ``python src/ravel/impact.py`` transport entrypoin
         load_family_graph,
         plan_identity,
         validate_plan,
+    )
+
+try:
+    from .generated.verification_plan import (
+        Binding as VerificationPlanBinding,
+        ChangeClass as NativeChangeClass,
+        SelectionInput,
+    )
+except ImportError:  # direct script execution
+    from generated.verification_plan import (
+        Binding as VerificationPlanBinding,
+        ChangeClass as NativeChangeClass,
+        SelectionInput,
     )
 
 
@@ -142,83 +154,31 @@ def _native_selection_policy(
     if not policy_path.is_file():
         raise ImpactError(f"native verification policy is unavailable: {policy_path}")
     risk_flags = set(impact.get("risk_flags", []))
-    fields = {
-        "cross_repository": {"boolean": {"value": cross_repository}},
-        "impact_complete": {"boolean": {"value": bool(impact.get("complete"))}},
-        "unknown_root": {"boolean": {"value": "unknown_root" in risk_flags}},
-        "truncated": {"boolean": {"value": "truncated" in risk_flags}},
-        "change_class": {"finite": {"type": "ChangeClass", "variant": change_class}},
-        "high_connectivity": {"boolean": {"value": "high_connectivity" in risk_flags}},
-        "shared_type": {"boolean": {"value": "shared_type" in risk_flags}},
-        "effect_semantics": {"boolean": {"value": "effect_semantics" in risk_flags}},
-        "abi_boundary": {"boolean": {"value": "abi_boundary" in risk_flags}},
-        "public_contract": {"boolean": {"value": "public_contract" in risk_flags}},
-        "direct_dependents": {"boolean": {"value": bool(impact.get("direct_dependents"))}},
-        "selected_tests": {"integer": {"value": selected_tests}},
-    }
-    request = {
-        "schema_version": "0.1",
-        "target": {"module": "mncs.family.verification_plan.v1", "function": "choose"},
-        "typed_arguments": [{"record": {"type": "SelectionInput", "fields": fields}}],
-        # The policy deliberately returns a fixed-size typed reason sequence.
-        # This is a deterministic execution cap, not an open-ended retry.
-        "step_budget": 4096,
-    }
-    with tempfile.TemporaryDirectory(prefix="ravel-verification-policy-") as directory:
-        request_path = Path(directory) / "request.json"
-        request_path.write_text(json.dumps(request), encoding="utf-8")
-        command = [mncs, "execute", str(policy_path), str(request_path)]
-        environment = dict(os.environ)
-        if libraries:
-            environment["MNCS_LIBRARY_PATH"] = os.pathsep.join(str(path.resolve()) for path in libraries)
-        raw = _run_json(command, cwd=cwd, environment=environment, timeout=timeout)
-    if not isinstance(raw, dict) or raw.get("status") != "returned":
-        raise ImpactError(f"native verification policy did not return a decision: {raw!r}")
-    returned = raw.get("returned")
-    fields_value = returned[0].get("record", {}).get("fields") if isinstance(returned, list) and returned else None
-    values: dict[str, Any] = {}
-    for pair in fields_value if isinstance(fields_value, list) else []:
-        if isinstance(pair, list) and len(pair) == 2 and isinstance(pair[0], str):
-            values[pair[0]] = pair[1]
-
+    try:
+        decision = VerificationPlanBinding(str(mncs), policy_path, libraries=tuple(libraries), timeout=timeout).choose(
+            SelectionInput(
+                cross_repository=cross_repository,
+                impact_complete=bool(impact.get("complete")),
+                unknown_root="unknown_root" in risk_flags,
+                truncated="truncated" in risk_flags,
+                change_class=NativeChangeClass(change_class),
+                high_connectivity="high_connectivity" in risk_flags,
+                shared_type="shared_type" in risk_flags,
+                effect_semantics="effect_semantics" in risk_flags,
+                abi_boundary="abi_boundary" in risk_flags,
+                public_contract="public_contract" in risk_flags,
+                direct_dependents=bool(impact.get("direct_dependents")),
+                selected_tests=selected_tests,
+            )
+        )
+    except (ValueError, OSError, subprocess.SubprocessError) as error:
+        raise ImpactError(f"native verification policy binding failed: {error}") from error
     levels, reasons_vocab = contract_vocab()
-
-    def finite_name(field: str) -> str:
-        value = values.get(field)
-        finite = value.get("finite") if isinstance(value, dict) else None
-        identity = finite.get("variant_identity") if isinstance(finite, dict) else None
-        if not isinstance(identity, str) or "::" not in identity:
-            raise ImpactError(f"native verification policy returned malformed {field}: {values!r}")
-        name = identity.rsplit("::", 1)[-1]
-        if field == "level" and name not in levels:
-            raise ImpactError(f"native verification policy returned unknown level: {name}")
-        if field == "reasons" and name not in reasons_vocab:
-            raise ImpactError(f"native verification policy returned unknown reason: {name}")
-        return name
-
-    level = finite_name("level")
-    reason_value = values.get("reasons")
-    sequence = reason_value.get("sequence") if isinstance(reason_value, dict) else None
-    raw_reasons = sequence.get("values") if isinstance(sequence, dict) else None
-    if not isinstance(raw_reasons, list):
-        raise ImpactError(f"native verification policy returned malformed reasons: {values!r}")
-    reasons = []
-    for item in raw_reasons:
-        finite = item.get("finite") if isinstance(item, dict) else None
-        identity = finite.get("variant_identity") if isinstance(finite, dict) else None
-        if not isinstance(identity, str) or "::" not in identity:
-            raise ImpactError(f"native verification policy returned malformed reason item: {item!r}")
-        name = identity.rsplit("::", 1)[-1]
-        if name != "none" and name not in reasons_vocab:
-            raise ImpactError(f"native verification policy returned unknown reason: {name}")
-        if name != "none" and name not in reasons:
-            reasons.append(name)
-    sufficient_value = values.get("sufficient_local")
-    boolean = sufficient_value.get("boolean") if isinstance(sufficient_value, dict) else None
-    sufficient = boolean.get("value") if isinstance(boolean, dict) else None
-    if not isinstance(sufficient, bool):
-        raise ImpactError(f"native verification policy returned malformed sufficiency: {values!r}")
-    return level, reasons, sufficient
+    level = decision.level.value
+    reasons = [reason.value for reason in decision.reasons if reason.value != "none"]
+    if level not in levels or any(reason not in reasons_vocab for reason in reasons):
+        raise ImpactError(f"generated verification binding returned an unknown semantic value: {decision!r}")
+    return level, reasons, decision.sufficient_local
 
 
 def _reason_for_change(change_class: str) -> str | None:
@@ -363,15 +323,39 @@ def build_verification_plan(
             producer_repository=producer_repository,
             contract_identity=contract_identity,
         )
+        coverage = family_graph.get("coverage", {})
+        if not isinstance(coverage, dict):
+            coverage = {}
         cross_repository_projection = {
             "graph_identity": family_graph["graph_identity"],
             "edges": edges,
             "selected_repositories": sorted({edge["consumer_repository"] for edge in edges}),
             "complete": bool(family_graph.get("complete")),
             "limitations": list(family_graph.get("limitations", [])),
+            # `complete` describes joined topology only. Keep registry
+            # coverage beside it so a selected proof cannot be mistaken for
+            # closed-world family closure.
+            "coverage": {
+                "registry_identity": coverage.get("registry_identity"),
+                "registered_family_project_count": coverage.get("registered_family_project_count", 0),
+                "classified_project_count": coverage.get("classified_project_count", 0),
+                "semantic_graph_participant_count": coverage.get("semantic_graph_participant_count", 0),
+                "explicit_nonparticipant_count": coverage.get("explicit_nonparticipant_count", 0),
+                "unclassified_project_count": coverage.get("unclassified_project_count", 0),
+                "unclassified_repositories": list(coverage.get("unclassified_repositories", [])),
+                "coverage_status": coverage.get("coverage_status", "incomplete"),
+                "topology_status": coverage.get("topology_status"),
+            },
         }
     if cross_repository and not cross_repository_projection["complete"]:
         reasons = sorted(set(reasons + ["cross_repository_graph_incomplete"]))
+    coverage_projection = cross_repository_projection.get("coverage", {})
+    if cross_repository and isinstance(coverage_projection, dict) and coverage_projection.get("coverage_status") != "complete":
+        cross_repository_projection["limitations"] = sorted(
+            set(cross_repository_projection["limitations"])
+            | {"family registry coverage is incomplete; selected proof is not family-wide closure"}
+        )
+        reasons = sorted(set(reasons + ["family_registry_coverage_incomplete"]))
 
     # A source inventory is not a repository-wide canonical proof.  The
     # compiler currently reports a source/module inventory, so a canonical
@@ -433,7 +417,25 @@ def build_verification_plan(
                 else ("family" if level == "family" else "local")
             ),
             "selected_repositories": cross_repository_projection["selected_repositories"],
+            # Backward-compatible name: this is the semantic graph count,
+            # never the registered family count.
             "available_repository_count": len(family_graph.get("repositories", [])) if family_graph else 0,
+            "semantic_graph_repository_count": len(family_graph.get("repositories", [])) if family_graph else 0,
+            "registered_family_project_count": (
+                family_graph.get("coverage", {}).get("registered_family_project_count", 0)
+                if family_graph
+                else 0
+            ),
+            "coverage_classified_project_count": (
+                family_graph.get("coverage", {}).get("classified_project_count", 0)
+                if family_graph
+                else 0
+            ),
+            "unclassified_project_count": (
+                family_graph.get("coverage", {}).get("unclassified_project_count", 0)
+                if family_graph
+                else 0
+            ),
         },
         "proof": {
             "sufficient_to_stop": sufficient,
@@ -456,6 +458,7 @@ def build_verification_plan(
                 "inventory_subject_identity": inventory.get("subject_identity"),
                 "inventory_subject_fingerprint": inventory.get("subject_fingerprint"),
                 "family_graph_identity": cross_repository_projection["graph_identity"],
+                "family_graph_coverage": cross_repository_projection.get("coverage"),
                 "selected_test_identities": selected,
                 "contract_revision": PLAN_SCHEMA,
             },
