@@ -57,6 +57,26 @@ def load_family_graph(path: Path) -> dict[str, Any]:
     return _commons_module_from_graph().load_graph(path)
 
 
+def default_family_graph_path() -> Path | None:
+    """Locate the checked-in Commons graph without regenerating it."""
+
+    configured = os.environ.get("MNCS_FAMILY_GRAPH_PATH")
+    candidates = [Path(configured)] if configured else []
+    configured_root = os.environ.get("MNCS_COMMONS_ROOT")
+    if configured_root:
+        candidates.append(Path(configured_root) / "family" / "semantic-edges-v1.json")
+    candidates.append(
+        Path(__file__).resolve().parents[3]
+        / "MNCS-Commons"
+        / "family"
+        / "semantic-edges-v1.json"
+    )
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return None
+
+
 def _commons_module_from_graph() -> ModuleType:
     verification_module = _commons_module()
     module_path = Path(verification_module.__file__).with_name("family_graph.py")

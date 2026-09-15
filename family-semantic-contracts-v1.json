@@ -15,7 +15,13 @@
       "contract_identity": "mncs.semantic-impact/1",
       "contract_revision": "1",
       "consumer_identity": "ravel:impact-planner",
-      "evidence": "src/ravel/impact.py"
+      "evidence": "src/ravel/impact.py",
+      "verification": {
+        "check_identity": "ravel:semantic-impact-join",
+        "executor": "ravel",
+        "surface": "semantic-impact-to-plan",
+        "evidence": "family-verification-checks-v1.json"
+      }
     }
   ]
 }
