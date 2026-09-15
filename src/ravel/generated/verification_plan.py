@@ -10,11 +10,11 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-GENERATOR_VERSION = 'mncs-host-bindings/0.1'
+GENERATOR_VERSION = 'mncs-host-bindings/0.2'
 MODULE_IDENTITY = 'mncs.family.verification_plan.v1'
 INTERFACE_IDENTITY = '31c958b74518d2d4341b510e15dfd35c8f767bc2ae5ea159abc516a095e0e406'
 TYPED_CALL_SCHEMA_VERSION = 'mncs.typed-call/1'
-BINDING_CONTENT_IDENTITY = '08591a70c4e81e830df9a3d48598f940b6e7ce7d017f5ffcf6deafde1def1679'
+BINDING_CONTENT_IDENTITY = '26edb261df504457d16de1b23de4aa6ca2f01bb587e3dde6fe06cc346aced9af'
 
 class BindingError(RuntimeError):
     pass
@@ -54,6 +54,8 @@ def _encode(value: Any) -> Any:
         return {'integer': {'value': value}}
     if isinstance(value, float):
         return {'float': {'value': value}}
+    if isinstance(value, (bytes, bytearray)):
+        return {'sequence': {'values': [{'byte': {'value': item}} for item in value]}}
     if isinstance(value, (tuple, list)):
         return {'sequence': {'values': [_encode(item) for item in value]}}
     return value
@@ -72,14 +74,15 @@ def _decode(descriptor: str, value: Any) -> Any:
         if cls is None:
             raise BindingError(f'generated record type is missing: {descriptor}')
         return cls.from_host_value(value)
-    if descriptor.startswith('sequence:') or descriptor.startswith('vector:'):
+    if descriptor.startswith('view:') or descriptor.startswith('sequence:') or descriptor.startswith('vector:'):
         sequence = value.get('sequence') if isinstance(value, dict) else None
         values = sequence.get('values') if isinstance(sequence, dict) else None
         if not isinstance(values, list):
             raise BindingError('returned value is not a typed sequence')
         parts = descriptor.split(':')
         element_descriptor = ':'.join(parts[1:-1])
-        return tuple(_decode(element_descriptor, item) for item in values)
+        decoded = tuple(_decode(element_descriptor, item) for item in values)
+        return bytes(decoded) if element_descriptor == 'byte' else decoded
     if descriptor == 'bool':
         boolean = value.get('boolean') if isinstance(value, dict) else None
         return boolean.get('value') if isinstance(boolean, dict) else value
@@ -217,9 +220,9 @@ class Binding:
         self._config = _BindingConfig(mncs, Path(source), tuple(Path(path) for path in libraries), timeout)
         self.last_execution: dict[str, Any] | None = None
 
-    def _call(self, module: str, function: str, argument: Any) -> dict[str, Any]:
+    def _call(self, module: str, function: str, *arguments: Any) -> dict[str, Any]:
         request = {'schema_version': '0.1', 'target': {'module': module, 'function': function},
-                   'typed_arguments': [_encode(argument)], 'expected_interface_identity': INTERFACE_IDENTITY, 'step_budget': 8192}
+                   'typed_arguments': [_encode(argument) for argument in arguments], 'expected_interface_identity': INTERFACE_IDENTITY, 'step_budget': 8192}
         with tempfile.TemporaryDirectory(prefix='mncs-generated-binding-') as directory:
             request_path = Path(directory) / 'request.json'
             request_path.write_text(json.dumps(request, separators=(',', ':')), encoding='utf-8')
@@ -240,6 +243,10 @@ class Binding:
         self.last_execution = response
         return response
 
+    def broad_reasons(self, input: SelectionInput, class_reason: int) -> int:
+        response = self._call('mncs.family.verification_plan.v1', 'broad_reasons', input, class_reason)
+        return _decode('int', response['returned'][0])
+
     def change_class_from_code(self, input_value: int) -> ChangeClass:
         response = self._call('mncs.family.verification_plan.v1', 'change_class_from_code', input_value)
         return _decode('finite:ChangeClass', response['returned'][0])
@@ -252,13 +259,41 @@ class Binding:
         response = self._call('mncs.family.verification_plan.v1', 'choose', input_value)
         return _decode('record:SelectionDecision', response['returned'][0])
 
+    def flag(self, value: bool, code: int) -> int:
+        response = self._call('mncs.family.verification_plan.v1', 'flag', value, code)
+        return _decode('int', response['returned'][0])
+
+    def flag_not(self, value: bool, code: int) -> int:
+        response = self._call('mncs.family.verification_plan.v1', 'flag_not', value, code)
+        return _decode('int', response['returned'][0])
+
+    def level_for(self, input: SelectionInput, class_reason: int) -> VerificationLevel:
+        response = self._call('mncs.family.verification_plan.v1', 'level_for', input, class_reason)
+        return _decode('finite:VerificationLevel', response['returned'][0])
+
     def locally_sufficient(self, input_value: VerificationLevel) -> bool:
         response = self._call('mncs.family.verification_plan.v1', 'locally_sufficient', input_value)
         return _decode('bool', response['returned'][0])
 
+    def make_decision(self, level: VerificationLevel, input: SelectionInput, class_reason: int, sufficient: bool) -> SelectionDecision:
+        response = self._call('mncs.family.verification_plan.v1', 'make_decision', level, input, class_reason, sufficient)
+        return _decode('record:SelectionDecision', response['returned'][0])
+
+    def reason_for_slot(self, input: SelectionInput, class_reason: int, slot: int) -> EscalationReason:
+        response = self._call('mncs.family.verification_plan.v1', 'reason_for_slot', input, class_reason, slot)
+        return _decode('finite:EscalationReason', response['returned'][0])
+
+    def reasons_for(self, input: SelectionInput, class_reason: int) -> tuple[Any, ...]:
+        response = self._call('mncs.family.verification_plan.v1', 'reasons_for', input, class_reason)
+        return _decode('sequence:finite:EscalationReason:', response['returned'][0])
+
     def risk_reasons(self, input_value: SelectionInput) -> int:
         response = self._call('mncs.family.verification_plan.v1', 'risk_reasons', input_value)
         return _decode('int', response['returned'][0])
+
+    def select_codes(self, cross_repository: int, impact_complete: int, unknown_root: int, truncated: int, change_class: int, high_connectivity: int, shared_type: int, effect_semantics: int, abi_boundary: int, public_contract: int, direct_dependents: int, selected_tests: int) -> SelectionDecision:
+        response = self._call('mncs.family.verification_plan.v1', 'select_codes', cross_repository, impact_complete, unknown_root, truncated, change_class, high_connectivity, shared_type, effect_semantics, abi_boundary, public_contract, direct_dependents, selected_tests)
+        return _decode('record:SelectionDecision', response['returned'][0])
 
 
 BINDING_METADATA = {
