@@ -1,0 +1,12 @@
+{
+  "schema_version": "mncs.native-userland-status/1",
+  "repository_id": "RAVEL",
+  "status": "hybrid",
+  "canonical_entrypoint": "ravel CLI",
+  "native_sources": {},
+  "native_shadow_slices": [
+    "semantic impact identities",
+    "verification-plan contract and exact selection semantics"
+  ],
+  "next_migration_slice": "native impact-to-verification-plan module without generated Python binding"
+}

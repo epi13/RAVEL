@@ -29,5 +29,11 @@
     "MNCS-VERIFY-CF7230C4396D"
   ],
   "migration_order": 5,
-  "next_native_slice": "native impact-to-verification-plan module without generated Python binding"
+  "next_native_slice": "native impact-to-verification-plan module without generated Python binding",
+  "native_shadow_candidate": "mncs impact identities and bounded selection policy",
+  "remaining_blockers": [
+    "RAVEL still obtains repository/filesystem facts through host orchestration",
+    "VerificationPlan contains dynamic external identities that need the shared structured-data/direct-call boundary",
+    "the current native modules are corpus-exercised but not yet exposed as a repository-owned application entrypoint"
+  ]
 }
