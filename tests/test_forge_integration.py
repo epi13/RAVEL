@@ -8,8 +8,8 @@ from pathlib import Path
 from ravel.providers import EvidenceRequest, ForgeAdapter, ForgeCliProvider
 
 ROOT = Path(__file__).resolve().parents[1]
-FORGE = ROOT.parent / "mncs-forge-mcp/.venv/bin/mncs-forge"
-FORGE_CONFIG = ROOT.parent / "mncs-forge-mcp/examples/minimal/mncs-forge.toml"
+FORGE = ROOT.parent / "mncs-forge/.venv/bin/mncs-forge"
+FORGE_CONFIG = ROOT.parent / "mncs-forge/examples/minimal/mncs-forge.toml"
 
 
 class ForgeIntegrationTests(unittest.TestCase):

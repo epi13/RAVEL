@@ -12,7 +12,7 @@ SIBLING_SOURCES = {
     "mncs-fabric": "mncs-fabric",
     "mncs_validator": "machine-native-complexity-standard",
     "mncs_commons": "MNCS-Commons",
-    "mncs_forge": "mncs-forge-mcp",
+    "mncs_forge": "mncs-forge",
 }
 
 

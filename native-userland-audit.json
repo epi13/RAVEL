@@ -1,0 +1,33 @@
+{
+  "schema_version": "mncs.native-userland-audit/1",
+  "repository": "ravel",
+  "status": "hybrid",
+  "canonical_mncs_surfaces": [
+    "semantic impact identities",
+    "verification-plan contract and exact selection semantics"
+  ],
+  "host_canonical_responsibilities": [
+    {
+      "area": "cross-repository source discovery and impact orchestration",
+      "classification": "small_application_refactor",
+      "eliminating_capability": "native filesystem traversal, compiler-owned impact API, and direct module calls"
+    },
+    {
+      "area": "verification-plan serialization and provider invocation",
+      "classification": "missing_reusable_runtime_capability",
+      "eliminating_capability": "native typed structured-data and in-process family APIs"
+    },
+    {
+      "area": "Git/provider integrations",
+      "classification": "external_interoperability_only",
+      "eliminating_capability": "none; preserve as explicit boundary adapters"
+    }
+  ],
+  "existing_pressures": [
+    "MNCS-LANG-52A5E0C72A39",
+    "MNCS-TOOLING-C5FD211E05C1",
+    "MNCS-VERIFY-CF7230C4396D"
+  ],
+  "migration_order": 5,
+  "next_native_slice": "native impact-to-verification-plan module without generated Python binding"
+}

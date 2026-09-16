@@ -7,7 +7,7 @@
       "commit": "9e41b2a46e8f5c261bdcb3561a42d77ab8d92881",
       "public_surfaces": ["FabricService", "LocalController", "LocalWorker", "NetworkController", "TLSNetworkTransport", "execution records", "receipts", "reconciliation"]
     },
-    "mncs-forge-mcp": {
+    "mncs-forge": {
       "commit": "00d4534ebbdc2a683bb88d26400d8b2bdb92fb1c",
       "public_surfaces": ["project configuration", "declared development workflows", "lifecycle records"]
     },

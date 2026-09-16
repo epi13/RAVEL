@@ -148,7 +148,7 @@ def check(name: str) -> tuple[str, str]:
         for name_, entry in lock.get("contracts", {}).items():
             candidates = {
                 "mncs-fabric": ROOT.parent / "mncs-fabric",
-                "mncs-forge-mcp": ROOT.parent / "mncs-forge-mcp",
+                "mncs-forge": ROOT.parent / "mncs-forge",
                 "machine-native-complexity-standard": ROOT.parent / "machine-native-complexity-standard",
                 "Machine-Native-Experimental-Learning": ROOT.parent / "Machine-Native-Experimental-Learning",
                 "MNCS-Commons": ROOT.parent / "MNCS-Commons",
@@ -194,7 +194,7 @@ def check(name: str) -> tuple[str, str]:
             repositories = {"ravel": ROOT}
             for alias, directory in {
                 "mncs-fabric": ROOT.parent / "mncs-fabric",
-                "mncs-forge-mcp": ROOT.parent / "mncs-forge-mcp",
+                "mncs-forge": ROOT.parent / "mncs-forge",
                 "machine-native-complexity-standard": ROOT.parent / "machine-native-complexity-standard",
                 "Machine-Native-Experimental-Learning": ROOT.parent / "Machine-Native-Experimental-Learning",
                 "MNCS-Commons": ROOT.parent / "MNCS-Commons",

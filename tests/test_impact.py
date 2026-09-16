@@ -138,7 +138,7 @@ class ImpactPlanTests(unittest.TestCase):
         assert plan["selection"]["level"] == "family"
         assert plan["selection"]["selected_repositories"] == [
             "mncs-actions",
-            "mncs-forge-mcp",
+            "mncs-forge",
             "mncs-test",
         ]
         assert plan["selection"]["available_repository_count"] == 6
