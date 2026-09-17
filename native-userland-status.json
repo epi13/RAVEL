@@ -2,9 +2,10 @@
   "schema_version": "mncs.native-userland-status/1",
   "repository_id": "RAVEL",
   "status": "native_shadow",
-  "canonical_entrypoint": "ravel CLI",
+  "canonical_entrypoint": "ravel CLI (Python semantic planner; native planner is parity-validated shadow)",
   "native_sources": {
-    "impact-inventory-selection": "native/mncs/ravel/planner/v1.mncs"
+    "impact-inventory-selection": "native/mncs/ravel/planner/v1.mncs",
+    "verification-plan-construction-publication": "native/mncs/ravel/planner/v1.mncs"
   },
   "native_application_descriptor": "native-applications/ravel-planner.json",
   "native_application_descriptors": {
@@ -12,7 +13,8 @@
   },
   "native_shadow_slices": [
     "semantic impact identities",
-    "verification-plan contract and exact selection semantics"
+    "verification-plan contract and exact selection semantics",
+    "complete plan proof boundary, provenance, graph coverage, and native identity publication"
   ],
-  "next_migration_slice": "native complete VerificationPlan construction, graph routing, identity publication, and canonical launcher cutover"
+  "next_migration_slice": "replace Python plan construction on the normal ravel CLI path after launcher parity and provider-admission integration are synchronized"
 }

@@ -12,9 +12,9 @@ from typing import Any
 
 GENERATOR_VERSION = 'mncs-host-bindings/0.2'
 MODULE_IDENTITY = 'mncs.family.verification_plan.v1'
-INTERFACE_IDENTITY = '31c958b74518d2d4341b510e15dfd35c8f767bc2ae5ea159abc516a095e0e406'
+INTERFACE_IDENTITY = 'f94b7e3760e955ce98d10cdbb2a20c1d9d3c038a80ec39b6c40fcc3c010596b9'
 TYPED_CALL_SCHEMA_VERSION = 'mncs.typed-call/1'
-BINDING_CONTENT_IDENTITY = '26edb261df504457d16de1b23de4aa6ca2f01bb587e3dde6fe06cc346aced9af'
+BINDING_CONTENT_IDENTITY = 'bc2fd65cae024299fc6dbbf3db27d38be0f4a694cee8ec36ccc7559dec93382e'
 
 class BindingError(RuntimeError):
     pass
@@ -127,6 +127,9 @@ class EscalationReason(str, Enum):
     language_profile_changed = 'language_profile_changed'
     high_connectivity_definition_changed = 'high_connectivity_definition_changed'
     direct_dependents_affected = 'direct_dependents_affected'
+    test_selection_unresolved = 'test_selection_unresolved'
+    cross_repository_graph_incomplete = 'cross_repository_graph_incomplete'
+    family_registry_coverage_incomplete = 'family_registry_coverage_incomplete'
 
 
 class VerificationLevel(str, Enum):
@@ -154,7 +157,7 @@ class SelectionDecision:
     def from_host_value(cls, value: Any) -> SelectionDecision:
         fields = _fields(value)
         level = _decode('finite:VerificationLevel', fields.get('level'))
-        reasons = _decode('sequence:finite:EscalationReason:16', fields.get('reasons'))
+        reasons = _decode('sequence:finite:EscalationReason:20', fields.get('reasons'))
         sufficient_local = _decode('bool', fields.get('sufficient_local'))
         return cls(level=level, reasons=reasons, sufficient_local=sufficient_local)
 
@@ -164,12 +167,15 @@ class SelectionInput:
     abi_boundary: bool
     change_class: ChangeClass
     cross_repository: bool
+    cross_repository_graph_incomplete: bool
     direct_dependents: bool
     effect_semantics: bool
+    family_registry_coverage_incomplete: bool
     high_connectivity: bool
     impact_complete: bool
     public_contract: bool
     selected_tests: int
+    selection_unresolved: bool
     shared_type: bool
     truncated: bool
     unknown_root: bool
@@ -179,12 +185,15 @@ class SelectionInput:
             'abi_boundary': _encode(self.abi_boundary),
             'change_class': _encode(self.change_class),
             'cross_repository': _encode(self.cross_repository),
+            'cross_repository_graph_incomplete': _encode(self.cross_repository_graph_incomplete),
             'direct_dependents': _encode(self.direct_dependents),
             'effect_semantics': _encode(self.effect_semantics),
+            'family_registry_coverage_incomplete': _encode(self.family_registry_coverage_incomplete),
             'high_connectivity': _encode(self.high_connectivity),
             'impact_complete': _encode(self.impact_complete),
             'public_contract': _encode(self.public_contract),
             'selected_tests': _encode(self.selected_tests),
+            'selection_unresolved': _encode(self.selection_unresolved),
             'shared_type': _encode(self.shared_type),
             'truncated': _encode(self.truncated),
             'unknown_root': _encode(self.unknown_root),
@@ -196,16 +205,19 @@ class SelectionInput:
         abi_boundary = _decode('bool', fields.get('abi_boundary'))
         change_class = _decode('finite:ChangeClass', fields.get('change_class'))
         cross_repository = _decode('bool', fields.get('cross_repository'))
+        cross_repository_graph_incomplete = _decode('bool', fields.get('cross_repository_graph_incomplete'))
         direct_dependents = _decode('bool', fields.get('direct_dependents'))
         effect_semantics = _decode('bool', fields.get('effect_semantics'))
+        family_registry_coverage_incomplete = _decode('bool', fields.get('family_registry_coverage_incomplete'))
         high_connectivity = _decode('bool', fields.get('high_connectivity'))
         impact_complete = _decode('bool', fields.get('impact_complete'))
         public_contract = _decode('bool', fields.get('public_contract'))
         selected_tests = _decode('int', fields.get('selected_tests'))
+        selection_unresolved = _decode('bool', fields.get('selection_unresolved'))
         shared_type = _decode('bool', fields.get('shared_type'))
         truncated = _decode('bool', fields.get('truncated'))
         unknown_root = _decode('bool', fields.get('unknown_root'))
-        return cls(abi_boundary=abi_boundary, change_class=change_class, cross_repository=cross_repository, direct_dependents=direct_dependents, effect_semantics=effect_semantics, high_connectivity=high_connectivity, impact_complete=impact_complete, public_contract=public_contract, selected_tests=selected_tests, shared_type=shared_type, truncated=truncated, unknown_root=unknown_root)
+        return cls(abi_boundary=abi_boundary, change_class=change_class, cross_repository=cross_repository, cross_repository_graph_incomplete=cross_repository_graph_incomplete, direct_dependents=direct_dependents, effect_semantics=effect_semantics, family_registry_coverage_incomplete=family_registry_coverage_incomplete, high_connectivity=high_connectivity, impact_complete=impact_complete, public_contract=public_contract, selected_tests=selected_tests, selection_unresolved=selection_unresolved, shared_type=shared_type, truncated=truncated, unknown_root=unknown_root)
 
 
 @dataclass(frozen=True)
@@ -221,15 +233,14 @@ class Binding:
         self.last_execution: dict[str, Any] | None = None
 
     def _call(self, module: str, function: str, *arguments: Any) -> dict[str, Any]:
-        request = {'schema_version': '0.1', 'target': {'module': module, 'function': function},
-                   'typed_arguments': [_encode(argument) for argument in arguments], 'expected_interface_identity': INTERFACE_IDENTITY, 'step_budget': 8192}
+        typed_arguments = [_encode(argument) for argument in arguments]
+        encoded_arguments = json.dumps(typed_arguments, separators=(',', ':'))
         with tempfile.TemporaryDirectory(prefix='mncs-generated-binding-') as directory:
-            request_path = Path(directory) / 'request.json'
-            request_path.write_text(json.dumps(request, separators=(',', ':')), encoding='utf-8')
             environment = dict(os.environ)
-            if self._config.libraries:
-                environment['MNCS_LIBRARY_PATH'] = os.pathsep.join(str(path.resolve()) for path in self._config.libraries)
-            result = subprocess.run([self._config.mncs, 'execute', str(self._config.source), str(request_path)],
+            command = [self._config.mncs, 'call', str(self._config.source), '--module', module, '--function', function, '--args-json', encoded_arguments, '--interface-identity', INTERFACE_IDENTITY]
+            for library in self._config.libraries:
+                command.extend(('--library', str(library.resolve())))
+            result = subprocess.run(command,
                                      text=True, capture_output=True, env=environment, timeout=self._config.timeout)
         if result.returncode != 0:
             detail = result.stderr.strip() or result.stdout.strip() or 'typed call failed'
@@ -238,10 +249,10 @@ class Binding:
             response = json.loads(result.stdout)
         except json.JSONDecodeError as error:
             raise BindingError('mncs returned non-JSON output') from error
-        if response.get('status') != 'returned':
-            raise BindingError(f'mncs typed call did not return: {response!r}')
+        if response.get('status') != 'returned' or not isinstance(response.get('call'), dict):
+            raise BindingError(f'mncs application call did not return: {response!r}')
         self.last_execution = response
-        return response
+        return response['call']
 
     def broad_reasons(self, input: SelectionInput, class_reason: int) -> int:
         response = self._call('mncs.family.verification_plan.v1', 'broad_reasons', input, class_reason)
@@ -258,6 +269,22 @@ class Binding:
     def choose(self, input_value: SelectionInput) -> SelectionDecision:
         response = self._call('mncs.family.verification_plan.v1', 'choose', input_value)
         return _decode('record:SelectionDecision', response['returned'][0])
+
+    def evidence_family(self) -> bytes:
+        response = self._call('mncs.family.verification_plan.v1', 'evidence_family')
+        return _decode('view:byte:128', response['returned'][0])
+
+    def evidence_repository_canonical(self) -> bytes:
+        response = self._call('mncs.family.verification_plan.v1', 'evidence_repository_canonical')
+        return _decode('view:byte:128', response['returned'][0])
+
+    def evidence_selected_consumers(self) -> bytes:
+        response = self._call('mncs.family.verification_plan.v1', 'evidence_selected_consumers')
+        return _decode('view:byte:128', response['returned'][0])
+
+    def evidence_selected_tests(self) -> bytes:
+        response = self._call('mncs.family.verification_plan.v1', 'evidence_selected_tests')
+        return _decode('view:byte:128', response['returned'][0])
 
     def flag(self, value: bool, code: int) -> int:
         response = self._call('mncs.family.verification_plan.v1', 'flag', value, code)
@@ -282,6 +309,10 @@ class Binding:
     def reason_for_slot(self, input: SelectionInput, class_reason: int, slot: int) -> EscalationReason:
         response = self._call('mncs.family.verification_plan.v1', 'reason_for_slot', input, class_reason, slot)
         return _decode('finite:EscalationReason', response['returned'][0])
+
+    def reason_label(self, input_value: EscalationReason) -> bytes:
+        response = self._call('mncs.family.verification_plan.v1', 'reason_label', input_value)
+        return _decode('view:byte:1024', response['returned'][0])
 
     def reasons_for(self, input: SelectionInput, class_reason: int) -> tuple[Any, ...]:
         response = self._call('mncs.family.verification_plan.v1', 'reasons_for', input, class_reason)
