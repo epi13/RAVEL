@@ -1,12 +1,18 @@
 {
   "schema_version": "mncs.native-userland-status/1",
   "repository_id": "RAVEL",
-  "status": "hybrid",
+  "status": "native_shadow",
   "canonical_entrypoint": "ravel CLI",
-  "native_sources": {},
+  "native_sources": {
+    "impact-inventory-selection": "native/mncs/ravel/planner/v1.mncs"
+  },
+  "native_application_descriptor": "native-applications/ravel-planner.json",
+  "native_application_descriptors": {
+    "planner": "native-applications/ravel-planner.json"
+  },
   "native_shadow_slices": [
     "semantic impact identities",
     "verification-plan contract and exact selection semantics"
   ],
-  "next_migration_slice": "native impact-to-verification-plan module without generated Python binding"
+  "next_migration_slice": "native complete VerificationPlan construction, graph routing, identity publication, and canonical launcher cutover"
 }

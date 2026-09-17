@@ -1,0 +1,52 @@
+{
+  "schema_version": "mncs.ravel-planner-request/1",
+  "source": {
+    "path": "source.mncs",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "subject_identity": "mncs:source:subject",
+    "subject_fingerprint": "1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  "impact": {
+    "graph_identity": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "roots": ["mncs:root:implementation"],
+    "affected_count": 2,
+    "direct_dependents": ["mncs-test:consumer"],
+    "test_identities": [
+      "mncs:0.2:test-case:tests.self_suite::arithmetic::f678e5ec3041e45e78e5ebefe4e87172fd2fbdd385846a2641a8e9cfd212b911",
+      "mncs:0.2:test-case:tests.self_suite::boolean::aed88ee42cd04283f1a415c36c95a3ef6e1db7c20cc63d6b7b28104f90f28500"
+    ],
+    "risk_flags": [],
+    "complete": true,
+    "limitations": [],
+    "cross_repository": {
+      "graph_identity": "1111111111111111111111111111111111111111111111111111111111111111",
+      "edges": [],
+      "selected_repositories": ["mncs-test"],
+      "complete": true,
+      "limitations": []
+    }
+  },
+  "inventory": {
+    "subject_identity": "mncs-test:inventory",
+    "subject_fingerprint": "f5c2c5664b24e27efdbe5f4e78ac888e96655b550631f8b19caa9731912715db",
+    "test_case_identities": [
+      "mncs:0.2:test-case:tests.self_suite::arithmetic::f678e5ec3041e45e78e5ebefe4e87172fd2fbdd385846a2641a8e9cfd212b911",
+      "mncs:0.2:test-case:tests.self_suite::boolean::aed88ee42cd04283f1a415c36c95a3ef6e1db7c20cc63d6b7b28104f90f28500"
+    ]
+  },
+  "cross_repository": false,
+  "unknown_root": false,
+  "truncated": false,
+  "change_class": "implementation",
+  "high_connectivity": false,
+  "direct_dependents": true,
+  "routing_scope": "selected_repositories",
+  "selected_repositories": ["mncs-test"],
+  "provider": "ravel",
+  "policy_identity": "mncs.family.verification_plan.v1",
+  "contract_revision": "1",
+  "required_evidence": ["test_result", "check_result"],
+  "claimed_scope": "selected_repositories",
+  "executor": "mncs-actions",
+  "stop_condition": "selected proof"
+}
