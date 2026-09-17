@@ -25,10 +25,14 @@ class ProviderMetadataTests(unittest.TestCase):
         binding = (ROOT / "src/ravel/generated/verification_plan.py").read_text(encoding="utf-8")
         with tempfile.TemporaryDirectory(prefix="ravel-provider-facts-") as directory:
             path = Path(directory) / "verification_plan.py"
+            interface_line = next(
+                line for line in binding.splitlines() if line.startswith("INTERFACE_IDENTITY = ")
+            )
             path.write_text(
                 binding.replace(
-                    "INTERFACE_IDENTITY = '31c958b74518d2d4341b510e15dfd35c8f767bc2ae5ea159abc516a095e0e406'",
-                    "INTERFACE_IDENTITY = '41c958b74518d2d4341b510e15dfd35c8f767bc2ae5ea159abc516a095e0e406'",
+                    interface_line,
+                    "INTERFACE_IDENTITY = '" + "41" * 32 + "'",
+                    1,
                 ),
                 encoding="utf-8",
             )
