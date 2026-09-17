@@ -1,0 +1,185 @@
+mncs 0.18;
+
+// mncs.ravel.planner.v1 — the native RAVEL impact-to-plan boundary.
+//
+// Compiler-owned impact and inventory facts enter as complete Commons
+// contracts. RAVEL performs the bounded inventory join and calls the
+// language-owned selection policy directly in the same MNCS session. This
+// shadow boundary publishes the typed selection decision; host Python remains
+// the compatibility oracle while complete plan construction, graph routing,
+// identity publication, and source/provenance acquisition migrate.
+module mncs.ravel.planner.v1;
+
+use mncs.std.application.v1;
+use mncs.family.verification_plan.v1 as policy;
+use mncs.commons.family.contracts.v1 as contracts;
+
+record PlannerRequest {
+    source: contracts.SourceContract,
+    impact: contracts.SemanticImpactContract,
+    inventory: contracts.TestInventoryContract,
+    cross_repository: bool,
+    unknown_root: bool,
+    truncated: bool,
+    change_class: policy.ChangeClass,
+    high_connectivity: bool,
+    direct_dependents: bool,
+    routing_scope: contracts.RoutingScope,
+    selected_repositories: [[byte; up_to 256]; up_to 64],
+    provider: [byte; up_to 256],
+    policy_identity: [byte; up_to 256],
+    contract_revision: [byte; up_to 128],
+    required_evidence: [[byte; up_to 128]; up_to 16],
+    claimed_scope: [byte; up_to 128],
+    executor: [byte; up_to 256],
+    stop_condition: [byte; up_to 128]
+}
+
+record PlannerDecision {
+    selection: policy.SelectionDecision,
+    joinable_test_count: u64,
+    inventory_join_complete: bool
+}
+
+fn equal_view(left: [byte; up_to 1024], right: [byte; up_to 1024]) -> (result: bool) {
+    if left.len != right.len {
+        return false;
+    }
+    iterate i over left carrying equal: bool = true {
+        next equal = equal && left[i] == right[i];
+    }
+    return equal;
+}
+
+fn inventory_contains(
+    candidate: [byte; up_to 1024],
+    inventory: contracts.TestInventoryContract
+) -> (result: bool) {
+    let identities: [[byte; up_to 1024]; up_to 256] = inventory.test_case_identities;
+    iterate i over identities carrying found: bool = false {
+        let inventory_identity: [byte; up_to 1024] = identities[i];
+        next found = found || equal_view(candidate, inventory_identity);
+    }
+    return found;
+}
+
+fn joinable_count(request: PlannerRequest) -> (result: u64) {
+    let impact_identities: [[byte; up_to 1024]; up_to 256] = request.impact.test_identities;
+    iterate i over impact_identities carrying count: u64 = 0 {
+        let impact_identity: [byte; up_to 1024] = impact_identities[i];
+        let present: bool = inventory_contains(impact_identity, request.inventory);
+        next count = count +% select(present, 1, 0);
+    }
+    return count;
+}
+
+fn join_complete(request: PlannerRequest, count: u64) -> (result: bool) {
+    return count == request.impact.test_identities.len
+        && request.impact.test_identities.len <= 8;
+}
+
+fn is_public_contract(value: policy.ChangeClass) -> (result: bool) {
+    return match value {
+        policy.ChangeClass.public_contract => true,
+        policy.ChangeClass.cross_repository_contract => true,
+        policy.ChangeClass.implementation => false,
+        policy.ChangeClass.shared_type => false,
+        policy.ChangeClass.parser_semantics => false,
+        policy.ChangeClass.serialization_format => false,
+        policy.ChangeClass.effect_semantics => false,
+        policy.ChangeClass.abi_boundary => false,
+        policy.ChangeClass.canonical_fixture => false,
+        policy.ChangeClass.language_profile => false
+    };
+}
+
+fn is_shared_type(value: policy.ChangeClass) -> (result: bool) {
+    return match value {
+        policy.ChangeClass.shared_type => true,
+        policy.ChangeClass.implementation => false,
+        policy.ChangeClass.public_contract => false,
+        policy.ChangeClass.parser_semantics => false,
+        policy.ChangeClass.serialization_format => false,
+        policy.ChangeClass.effect_semantics => false,
+        policy.ChangeClass.abi_boundary => false,
+        policy.ChangeClass.canonical_fixture => false,
+        policy.ChangeClass.language_profile => false,
+        policy.ChangeClass.cross_repository_contract => false
+    };
+}
+
+fn is_effect_semantics(value: policy.ChangeClass) -> (result: bool) {
+    return match value {
+        policy.ChangeClass.effect_semantics => true,
+        policy.ChangeClass.implementation => false,
+        policy.ChangeClass.public_contract => false,
+        policy.ChangeClass.shared_type => false,
+        policy.ChangeClass.parser_semantics => false,
+        policy.ChangeClass.serialization_format => false,
+        policy.ChangeClass.abi_boundary => false,
+        policy.ChangeClass.canonical_fixture => false,
+        policy.ChangeClass.language_profile => false,
+        policy.ChangeClass.cross_repository_contract => false
+    };
+}
+
+fn is_abi_boundary(value: policy.ChangeClass) -> (result: bool) {
+    return match value {
+        policy.ChangeClass.abi_boundary => true,
+        policy.ChangeClass.implementation => false,
+        policy.ChangeClass.public_contract => false,
+        policy.ChangeClass.shared_type => false,
+        policy.ChangeClass.parser_semantics => false,
+        policy.ChangeClass.serialization_format => false,
+        policy.ChangeClass.effect_semantics => false,
+        policy.ChangeClass.canonical_fixture => false,
+        policy.ChangeClass.language_profile => false,
+        policy.ChangeClass.cross_repository_contract => false
+    };
+}
+
+fn select_decision(
+    request: PlannerRequest,
+    joinable: u64,
+    complete: bool
+) -> (result: policy.SelectionDecision) {
+    return policy.choose(policy.SelectionInput {
+        cross_repository: request.cross_repository,
+        impact_complete: request.impact.complete && request.impact.cross_repository.complete && complete,
+        unknown_root: request.unknown_root,
+        truncated: request.truncated || !request.impact.cross_repository.complete,
+        change_class: request.change_class,
+        high_connectivity: request.high_connectivity,
+        shared_type: is_shared_type(request.change_class),
+        effect_semantics: is_effect_semantics(request.change_class),
+        abi_boundary: is_abi_boundary(request.change_class),
+        public_contract: is_public_contract(request.change_class),
+        direct_dependents: request.direct_dependents || request.impact.direct_dependents.len > 0,
+        selected_tests: joinable as i32
+    });
+}
+
+fn planner_app(context: ApplicationContext) -> (result: ApplicationExit)
+    capability ravel_artifact
+    effect structured_read authorized_by ravel_artifact
+    effect structured_write authorized_by ravel_artifact
+{
+    if !context_is_bounded(context) || context.argv_count < 2 {
+        return failure([97, 114, 103, 118, 32, 114, 101, 113, 117, 105, 114, 101, 115, 32, 50, 32, 112, 108, 97, 110, 110, 101, 114, 32, 97, 114, 116, 105, 102, 97, 99, 116, 32, 112, 97, 116, 104, 115], 2);
+    }
+    let request_schema: [byte; up_to 64] = [109, 110, 99, 115, 46, 114, 97, 118, 101, 108, 45, 112, 108, 97, 110, 110, 101, 114, 45, 114, 101, 113, 117, 101, 115, 116, 47, 49];
+    let decision_schema: [byte; up_to 64] = [109, 110, 99, 115, 46, 114, 97, 118, 101, 108, 45, 115, 101, 108, 101, 99, 116, 105, 111, 110, 45, 100, 101, 99, 105, 115, 105, 111, 110, 47, 49];
+    let request: PlannerRequest = structured_read(context.argv[0], request_schema);
+    let joinable: u64 = joinable_count(request);
+    let complete: bool = join_complete(request, joinable);
+    let decision: policy.SelectionDecision = select_decision(request, joinable, complete);
+    let published_decision: u64 = structured_write(context.argv[1], decision_schema, PlannerDecision {
+        selection: decision,
+        joinable_test_count: joinable,
+        inventory_join_complete: complete
+    });
+    if published_decision == 0 {
+        return failure([112, 108, 97, 110, 110, 101, 114, 32, 112, 117, 98, 108, 105, 115, 104, 32, 102, 97, 105, 108, 101, 100], 3);
+    }
+    return success([]);
+}

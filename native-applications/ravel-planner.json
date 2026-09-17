@@ -1,0 +1,17 @@
+{
+  "schema_version": "mncs.native-application/1",
+  "application_identity": "ravel.native-planner",
+  "source": "../native/mncs/ravel/planner/v1.mncs",
+  "module": "mncs.ravel.planner.v1",
+  "entry_function": "planner_app",
+  "profile": "0.18",
+  "interface_identity": "889a8eb1296c31ce45b90433d09f50267690b2680dbcdf391d9977579f8fd624",
+  "libraries": [
+    "../../mncs-language/library",
+    "../../MNCS-Commons/src/mncs_commons/mesh/mncs"
+  ],
+  "environment_keys": [],
+  "required_capabilities": [
+    "ravel_artifact"
+  ]
+}
