@@ -35,11 +35,7 @@
     ]
   },
   "cross_repository": false,
-  "unknown_root": false,
-  "truncated": false,
   "change_class": "implementation",
-  "high_connectivity": false,
-  "direct_dependents": true,
   "routing_scope": "selected_repositories",
   "selected_repositories": ["mncs-test"],
   "provider": "ravel",

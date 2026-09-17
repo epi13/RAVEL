@@ -11,6 +11,7 @@ mncs 0.18;
 module mncs.ravel.planner.v1;
 
 use mncs.std.application.v1;
+use mncs.core.sequences.v1 as sequences;
 use mncs.family.verification_plan.v1 as policy;
 use mncs.commons.family.contracts.v1 as contracts;
 
@@ -19,11 +20,7 @@ record PlannerRequest {
     impact: contracts.SemanticImpactContract,
     inventory: contracts.TestInventoryContract,
     cross_repository: bool,
-    unknown_root: bool,
-    truncated: bool,
     change_class: policy.ChangeClass,
-    high_connectivity: bool,
-    direct_dependents: bool,
     routing_scope: contracts.RoutingScope,
     selected_repositories: [[byte; up_to 256]; up_to 64],
     provider: [byte; up_to 256],
@@ -38,17 +35,8 @@ record PlannerRequest {
 record PlannerDecision {
     selection: policy.SelectionDecision,
     joinable_test_count: u64,
-    inventory_join_complete: bool
-}
-
-fn equal_view(left: [byte; up_to 1024], right: [byte; up_to 1024]) -> (result: bool) {
-    if left.len != right.len {
-        return false;
-    }
-    iterate i over left carrying equal: bool = true {
-        next equal = equal && left[i] == right[i];
-    }
-    return equal;
+    inventory_join_complete: bool,
+    selected_test_identities: [[byte; up_to 1024]; up_to 256]
 }
 
 fn inventory_contains(
@@ -58,7 +46,7 @@ fn inventory_contains(
     let identities: [[byte; up_to 1024]; up_to 256] = inventory.test_case_identities;
     iterate i over identities carrying found: bool = false {
         let inventory_identity: [byte; up_to 1024] = identities[i];
-        next found = found || equal_view(candidate, inventory_identity);
+        next found = found || sequences.equals_byte_view<1024>(candidate, inventory_identity);
     }
     return found;
 }
@@ -73,9 +61,62 @@ fn joinable_count(request: PlannerRequest) -> (result: u64) {
     return count;
 }
 
+fn has_risk_flag(impact: contracts.SemanticImpactContract, expected: [byte; up_to 128]) -> (result: bool) {
+    iterate i over impact.risk_flags carrying found: bool = false {
+        next found = found || sequences.equals_byte_view<128>(impact.risk_flags[i], expected);
+    }
+    return found;
+}
+
+fn impact_has_unknown_root(impact: contracts.SemanticImpactContract) -> (result: bool) {
+    return has_risk_flag(impact, [117, 110, 107, 110, 111, 119, 110, 95, 114, 111, 111, 116]);
+}
+
+fn impact_is_truncated(impact: contracts.SemanticImpactContract) -> (result: bool) {
+    return has_risk_flag(impact, [116, 114, 117, 110, 99, 97, 116, 101, 100]);
+}
+
+fn impact_has_high_connectivity(impact: contracts.SemanticImpactContract) -> (result: bool) {
+    return has_risk_flag(impact, [104, 105, 103, 104, 95, 99, 111, 110, 110, 101, 99, 116, 105, 118, 105, 116, 121]);
+}
+
+fn duplicate_with(
+    candidate: [byte; up_to 1024],
+    values: [[byte; up_to 1024]; up_to 256],
+    ordinal: u64
+) -> (result: bool) {
+    iterate j over values carrying duplicate: bool = false {
+        next duplicate = duplicate
+            || (j != ordinal && sequences.equals_byte_view<1024>(candidate, values[j]));
+    }
+    return duplicate;
+}
+
+fn duplicate_selection(values: [[byte; up_to 1024]; up_to 256]) -> (result: bool) {
+    iterate i over values carrying duplicate: bool = false {
+        next duplicate = duplicate
+            || duplicate_with(values[i], values, i);
+    }
+    return duplicate;
+}
+
+fn materialize_joined(request: PlannerRequest) -> (result: [[byte; up_to 1024]; up_to 256]) {
+    let impacted: [[byte; up_to 1024]; up_to 256] = request.impact.test_identities;
+    let seed_builder: sequences.ByteViewBuilder256 = sequences.byte_view_builder_empty();
+    iterate i over impacted carrying builder: sequences.ByteViewBuilder256 = seed_builder {
+        let candidate: [byte; up_to 1024] = impacted[i];
+        let included: bool = inventory_contains(candidate, request.inventory);
+        next builder = sequences.byte_view_builder_push(builder, candidate, included);
+    }
+    return sequences.byte_view_builder_finish(builder);
+}
+
 fn join_complete(request: PlannerRequest, count: u64) -> (result: bool) {
-    return count == request.impact.test_identities.len
-        && request.impact.test_identities.len <= 8;
+    let impacted: [[byte; up_to 1024]; up_to 256] = request.impact.test_identities;
+    let inventory: [[byte; up_to 1024]; up_to 256] = request.inventory.test_case_identities;
+    return count == impacted.len
+        && !duplicate_selection(impacted)
+        && !duplicate_selection(inventory);
 }
 
 fn is_public_contract(value: policy.ChangeClass) -> (result: bool) {
@@ -146,15 +187,15 @@ fn select_decision(
     return policy.choose(policy.SelectionInput {
         cross_repository: request.cross_repository,
         impact_complete: request.impact.complete && request.impact.cross_repository.complete && complete,
-        unknown_root: request.unknown_root,
-        truncated: request.truncated || !request.impact.cross_repository.complete,
+        unknown_root: impact_has_unknown_root(request.impact),
+        truncated: impact_is_truncated(request.impact) || !request.impact.cross_repository.complete,
         change_class: request.change_class,
-        high_connectivity: request.high_connectivity,
+        high_connectivity: impact_has_high_connectivity(request.impact),
         shared_type: is_shared_type(request.change_class),
         effect_semantics: is_effect_semantics(request.change_class),
         abi_boundary: is_abi_boundary(request.change_class),
         public_contract: is_public_contract(request.change_class),
-        direct_dependents: request.direct_dependents || request.impact.direct_dependents.len > 0,
+        direct_dependents: request.impact.direct_dependents.len > 0,
         selected_tests: joinable as i32
     });
 }
@@ -173,10 +214,19 @@ fn planner_app(context: ApplicationContext) -> (result: ApplicationExit)
     let joinable: u64 = joinable_count(request);
     let complete: bool = join_complete(request, joinable);
     let decision: policy.SelectionDecision = select_decision(request, joinable, complete);
+    let impacted_ids: [[byte; up_to 1024]; up_to 256] = request.impact.test_identities;
+    let empty_selection: [[byte; up_to 1024]; up_to 256] = impacted_ids[0..0];
+    let joined_selection: [[byte; up_to 1024]; up_to 256] = materialize_joined(request);
+    let selected: [[byte; up_to 1024]; up_to 256] = select(
+        complete,
+        joined_selection,
+        empty_selection
+    );
     let published_decision: u64 = structured_write(context.argv[1], decision_schema, PlannerDecision {
         selection: decision,
         joinable_test_count: joinable,
-        inventory_join_complete: complete
+        inventory_join_complete: complete,
+        selected_test_identities: selected
     });
     if published_decision == 0 {
         return failure([112, 108, 97, 110, 110, 101, 114, 32, 112, 117, 98, 108, 105, 115, 104, 32, 102, 97, 105, 108, 101, 100], 3);
