@@ -3,8 +3,8 @@
   "source": {
     "path": "source.mncs",
     "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-    "subject_identity": "mncs:source:subject",
-    "subject_fingerprint": "1111111111111111111111111111111111111111111111111111111111111111"
+    "subject_identity": "mncs-test:inventory",
+    "subject_fingerprint": "f5c2c5664b24e27efdbe5f4e78ac888e96655b550631f8b19caa9731912715db"
   },
   "impact": {
     "graph_identity": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
@@ -19,11 +19,24 @@
     "complete": true,
     "limitations": [],
     "cross_repository": {
-      "graph_identity": "1111111111111111111111111111111111111111111111111111111111111111",
+      "graph_identity": "7be6180a4150615b9e75090e4db938d1cb86968ca82d8ef04aec77a9695ebc83",
       "edges": [],
-      "selected_repositories": ["mncs-test"],
+      "selected_repositories": [],
       "complete": true,
-      "limitations": []
+      "limitations": [
+        "cross-repository topology was not requested"
+      ],
+      "coverage": {
+        "registry_identity": "6c4b5a3fe947e69c1e08e0505c78652c386fd6ae08c9737bdd7907ed3536e3f1",
+        "registered_family_project_count": 0,
+        "classified_project_count": 0,
+        "semantic_graph_participant_count": 0,
+        "explicit_nonparticipant_count": 0,
+        "unclassified_project_count": 0,
+        "unclassified_repositories": [],
+        "coverage_status": "not_requested",
+        "topology_status": "not_requested"
+      }
     }
   },
   "inventory": {
@@ -35,14 +48,5 @@
     ]
   },
   "cross_repository": false,
-  "change_class": "implementation",
-  "routing_scope": "selected_repositories",
-  "selected_repositories": ["mncs-test"],
-  "provider": "ravel",
-  "policy_identity": "mncs.family.verification_plan.v1",
-  "contract_revision": "1",
-  "required_evidence": ["test_result", "check_result"],
-  "claimed_scope": "selected_repositories",
-  "executor": "mncs-actions",
-  "stop_condition": "selected proof"
+  "change_class": "implementation"
 }

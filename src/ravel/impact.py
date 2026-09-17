@@ -309,6 +309,7 @@ def build_verification_plan(
         selected = sorted(impacted_tests)
     family_scope_requested = cross_repository or change_class == "cross_repository_contract"
     if family_graph is None or not family_scope_requested:
+        no_registry_identity = sha256_bytes(b"no-family-registry-overlay")
         cross_repository_projection: dict[str, Any] = {
             "graph_identity": sha256_bytes(b"no-cross-repository-overlay"),
             "edges": [],
@@ -319,6 +320,17 @@ def build_verification_plan(
                 if not family_scope_requested
                 else "cross-repository topology was requested but no family overlay was supplied"
             ],
+            "coverage": {
+                "registry_identity": no_registry_identity,
+                "registered_family_project_count": 0,
+                "classified_project_count": 0,
+                "semantic_graph_participant_count": 0,
+                "explicit_nonparticipant_count": 0,
+                "unclassified_project_count": 0,
+                "unclassified_repositories": [],
+                "coverage_status": "not_requested" if not family_scope_requested else "incomplete",
+                "topology_status": "not_requested" if not family_scope_requested else "unavailable",
+            },
         }
     else:
         edges = consumers_for(
@@ -340,7 +352,7 @@ def build_verification_plan(
             # coverage beside it so a selected proof cannot be mistaken for
             # closed-world family closure.
             "coverage": {
-                "registry_identity": coverage.get("registry_identity"),
+                "registry_identity": coverage.get("registry_identity") or sha256_bytes(b"missing-family-registry-coverage"),
                 "registered_family_project_count": coverage.get("registered_family_project_count", 0),
                 "classified_project_count": coverage.get("classified_project_count", 0),
                 "semantic_graph_participant_count": coverage.get("semantic_graph_participant_count", 0),
@@ -462,7 +474,6 @@ def build_verification_plan(
                 "inventory_subject_identity": inventory.get("subject_identity"),
                 "inventory_subject_fingerprint": inventory.get("subject_fingerprint"),
                 "family_graph_identity": cross_repository_projection["graph_identity"],
-                "family_graph_coverage": cross_repository_projection.get("coverage"),
                 "selected_test_identities": selected,
                 "contract_revision": PLAN_SCHEMA,
             },

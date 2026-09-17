@@ -20,16 +20,7 @@ record PlannerRequest {
     impact: contracts.SemanticImpactContract,
     inventory: contracts.TestInventoryContract,
     cross_repository: bool,
-    change_class: policy.ChangeClass,
-    routing_scope: contracts.RoutingScope,
-    selected_repositories: [[byte; up_to 256]; up_to 64],
-    provider: [byte; up_to 256],
-    policy_identity: [byte; up_to 256],
-    contract_revision: [byte; up_to 128],
-    required_evidence: [[byte; up_to 128]; up_to 16],
-    claimed_scope: [byte; up_to 128],
-    executor: [byte; up_to 256],
-    stop_condition: [byte; up_to 128]
+    change_class: policy.ChangeClass
 }
 
 record PlannerDecision {
@@ -80,6 +71,19 @@ fn impact_has_high_connectivity(impact: contracts.SemanticImpactContract) -> (re
     return has_risk_flag(impact, [104, 105, 103, 104, 95, 99, 111, 110, 110, 101, 99, 116, 105, 118, 105, 116, 121]);
 }
 
+fn family_coverage_is_complete(impact: contracts.SemanticImpactContract) -> (result: bool) {
+    return sequences.equals_byte_view<64>(
+        impact.cross_repository.coverage.coverage_status,
+        [99, 111, 109, 112, 108, 101, 116, 101]
+    );
+}
+
+fn selection_is_unresolved(request: PlannerRequest, joinable: u64) -> (result: bool) {
+    return !request.cross_repository
+        && joinable == 0
+        && request.inventory.test_case_identities.len > 0;
+}
+
 fn duplicate_with(
     candidate: [byte; up_to 1024],
     values: [[byte; up_to 1024]; up_to 256],
@@ -111,12 +115,262 @@ fn materialize_joined(request: PlannerRequest) -> (result: [[byte; up_to 1024]; 
     return sequences.byte_view_builder_finish(builder);
 }
 
+// When impact identifies no executable test, the Python compatibility path
+// escalates to the complete compiler inventory. Preserve that fail-closed
+// proof boundary natively; the compiler inventory is already deterministic
+// and authoritative, so no host-side selection list is needed.
+fn materialize_inventory(request: PlannerRequest) -> (result: [[byte; up_to 1024]; up_to 256]) {
+    return request.inventory.test_case_identities;
+}
+
 fn join_complete(request: PlannerRequest, count: u64) -> (result: bool) {
     let impacted: [[byte; up_to 1024]; up_to 256] = request.impact.test_identities;
     let inventory: [[byte; up_to 1024]; up_to 256] = request.inventory.test_case_identities;
     return count == impacted.len
         && !duplicate_selection(impacted)
         && !duplicate_selection(inventory);
+}
+
+fn reason_is_none(reason: policy.EscalationReason) -> (result: bool) {
+    return match reason {
+        policy.EscalationReason.none => true,
+        policy.EscalationReason.cross_repository_contract_changed => false,
+        policy.EscalationReason.impact_evidence_truncated => false,
+        policy.EscalationReason.unknown_changed_identity => false,
+        policy.EscalationReason.public_contract_changed => false,
+        policy.EscalationReason.shared_type_changed => false,
+        policy.EscalationReason.parser_semantics_changed => false,
+        policy.EscalationReason.serialization_format_changed => false,
+        policy.EscalationReason.effect_semantics_changed => false,
+        policy.EscalationReason.abi_boundary_changed => false,
+        policy.EscalationReason.canonical_fixture_changed => false,
+        policy.EscalationReason.language_profile_changed => false,
+        policy.EscalationReason.high_connectivity_definition_changed => false,
+        policy.EscalationReason.direct_dependents_affected => false,
+        policy.EscalationReason.test_selection_unresolved => false,
+        policy.EscalationReason.cross_repository_graph_incomplete => false,
+        policy.EscalationReason.family_registry_coverage_incomplete => false
+    };
+}
+
+fn make_selection_input(
+    request: PlannerRequest,
+    joinable: u64,
+    complete: bool
+) -> (result: policy.SelectionInput) {
+    return policy.SelectionInput {
+        cross_repository: request.cross_repository,
+        impact_complete: request.impact.complete && complete,
+        unknown_root: impact_has_unknown_root(request.impact),
+        truncated: impact_is_truncated(request.impact),
+        change_class: request.change_class,
+        high_connectivity: impact_has_high_connectivity(request.impact),
+        shared_type: is_shared_type(request.change_class),
+        effect_semantics: is_effect_semantics(request.change_class),
+        abi_boundary: is_abi_boundary(request.change_class),
+        public_contract: is_public_contract(request.change_class),
+        direct_dependents: request.impact.direct_dependents.len > 0,
+        selected_tests: joinable as i32,
+        selection_unresolved: selection_is_unresolved(request, joinable),
+        cross_repository_graph_incomplete: request.cross_repository && !request.impact.cross_repository.complete,
+        family_registry_coverage_incomplete: request.cross_repository && !family_coverage_is_complete(request.impact)
+    };
+}
+
+fn selection_level(request: PlannerRequest, joinable: u64, complete: bool) -> (result: policy.VerificationLevel) {
+    let input: policy.SelectionInput = make_selection_input(request, joinable, complete);
+    return policy.level_for(input, policy.change_reason(request.change_class));
+}
+
+fn materialize_reasons(
+    request: PlannerRequest,
+    joinable: u64,
+    complete: bool
+) -> (result: [[byte; up_to 1024]; up_to 64]) {
+    let input: policy.SelectionInput = make_selection_input(request, joinable, complete);
+    let reasons: [policy.EscalationReason; 20] = policy.reasons_for(
+        input,
+        policy.change_reason(request.change_class)
+    );
+    let seed_builder: sequences.ByteViewBuilder64 = sequences.byte_view_builder64_empty();
+    iterate i over reasons carrying builder: sequences.ByteViewBuilder64 = seed_builder {
+        let reason: policy.EscalationReason = reasons[i];
+        let label: [byte; up_to 1024] = policy.reason_label(reason);
+        next builder = sequences.byte_view_builder64_push(builder, label, !reason_is_none(reason));
+    }
+    return sequences.byte_view_builder64_finish(builder);
+}
+
+fn contract_level_code(value: policy.VerificationLevel) -> (result: i64) {
+    return match value {
+        policy.VerificationLevel.changed_item => 0,
+        policy.VerificationLevel.direct_dependents => 1,
+        policy.VerificationLevel.affected_subsystem => 2,
+        policy.VerificationLevel.repository_canonical => 3,
+        policy.VerificationLevel.family => 4
+    };
+}
+
+fn routed_repositories(request: PlannerRequest) -> (result: [[byte; up_to 256]; up_to 64]) {
+    let selected: [[byte; up_to 256]; up_to 64] = request.impact.cross_repository.selected_repositories;
+    let empty: [[byte; up_to 256]; up_to 64] = selected[0..0];
+    return select(request.cross_repository, selected, empty);
+}
+
+fn is_selected_repository_route(request: PlannerRequest) -> (result: bool) {
+    return request.cross_repository && request.impact.cross_repository.selected_repositories.len > 0;
+}
+
+fn contract_routing_scope(
+    request: PlannerRequest,
+    level: policy.VerificationLevel
+) -> (result: contracts.RoutingScope) {
+    if is_selected_repository_route(request) {
+        return contracts.RoutingScope.selected_repositories;
+    }
+    return match level {
+        policy.VerificationLevel.family => contracts.RoutingScope.family,
+        policy.VerificationLevel.changed_item => contracts.RoutingScope.local,
+        policy.VerificationLevel.direct_dependents => contracts.RoutingScope.local,
+        policy.VerificationLevel.affected_subsystem => contracts.RoutingScope.local,
+        policy.VerificationLevel.repository_canonical => contracts.RoutingScope.local
+    };
+}
+
+fn required_evidence(
+    request: PlannerRequest,
+    level: policy.VerificationLevel
+) -> (result: [[byte; up_to 128]; up_to 16]) {
+    if is_selected_repository_route(request) {
+        return [policy.evidence_selected_consumers()];
+    }
+    return match level {
+        policy.VerificationLevel.family => [policy.evidence_family()],
+        policy.VerificationLevel.repository_canonical => [policy.evidence_repository_canonical()],
+        policy.VerificationLevel.changed_item => [policy.evidence_selected_tests()],
+        policy.VerificationLevel.direct_dependents => [policy.evidence_selected_tests()],
+        policy.VerificationLevel.affected_subsystem => [policy.evidence_selected_tests()]
+    };
+}
+
+fn claimed_scope(
+    request: PlannerRequest,
+    level: policy.VerificationLevel
+) -> (result: [byte; up_to 128]) {
+    if is_selected_repository_route(request) {
+        return [115, 101, 108, 101, 99, 116, 101, 100, 95, 114, 101, 112, 111, 115, 105, 116, 111, 114, 105, 101, 115];
+    }
+    return match level {
+        policy.VerificationLevel.family => [102, 97, 109, 105, 108, 121],
+        policy.VerificationLevel.repository_canonical => [114, 101, 112, 111, 115, 105, 116, 111, 114, 121],
+        policy.VerificationLevel.changed_item => [99, 104, 97, 110, 103, 101, 100, 95, 105, 116, 101, 109],
+        policy.VerificationLevel.direct_dependents => [100, 105, 114, 101, 99, 116, 95, 100, 101, 112, 101, 110, 100, 101, 110, 116, 115],
+        policy.VerificationLevel.affected_subsystem => [97, 102, 102, 101, 99, 116, 101, 100, 95, 115, 117, 98, 115, 121, 115, 116, 101, 109]
+    };
+}
+
+fn proof_executor(
+    request: PlannerRequest,
+    level: policy.VerificationLevel
+) -> (result: [byte; up_to 256]) {
+    if is_selected_repository_route(request) {
+        return [109, 110, 99, 115, 45, 97, 99, 116, 105, 111, 110, 115];
+    }
+    return match level {
+        policy.VerificationLevel.family => [102, 97, 109, 105, 108, 121, 45, 114, 111, 117, 116, 101, 114],
+        policy.VerificationLevel.repository_canonical => [109, 110, 99, 115, 45, 116, 101, 115, 116],
+        policy.VerificationLevel.changed_item => [109, 110, 99, 115, 45, 116, 101, 115, 116],
+        policy.VerificationLevel.direct_dependents => [109, 110, 99, 115, 45, 116, 101, 115, 116],
+        policy.VerificationLevel.affected_subsystem => [109, 110, 99, 115, 45, 116, 101, 115, 116]
+    };
+}
+
+fn plan_sufficient(request: PlannerRequest, level: policy.VerificationLevel, selected_count: u64) -> (result: bool) {
+    return policy.locally_sufficient(level) && selected_count > 0 && !is_selected_repository_route(request);
+}
+
+fn copy_digest(view: [byte; up_to 64]) -> (result: [byte; 32]) {
+    let seed: [byte; 32] = [0; 32];
+    return copy_span(seed, 0, view, 0, 32);
+}
+
+fn build_plan(
+    request: PlannerRequest,
+    level: policy.VerificationLevel,
+    joinable: u64,
+    join_complete_value: bool,
+    selected: [[byte; up_to 1024]; up_to 256]
+) -> (result: contracts.VerificationPlan)
+    capability ravel_digest
+    effect structured_digest authorized_by ravel_digest
+{
+    let routed: [[byte; up_to 256]; up_to 64] = routed_repositories(request);
+    let route_scope: contracts.RoutingScope = contract_routing_scope(request, level);
+    let reasons: [[byte; up_to 1024]; up_to 64] = materialize_reasons(request, joinable, join_complete_value);
+    let evidence: [[byte; up_to 128]; up_to 16] = required_evidence(request, level);
+    let sufficient: bool = plan_sufficient(request, level, selected.len);
+    let boundary_details: contracts.ProofBoundaryDetails = contracts.ProofBoundaryDetails {
+        claimed_scope: claimed_scope(request, level),
+        established: sufficient,
+        executor: proof_executor(request, level),
+        stop_condition: evidence[0]
+    };
+    let proof: contracts.ProofBoundaryContract = contracts.ProofBoundaryContract {
+        sufficient_to_stop: sufficient,
+        required_evidence: evidence,
+        boundary: boundary_details
+    };
+    let selection: contracts.SelectionContract = contracts.selection_contract(
+        contract_level_code(level),
+        selected,
+        request.inventory.test_case_identities.len,
+        reasons,
+        route_scope,
+        routed,
+        select(
+            request.cross_repository,
+            request.impact.cross_repository.coverage.semantic_graph_participant_count,
+            0
+        ),
+        request.impact.cross_repository.coverage.semantic_graph_participant_count,
+        request.impact.cross_repository.coverage.registered_family_project_count,
+        request.impact.cross_repository.coverage.classified_project_count,
+        request.impact.cross_repository.coverage.unclassified_project_count
+    );
+    let provenance: contracts.ProvenanceContract = contracts.ProvenanceContract {
+        provider: [114, 97, 118, 101, 108],
+        policy: [98, 111, 117, 110, 100, 101, 100, 45, 105, 109, 112, 97, 99, 116, 45, 118, 49],
+        compiler_impact_schema: contracts.semantic_impact_schema(),
+        dependencies: contracts.ProvenanceDependencies {
+            source_sha256: request.source.sha256,
+            semantic_graph_identity: request.impact.graph_identity,
+            inventory_subject_identity: request.inventory.subject_identity,
+            inventory_subject_fingerprint: request.inventory.subject_fingerprint,
+            family_graph_identity: request.impact.cross_repository.graph_identity,
+            selected_test_identities: selected,
+            contract_revision: contracts.verification_plan_schema()
+        }
+    };
+    let identity_material: contracts.VerificationPlanIdentityMaterial = contracts.VerificationPlanIdentityMaterial {
+        schema_version: contracts.verification_plan_schema(),
+        source: request.source,
+        impact: request.impact,
+        selection: selection,
+        proof: proof,
+        provenance: provenance
+    };
+    let plan_identity: [byte; 32] = copy_digest(structured_digest(
+        identity_material
+    ));
+    return contracts.VerificationPlan {
+        schema_version: contracts.verification_plan_schema(),
+        plan_id: plan_identity,
+        source: request.source,
+        impact: request.impact,
+        selection: selection,
+        proof: proof,
+        provenance: provenance
+    };
 }
 
 fn is_public_contract(value: policy.ChangeClass) -> (result: bool) {
@@ -186,9 +440,9 @@ fn select_decision(
 ) -> (result: policy.SelectionDecision) {
     return policy.choose(policy.SelectionInput {
         cross_repository: request.cross_repository,
-        impact_complete: request.impact.complete && request.impact.cross_repository.complete && complete,
+        impact_complete: request.impact.complete && complete,
         unknown_root: impact_has_unknown_root(request.impact),
-        truncated: impact_is_truncated(request.impact) || !request.impact.cross_repository.complete,
+        truncated: impact_is_truncated(request.impact),
         change_class: request.change_class,
         high_connectivity: impact_has_high_connectivity(request.impact),
         shared_type: is_shared_type(request.change_class),
@@ -196,17 +450,22 @@ fn select_decision(
         abi_boundary: is_abi_boundary(request.change_class),
         public_contract: is_public_contract(request.change_class),
         direct_dependents: request.impact.direct_dependents.len > 0,
-        selected_tests: joinable as i32
+        selected_tests: joinable as i32,
+        selection_unresolved: selection_is_unresolved(request, joinable),
+        cross_repository_graph_incomplete: request.cross_repository && !request.impact.cross_repository.complete,
+        family_registry_coverage_incomplete: request.cross_repository && !family_coverage_is_complete(request.impact)
     });
 }
 
 fn planner_app(context: ApplicationContext) -> (result: ApplicationExit)
     capability ravel_artifact
+    capability ravel_digest
     effect structured_read authorized_by ravel_artifact
     effect structured_write authorized_by ravel_artifact
+    effect structured_digest authorized_by ravel_digest
 {
-    if !context_is_bounded(context) || context.argv_count < 2 {
-        return failure([97, 114, 103, 118, 32, 114, 101, 113, 117, 105, 114, 101, 115, 32, 50, 32, 112, 108, 97, 110, 110, 101, 114, 32, 97, 114, 116, 105, 102, 97, 99, 116, 32, 112, 97, 116, 104, 115], 2);
+    if !context_is_bounded(context) || context.argv_count < 3 {
+        return failure([97, 114, 103, 118, 32, 114, 101, 113, 117, 105, 114, 101, 115, 32, 51, 32, 112, 108, 97, 110, 110, 101, 114, 32, 97, 114, 116, 105, 102, 97, 99, 116, 32, 112, 97, 116, 104, 115], 2);
     }
     let request_schema: [byte; up_to 64] = [109, 110, 99, 115, 46, 114, 97, 118, 101, 108, 45, 112, 108, 97, 110, 110, 101, 114, 45, 114, 101, 113, 117, 101, 115, 116, 47, 49];
     let decision_schema: [byte; up_to 64] = [109, 110, 99, 115, 46, 114, 97, 118, 101, 108, 45, 115, 101, 108, 101, 99, 116, 105, 111, 110, 45, 100, 101, 99, 105, 115, 105, 111, 110, 47, 49];
@@ -217,18 +476,27 @@ fn planner_app(context: ApplicationContext) -> (result: ApplicationExit)
     let impacted_ids: [[byte; up_to 1024]; up_to 256] = request.impact.test_identities;
     let empty_selection: [[byte; up_to 1024]; up_to 256] = impacted_ids[0..0];
     let joined_selection: [[byte; up_to 1024]; up_to 256] = materialize_joined(request);
+    let inventory_selection: [[byte; up_to 1024]; up_to 256] = materialize_inventory(request);
+    let unresolved_selection: bool = selection_is_unresolved(request, joinable);
     let selected: [[byte; up_to 1024]; up_to 256] = select(
         complete,
         joined_selection,
-        empty_selection
+        select(unresolved_selection, inventory_selection, empty_selection)
     );
+    let level: policy.VerificationLevel = selection_level(request, joinable, complete);
+    let plan: contracts.VerificationPlan = build_plan(request, level, joinable, complete, selected);
     let published_decision: u64 = structured_write(context.argv[1], decision_schema, PlannerDecision {
         selection: decision,
         joinable_test_count: joinable,
         inventory_join_complete: complete,
         selected_test_identities: selected
     });
-    if published_decision == 0 {
+    let published_plan: u64 = structured_write(
+        context.argv[2],
+        contracts.verification_plan_schema(),
+        plan
+    );
+    if published_decision == 0 || published_plan == 0 {
         return failure([112, 108, 97, 110, 110, 101, 114, 32, 112, 117, 98, 108, 105, 115, 104, 32, 102, 97, 105, 108, 101, 100], 3);
     }
     return success([]);

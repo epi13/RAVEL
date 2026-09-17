@@ -5,13 +5,14 @@
   "module": "mncs.ravel.planner.v1",
   "entry_function": "planner_app",
   "profile": "0.18",
-  "interface_identity": "d2c699b9eeff85747e0ef9a4c0f6eea553b4b24ef3ae25d35cccf67adc6aa374",
+  "interface_identity": "d6011602f38514768d663cc43b11b6f0f660a6895dba29ae959de49362a81db7",
   "libraries": [
     "../../mncs-language/library",
     "../../MNCS-Commons/src/mncs_commons/mesh/mncs"
   ],
   "environment_keys": [],
   "required_capabilities": [
-    "ravel_artifact"
+    "ravel_artifact",
+    "ravel_digest"
   ]
 }
