@@ -1,17 +1,17 @@
 mncs 0.18;
 
-// mncs.ravel.planner.v1 — the native RAVEL impact-to-plan boundary.
+// ravel.planning — the native RAVEL impact-to-plan boundary.
 //
 // Compiler-owned impact and inventory facts enter as complete Commons
 // contracts. RAVEL performs the bounded inventory join and calls the
 // language-owned selection policy directly in the same MNCS session. This
 // The application publishes the complete canonical plan. Host Python may
 // retain a compatibility oracle, but it is not on the normal plan path.
-module mncs.ravel.planner.v1;
+module ravel.planning;
 
 use mncs.std.application.v1;
 use mncs.core.sequences.v1 as sequences;
-use mncs.family.verification_plan.v1 as policy;
+use ravel.verification_policy as policy;
 use mncs.commons.family.contracts.v1 as contracts;
 
 record PlannerRequest {

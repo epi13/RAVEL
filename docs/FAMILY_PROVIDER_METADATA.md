@@ -1,7 +1,7 @@
 # Family provider metadata
 
 Ravel's `family-provider-metadata-v1.json` is generated from the checked-in
-MNCS-generated binding at `src/ravel/generated/verification_plan.py` and the
+MNCS-generated binding at `src/ravel/generated/verification_policy.py` and the
 explicit `family-semantic-contracts-v1.json` provider declaration.
 
 The binding contributes the compiler-owned module, interface, typed-call

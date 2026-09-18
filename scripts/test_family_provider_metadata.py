@@ -16,15 +16,15 @@ ROOT = Path(__file__).resolve().parents[1]
 class ProviderMetadataTests(unittest.TestCase):
     def test_checked_in_metadata_is_current(self) -> None:
         rendered = generator.render(
-            ROOT / "src/ravel/generated/verification_plan.py",
+            ROOT / "src/ravel/generated/verification_policy.py",
             ROOT / "family-semantic-contracts-v1.json",
         )
         self.assertEqual(rendered, (ROOT / "family-provider-metadata-v1.json").read_text(encoding="utf-8"))
 
     def test_changed_binding_identity_changes_generated_provider_fact(self) -> None:
-        binding = (ROOT / "src/ravel/generated/verification_plan.py").read_text(encoding="utf-8")
+        binding = (ROOT / "src/ravel/generated/verification_policy.py").read_text(encoding="utf-8")
         with tempfile.TemporaryDirectory(prefix="ravel-provider-facts-") as directory:
-            path = Path(directory) / "verification_plan.py"
+            path = Path(directory) / "verification_policy.py"
             interface_line = next(
                 line for line in binding.splitlines() if line.startswith("INTERFACE_IDENTITY = ")
             )

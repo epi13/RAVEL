@@ -13,7 +13,12 @@ from ravel.impact import build_verification_plan
 
 
 ROOT = Path(__file__).resolve().parents[1]
-LANGUAGE_ROOT = Path("/home/epi13/Documents/Projects/mncs-language")
+LANGUAGE_ROOT = Path(
+    os.environ.get(
+        "MNCS_LANGUAGE_ROOT",
+        "/home/epi13/Documents/Projects/mncs-language",
+    )
+)
 COMMONS_ROOT = Path("/home/epi13/Documents/Projects/MNCS-Commons")
 
 
@@ -42,6 +47,8 @@ def run_native(request: dict[str, object]) -> dict[str, object]:
             str(LANGUAGE_ROOT / "library"),
             "--library",
             str(COMMONS_ROOT / "src" / "mncs_commons" / "mesh"),
+            "--library",
+            str(ROOT / "mncs" / "workspace" / "ravel"),
             "--grant-structured",
             "ravel_artifact",
             "--grant-structured",

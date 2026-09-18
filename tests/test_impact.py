@@ -102,7 +102,12 @@ class ImpactPlanTests(unittest.TestCase):
         self.assertEqual(plan["selection"]["routing_scope"], "selected_repositories")
 
     def test_native_selection_policy_matches_bounded_local_cases(self) -> None:
-        runtime = Path("/home/epi13/Documents/Projects/mncs-language/target/debug/mncs")
+        runtime = Path(
+            os.environ.get(
+                "MNCS_BINARY",
+                "/home/epi13/Documents/Projects/mncs-language/target/debug/mncs",
+            )
+        )
         if not runtime.is_file():
             self.skipTest("mncs runtime is not built")
         level, reasons, sufficient = _native_selection_policy(

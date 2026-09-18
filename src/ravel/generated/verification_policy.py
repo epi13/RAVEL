@@ -11,10 +11,10 @@ from pathlib import Path
 from typing import Any
 
 GENERATOR_VERSION = 'mncs-host-bindings/0.2'
-MODULE_IDENTITY = 'mncs.family.verification_plan.v1'
-INTERFACE_IDENTITY = 'f94b7e3760e955ce98d10cdbb2a20c1d9d3c038a80ec39b6c40fcc3c010596b9'
+MODULE_IDENTITY = 'ravel.verification_policy'
+INTERFACE_IDENTITY = 'fcc2f95662094ecb4f82dff8dee281d0a243907b5e79d1c69a8356be6c644bd1'
 TYPED_CALL_SCHEMA_VERSION = 'mncs.typed-call/1'
-BINDING_CONTENT_IDENTITY = 'bc2fd65cae024299fc6dbbf3db27d38be0f4a694cee8ec36ccc7559dec93382e'
+BINDING_CONTENT_IDENTITY = 'd14688d8eb414b8a18525f09bcffcf2eddfb35638360e1e3a50b2f88981ff570'
 
 class BindingError(RuntimeError):
     pass
@@ -255,75 +255,75 @@ class Binding:
         return response['call']
 
     def broad_reasons(self, input: SelectionInput, class_reason: int) -> int:
-        response = self._call('mncs.family.verification_plan.v1', 'broad_reasons', input, class_reason)
+        response = self._call('ravel.verification_policy', 'broad_reasons', input, class_reason)
         return _decode('int', response['returned'][0])
 
     def change_class_from_code(self, input_value: int) -> ChangeClass:
-        response = self._call('mncs.family.verification_plan.v1', 'change_class_from_code', input_value)
+        response = self._call('ravel.verification_policy', 'change_class_from_code', input_value)
         return _decode('finite:ChangeClass', response['returned'][0])
 
     def change_reason(self, input_value: ChangeClass) -> int:
-        response = self._call('mncs.family.verification_plan.v1', 'change_reason', input_value)
+        response = self._call('ravel.verification_policy', 'change_reason', input_value)
         return _decode('int', response['returned'][0])
 
     def choose(self, input_value: SelectionInput) -> SelectionDecision:
-        response = self._call('mncs.family.verification_plan.v1', 'choose', input_value)
+        response = self._call('ravel.verification_policy', 'choose', input_value)
         return _decode('record:SelectionDecision', response['returned'][0])
 
     def evidence_family(self) -> bytes:
-        response = self._call('mncs.family.verification_plan.v1', 'evidence_family')
+        response = self._call('ravel.verification_policy', 'evidence_family')
         return _decode('view:byte:128', response['returned'][0])
 
     def evidence_repository_canonical(self) -> bytes:
-        response = self._call('mncs.family.verification_plan.v1', 'evidence_repository_canonical')
+        response = self._call('ravel.verification_policy', 'evidence_repository_canonical')
         return _decode('view:byte:128', response['returned'][0])
 
     def evidence_selected_consumers(self) -> bytes:
-        response = self._call('mncs.family.verification_plan.v1', 'evidence_selected_consumers')
+        response = self._call('ravel.verification_policy', 'evidence_selected_consumers')
         return _decode('view:byte:128', response['returned'][0])
 
     def evidence_selected_tests(self) -> bytes:
-        response = self._call('mncs.family.verification_plan.v1', 'evidence_selected_tests')
+        response = self._call('ravel.verification_policy', 'evidence_selected_tests')
         return _decode('view:byte:128', response['returned'][0])
 
     def flag(self, value: bool, code: int) -> int:
-        response = self._call('mncs.family.verification_plan.v1', 'flag', value, code)
+        response = self._call('ravel.verification_policy', 'flag', value, code)
         return _decode('int', response['returned'][0])
 
     def flag_not(self, value: bool, code: int) -> int:
-        response = self._call('mncs.family.verification_plan.v1', 'flag_not', value, code)
+        response = self._call('ravel.verification_policy', 'flag_not', value, code)
         return _decode('int', response['returned'][0])
 
     def level_for(self, input: SelectionInput, class_reason: int) -> VerificationLevel:
-        response = self._call('mncs.family.verification_plan.v1', 'level_for', input, class_reason)
+        response = self._call('ravel.verification_policy', 'level_for', input, class_reason)
         return _decode('finite:VerificationLevel', response['returned'][0])
 
     def locally_sufficient(self, input_value: VerificationLevel) -> bool:
-        response = self._call('mncs.family.verification_plan.v1', 'locally_sufficient', input_value)
+        response = self._call('ravel.verification_policy', 'locally_sufficient', input_value)
         return _decode('bool', response['returned'][0])
 
     def make_decision(self, level: VerificationLevel, input: SelectionInput, class_reason: int, sufficient: bool) -> SelectionDecision:
-        response = self._call('mncs.family.verification_plan.v1', 'make_decision', level, input, class_reason, sufficient)
+        response = self._call('ravel.verification_policy', 'make_decision', level, input, class_reason, sufficient)
         return _decode('record:SelectionDecision', response['returned'][0])
 
     def reason_for_slot(self, input: SelectionInput, class_reason: int, slot: int) -> EscalationReason:
-        response = self._call('mncs.family.verification_plan.v1', 'reason_for_slot', input, class_reason, slot)
+        response = self._call('ravel.verification_policy', 'reason_for_slot', input, class_reason, slot)
         return _decode('finite:EscalationReason', response['returned'][0])
 
     def reason_label(self, input_value: EscalationReason) -> bytes:
-        response = self._call('mncs.family.verification_plan.v1', 'reason_label', input_value)
+        response = self._call('ravel.verification_policy', 'reason_label', input_value)
         return _decode('view:byte:1024', response['returned'][0])
 
     def reasons_for(self, input: SelectionInput, class_reason: int) -> tuple[Any, ...]:
-        response = self._call('mncs.family.verification_plan.v1', 'reasons_for', input, class_reason)
+        response = self._call('ravel.verification_policy', 'reasons_for', input, class_reason)
         return _decode('sequence:finite:EscalationReason:', response['returned'][0])
 
     def risk_reasons(self, input_value: SelectionInput) -> int:
-        response = self._call('mncs.family.verification_plan.v1', 'risk_reasons', input_value)
+        response = self._call('ravel.verification_policy', 'risk_reasons', input_value)
         return _decode('int', response['returned'][0])
 
     def select_codes(self, cross_repository: int, impact_complete: int, unknown_root: int, truncated: int, change_class: int, high_connectivity: int, shared_type: int, effect_semantics: int, abi_boundary: int, public_contract: int, direct_dependents: int, selected_tests: int) -> SelectionDecision:
-        response = self._call('mncs.family.verification_plan.v1', 'select_codes', cross_repository, impact_complete, unknown_root, truncated, change_class, high_connectivity, shared_type, effect_semantics, abi_boundary, public_contract, direct_dependents, selected_tests)
+        response = self._call('ravel.verification_policy', 'select_codes', cross_repository, impact_complete, unknown_root, truncated, change_class, high_connectivity, shared_type, effect_semantics, abi_boundary, public_contract, direct_dependents, selected_tests)
         return _decode('record:SelectionDecision', response['returned'][0])
 
 

@@ -45,13 +45,13 @@ except ImportError:  # direct ``python src/ravel/impact.py`` transport entrypoin
     )
 
 try:
-    from .generated.verification_plan import (
+    from .generated.verification_policy import (
         Binding as VerificationPlanBinding,
         ChangeClass as NativeChangeClass,
         SelectionInput,
     )
 except ImportError:  # direct script execution
-    from generated.verification_plan import (
+    from generated.verification_policy import (
         Binding as VerificationPlanBinding,
         ChangeClass as NativeChangeClass,
         SelectionInput,
@@ -138,6 +138,8 @@ def _native_selection_policy(
     libraries: Sequence[Path],
     timeout: float,
     commons_root: Path | None = None,
+    cross_repository_graph_incomplete: bool = False,
+    family_registry_coverage_incomplete: bool = False,
 ) -> tuple[str, list[str], bool]:
     """Ask the MNCS-native policy for typed level, reasons, and sufficiency.
 
@@ -150,7 +152,7 @@ def _native_selection_policy(
     policy_path = Path(
         os.environ.get(
             "MNCS_VERIFICATION_POLICY",
-            str(Path(__file__).resolve().parents[3] / "mncs-language" / "library" / "family" / "verification_plan.mncs"),
+            str(Path(__file__).resolve().parents[2] / "mncs" / "workspace" / "ravel" / "verification_policy.mncs"),
         )
     )
     if not policy_path.is_file():
@@ -171,6 +173,9 @@ def _native_selection_policy(
                 public_contract="public_contract" in risk_flags,
                 direct_dependents=bool(impact.get("direct_dependents")),
                 selected_tests=selected_tests,
+                selection_unresolved=selected_tests == 0,
+                cross_repository_graph_incomplete=cross_repository_graph_incomplete,
+                family_registry_coverage_incomplete=family_registry_coverage_incomplete,
             )
         )
     except (ValueError, OSError, subprocess.SubprocessError) as error:
@@ -282,6 +287,12 @@ def build_verification_plan(
     impacted_tests = [identity for identity in impact["test_identities"] if identity in test_by_id]
     policy_sufficient_local: bool | None = None
     if policy_runtime is not None:
+        native_graph_incomplete = False
+        native_registry_incomplete = False
+        if cross_repository or change_class == "cross_repository_contract":
+            native_graph_incomplete = family_graph is None or not bool(family_graph.get("complete"))
+            coverage = family_graph.get("coverage", {}) if isinstance(family_graph, dict) else {}
+            native_registry_incomplete = not isinstance(coverage, dict) or coverage.get("coverage_status") != "complete"
         level, reasons, policy_sufficient_local = _native_selection_policy(
             mncs=policy_runtime,
             impact=impact,
@@ -292,6 +303,8 @@ def build_verification_plan(
             libraries=policy_libraries,
             timeout=policy_timeout,
             commons_root=commons_root,
+            cross_repository_graph_incomplete=native_graph_incomplete,
+            family_registry_coverage_incomplete=native_registry_incomplete,
         )
     else:
         level, reasons = select_level(
@@ -644,6 +657,7 @@ def _run_native_planner(
                 encoding="utf-8",
             )
             command = [str(mncs), "run-app", str(descriptor)]
+            command.extend(("--library", str(Path(__file__).resolve().parents[1] / "mncs" / "workspace" / "ravel")))
             for library in libraries:
                 command.extend(("--library", str(library)))
             command.extend(

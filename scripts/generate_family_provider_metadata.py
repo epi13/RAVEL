@@ -150,7 +150,7 @@ def render(binding_path: Path, declaration_path: Path) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--binding", type=Path, default=Path("src/ravel/generated/verification_plan.py")
+        "--binding", type=Path, default=Path("src/ravel/generated/verification_policy.py")
     )
     parser.add_argument(
         "--declaration", type=Path, default=Path("family-semantic-contracts-v1.json")

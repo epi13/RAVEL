@@ -33,8 +33,9 @@ CORPUS = MNCS_DIR / "corpus"
 # because stems no longer map 1:1 onto flat file names. Every module with an
 # executable corpus MUST appear here: the checker cross-verifies this table
 # against the workspace directory and fails when a module is omitted.
-# ravel.types.v1 is the only intentional exclusion — it declares shared
-# identity vocabulary with no entry-point functions and no corpus.
+# ravel.types.v1 is the shared identity vocabulary without an entry-point
+# corpus. The planning and verification policy modules are application-bound
+# integration surfaces exercised by their native planner tests.
 MODULES: dict[str, dict[str, object]] = {
     "core": {
         "module": "ravel.core.v1",
@@ -376,8 +377,10 @@ def main() -> int:
         return 0
 
     # Coverage cross-check: every workspace module with an executable corpus
-    # must be enumerated in MODULES. Only ravel.types.v1 (shared vocabulary,
-    # no entry points, no corpus) may be absent.
+    # must be enumerated in MODULES. Shared vocabulary and the application-bound
+    # planning module are intentionally exercised by their own integration
+    # fixtures because they import external family contracts rather than the
+    # standalone RAVEL workspace corpus.
     workspace_sources = sorted(
         path.name
         for path in (WORKSPACE / "ravel").glob("*.mncs")
@@ -387,7 +390,7 @@ def main() -> int:
     uncovered = [
         name
         for name in workspace_sources
-        if name not in covered_sources and name != "types.mncs"
+        if name not in covered_sources and name not in {"types.mncs", "planning.mncs", "verification_policy.mncs"}
     ]
     negative_ok, negative_detail = _negative_probe_ok(binary, str(library))
 
@@ -399,6 +402,7 @@ def main() -> int:
             "workspace_modules": workspace_sources,
             "covered": covered_sources,
             "uncovered": uncovered,
+            "application_bound": ["planning.mncs", "verification_policy.mncs"],
         },
         "negative_nominal_type": negative_detail,
         "modules": {},
