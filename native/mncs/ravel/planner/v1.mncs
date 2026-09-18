@@ -5,9 +5,8 @@ mncs 0.18;
 // Compiler-owned impact and inventory facts enter as complete Commons
 // contracts. RAVEL performs the bounded inventory join and calls the
 // language-owned selection policy directly in the same MNCS session. This
-// shadow boundary publishes the typed selection decision; host Python remains
-// the compatibility oracle while complete plan construction, graph routing,
-// identity publication, and source/provenance acquisition migrate.
+// The application publishes the complete canonical plan. Host Python may
+// retain a compatibility oracle, but it is not on the normal plan path.
 module mncs.ravel.planner.v1;
 
 use mncs.std.application.v1;
@@ -461,6 +460,7 @@ fn planner_app(context: ApplicationContext) -> (result: ApplicationExit)
     capability ravel_artifact
     capability ravel_digest
     effect structured_read authorized_by ravel_artifact
+    effect structured_read_identity authorized_by ravel_artifact
     effect structured_write authorized_by ravel_artifact
     effect structured_digest authorized_by ravel_digest
 {
@@ -469,7 +469,11 @@ fn planner_app(context: ApplicationContext) -> (result: ApplicationExit)
     }
     let request_schema: [byte; up_to 64] = [109, 110, 99, 115, 46, 114, 97, 118, 101, 108, 45, 112, 108, 97, 110, 110, 101, 114, 45, 114, 101, 113, 117, 101, 115, 116, 47, 49];
     let decision_schema: [byte; up_to 64] = [109, 110, 99, 115, 46, 114, 97, 118, 101, 108, 45, 115, 101, 108, 101, 99, 116, 105, 111, 110, 45, 100, 101, 99, 105, 115, 105, 111, 110, 47, 49];
-    let request: PlannerRequest = structured_read(context.argv[0], request_schema);
+    let request: PlannerRequest = structured_read_identity(
+        context.argv[0],
+        request_schema,
+        contracts.identity_extension_policy()
+    );
     let joinable: u64 = joinable_count(request);
     let complete: bool = join_complete(request, joinable);
     let decision: policy.SelectionDecision = select_decision(request, joinable, complete);

@@ -2,7 +2,7 @@
   "schema_version": "mncs.native-userland-status/1",
   "repository_id": "RAVEL",
   "status": "native_shadow",
-  "canonical_entrypoint": "ravel CLI (Python semantic planner; native planner is parity-validated shadow)",
+  "canonical_entrypoint": "ravel CLI → native ravel-planner application (host transport adapter retained)",
   "native_sources": {
     "impact-inventory-selection": "native/mncs/ravel/planner/v1.mncs",
     "verification-plan-construction-publication": "native/mncs/ravel/planner/v1.mncs"

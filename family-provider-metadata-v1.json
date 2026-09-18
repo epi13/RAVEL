@@ -2,15 +2,15 @@
   "schema_version": "commons.mncs.generated-provider-metadata/v1",
   "repository_id": "ravel",
   "authority": {
-    "kind": "language-owned-abi",
-    "module_identity": "mncs.family.verification_plan.v1",
-    "interface_identity": "f94b7e3760e955ce98d10cdbb2a20c1d9d3c038a80ec39b6c40fcc3c010596b9",
+    "kind": "native-application-descriptor",
+    "module_identity": "mncs.ravel.planner.v1",
+    "interface_identity": "d2750f59714347c8723fbe3986865bee062c9ba6f15cf5e11219b2730ff7fff8",
     "typed_call_schema_version": "mncs.typed-call/1",
-    "generator_version": "ravel-provider-facts/0.1",
-    "binding_content_identity": "bc2fd65cae024299fc6dbbf3db27d38be0f4a694cee8ec36ccc7559dec93382e",
-    "provider_fact_identity": "ed9b2ed7099c1c3853693a425cde02a07d247b727926f8440ab67639fbf9c526",
+    "generator_version": "ravel-native-provider-facts/0.1",
+    "binding_content_identity": "40b91cb5f036b154c7f99f5dfd26bbb602fa6f4e773ccd92b34d7112c4dfa973",
+    "provider_fact_identity": "fd37360af6636f0e32d74ebdee2d44da0bc1840fa76757c5f5cb416c59d1e21f",
     "evidence_digests": {
-      "src/ravel/impact.py": "988d467207db021a3cd9be6d7d882c2ba9af87e3ef1c08d72b0d2e902ad0283d"
+      "native/mncs/ravel/planner/v1.mncs": "8c918858fd0f6778b09689e8d3e55b547bce3a7c90f933827186451bfb57389d"
     }
   },
   "providers": [
@@ -18,7 +18,7 @@
       "contract_identity": "mncs.verification-plan/1",
       "contract_revision": "1",
       "exported_identity": "ravel:verification-plan",
-      "evidence": "src/ravel/impact.py"
+      "evidence": "native/mncs/ravel/planner/v1.mncs"
     }
   ]
 }
