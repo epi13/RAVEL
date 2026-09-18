@@ -337,7 +337,7 @@ fn build_plan(
         request.impact.cross_repository.coverage.unclassified_project_count
     );
     let provenance: contracts.ProvenanceContract = contracts.ProvenanceContract {
-        provider: [114, 97, 118, 101, 108],
+        provider: [114, 97, 118, 101, 108, 46, 118, 101, 114, 105, 102, 105, 99, 97, 116, 105, 111, 110, 95, 112, 111, 108, 105, 99, 121],
         policy: [98, 111, 117, 110, 100, 101, 100, 45, 105, 109, 112, 97, 99, 116, 45, 118, 49],
         compiler_impact_schema: contracts.semantic_impact_schema(),
         dependencies: contracts.ProvenanceDependencies {

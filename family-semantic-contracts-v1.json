@@ -7,7 +7,7 @@
       "contract_identity": "mncs.verification-plan/1",
       "contract_revision": "1",
       "exported_identity": "ravel:verification-plan",
-      "evidence": "src/ravel/impact.py"
+      "evidence": "mncs/workspace/ravel/verification_policy.mncs"
     }
   ],
   "consumes": [

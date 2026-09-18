@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+import json
 from pathlib import Path
 
 import generate_family_provider_metadata as generator
@@ -38,6 +39,17 @@ class ProviderMetadataTests(unittest.TestCase):
             )
             changed = generator.render(path, ROOT / "family-semantic-contracts-v1.json")
         self.assertNotEqual(changed, (ROOT / "family-provider-metadata-v1.json").read_text(encoding="utf-8"))
+
+    def test_provider_evidence_identifies_native_semantic_authority(self) -> None:
+        rendered = generator.render(
+            ROOT / "src/ravel/generated/verification_policy.py",
+            ROOT / "family-semantic-contracts-v1.json",
+        )
+        metadata = json.loads(rendered)
+        self.assertEqual(metadata["authority"]["kind"], "native-mncs-semantic-provider")
+        provider = metadata["providers"][0]
+        self.assertEqual(provider["evidence"], "mncs/workspace/ravel/verification_policy.mncs")
+        self.assertNotEqual(provider["evidence"], "src/ravel/impact.py")
 
 
 if __name__ == "__main__":

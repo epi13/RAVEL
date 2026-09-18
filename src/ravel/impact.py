@@ -60,6 +60,7 @@ except ImportError:  # direct script execution
 
 IMPACT_SCHEMA = "mncs.semantic-impact/1"
 PLAN_SCHEMA = "mncs.verification-plan/1"
+SEMANTIC_PROVIDER = "ravel.verification_policy"
 CHANGE_CLASSES = {
     "implementation",
     "public_contract",
@@ -478,7 +479,10 @@ def build_verification_plan(
             },
         },
         "provenance": {
-            "provider": "ravel",
+            # The native policy module is the semantic authority.  This
+            # Python module remains the transport/compatibility adapter around
+            # compiler and filesystem boundaries.
+            "provider": SEMANTIC_PROVIDER,
             "policy": "bounded-impact-v1",
             "compiler_impact_schema": IMPACT_SCHEMA,
             **(provenance or {}),

@@ -92,6 +92,7 @@ class Phase6NativePlannerTests(unittest.TestCase):
         self.assertIsInstance(plan["selection"]["level"], str)
         self.assertEqual(plan["proof"]["boundary"]["claimed_scope"], "direct_dependents")
         self.assertEqual(plan["plan_id"], plan_identity(plan, commons_root=COMMONS_ROOT))
+        self.assertEqual(plan["provenance"]["provider"], "ravel.verification_policy")
         validate_plan(plan, commons_root=COMMONS_ROOT)
 
     def test_native_complete_plan_matches_python_parity_oracle(self) -> None:

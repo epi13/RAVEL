@@ -2,15 +2,15 @@
   "schema_version": "commons.mncs.generated-provider-metadata/v1",
   "repository_id": "ravel",
   "authority": {
-    "kind": "language-owned-abi",
+    "kind": "native-mncs-semantic-provider",
     "module_identity": "ravel.verification_policy",
     "interface_identity": "fcc2f95662094ecb4f82dff8dee281d0a243907b5e79d1c69a8356be6c644bd1",
     "typed_call_schema_version": "mncs.typed-call/1",
     "generator_version": "ravel-provider-facts/0.1",
     "binding_content_identity": "d14688d8eb414b8a18525f09bcffcf2eddfb35638360e1e3a50b2f88981ff570",
-    "provider_fact_identity": "54609db83c2550c368a307c7fbda7164bd8801160b9b202efe8847ae8b9a6aa8",
+    "provider_fact_identity": "2cc59b030d8cfb62bbac147151f09ee1ba308c10b18a221038275f3a538b42d1",
     "evidence_digests": {
-      "src/ravel/impact.py": "4722675b5d87b3734a6aa735907c5e59fdf819d9041e6309708443ad6921e957"
+      "mncs/workspace/ravel/verification_policy.mncs": "3e2f53dcd9bcc3ca63d6661c9076b3121dd5ae7801051c46ca4dc98b5f85719d"
     }
   },
   "providers": [
@@ -18,7 +18,7 @@
       "contract_identity": "mncs.verification-plan/1",
       "contract_revision": "1",
       "exported_identity": "ravel:verification-plan",
-      "evidence": "src/ravel/impact.py"
+      "evidence": "mncs/workspace/ravel/verification_policy.mncs"
     }
   ]
 }

@@ -133,7 +133,7 @@ def render(binding_path: Path, declaration_path: Path) -> str:
         "schema_version": SCHEMA,
         "repository_id": "ravel",
         "authority": {
-            "kind": "language-owned-abi",
+            "kind": "native-mncs-semantic-provider",
             "module_identity": binding["MODULE_IDENTITY"],
             "interface_identity": binding["INTERFACE_IDENTITY"],
             "typed_call_schema_version": binding["TYPED_CALL_SCHEMA_VERSION"],
