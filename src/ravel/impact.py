@@ -20,7 +20,8 @@ import json
 import os
 import subprocess
 import sys
-from collections.abc import Sequence
+import tempfile
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -489,6 +490,202 @@ def build_verification_plan(
         raise ImpactError(str(error)) from error
 
 
+def _native_planner_request(
+    *,
+    impact_document: Mapping[str, Any],
+    inventory_document: Mapping[str, Any],
+    source_path: Path,
+    source_sha256: str,
+    cross_repository: bool,
+    change_class: str,
+    family_graph: dict[str, Any] | None,
+    commons_root: Path | None,
+    producer_repository: str,
+    contract_identity: str | None,
+) -> dict[str, Any]:
+    """Build only the typed transport envelope consumed by native RAVEL.
+
+    Compiler and Commons own the facts in this document. This adapter only
+    changes the compiler inventory's nested transport shape into the
+    Commons-owned ``TestInventoryContract`` shape; selection, escalation,
+    proof boundary, and plan identity are produced by ``planner_app``.
+    """
+
+    impact = validate_impact(dict(impact_document))
+    inventory, tests = _inventory_tests(dict(inventory_document))
+    family_scope_requested = (
+        cross_repository
+        or change_class == "cross_repository_contract"
+        or contract_identity is not None
+    )
+    if family_graph is None or not family_scope_requested:
+        no_registry_identity = sha256_bytes(b"no-family-registry-overlay")
+        cross_projection: dict[str, Any] = {
+            "graph_identity": sha256_bytes(b"no-cross-repository-overlay"),
+            "edges": [],
+            "selected_repositories": [],
+            "complete": not family_scope_requested,
+            "limitations": [
+                "cross-repository topology was not requested"
+                if not family_scope_requested
+                else "cross-repository topology was requested but no family overlay was supplied"
+            ],
+            "coverage": {
+                "registry_identity": no_registry_identity,
+                "registered_family_project_count": 0,
+                "classified_project_count": 0,
+                "semantic_graph_participant_count": 0,
+                "explicit_nonparticipant_count": 0,
+                "unclassified_project_count": 0,
+                "unclassified_repositories": [],
+                "coverage_status": "not_requested" if not family_scope_requested else "incomplete",
+                "topology_status": "not_requested" if not family_scope_requested else "unavailable",
+            },
+        }
+    else:
+        edges = consumers_for(
+            family_graph,
+            producer_repository=producer_repository,
+            contract_identity=contract_identity,
+            commons_root=commons_root,
+        )
+        coverage = family_graph.get("coverage", {})
+        if not isinstance(coverage, Mapping):
+            coverage = {}
+        cross_projection = {
+            "graph_identity": family_graph["graph_identity"],
+            "edges": edges,
+            "selected_repositories": sorted({edge["consumer_repository"] for edge in edges}),
+            "complete": bool(family_graph.get("complete")),
+            "limitations": list(family_graph.get("limitations", [])),
+            "coverage": {
+                "registry_identity": coverage.get("registry_identity") or sha256_bytes(b"missing-family-registry-coverage"),
+                "registered_family_project_count": coverage.get("registered_family_project_count", 0),
+                "classified_project_count": coverage.get("classified_project_count", 0),
+                "semantic_graph_participant_count": coverage.get("semantic_graph_participant_count", 0),
+                "explicit_nonparticipant_count": coverage.get("explicit_nonparticipant_count", 0),
+                "unclassified_project_count": coverage.get("unclassified_project_count", 0),
+                "unclassified_repositories": list(coverage.get("unclassified_repositories", [])),
+                "coverage_status": coverage.get("coverage_status", "incomplete"),
+                "topology_status": coverage.get("topology_status"),
+            },
+        }
+
+    return {
+        "source": {
+            "path": str(source_path.resolve()),
+            "sha256": source_sha256,
+            "subject_identity": str(inventory.get("subject_identity", "")),
+            "subject_fingerprint": str(inventory.get("subject_fingerprint", "0" * 64)),
+        },
+        "impact": {
+            "graph_identity": impact["graph_identity"],
+            "roots": impact["roots"],
+            "affected_count": impact["affected_count"],
+            "direct_dependents": impact["direct_dependents"],
+            "test_identities": impact["test_identities"],
+            "risk_flags": impact["risk_flags"],
+            "complete": impact["complete"],
+            "limitations": impact["limitations"],
+            "cross_repository": cross_projection,
+        },
+        "inventory": {
+            "subject_identity": inventory.get("subject_identity", ""),
+            "subject_fingerprint": inventory.get("subject_fingerprint", ""),
+            "test_case_identities": [test["test_case_identity"] for test in tests],
+        },
+        "cross_repository": cross_repository,
+        "change_class": change_class,
+    }
+
+
+def _run_native_planner(
+    *,
+    mncs: str,
+    source_path: Path,
+    impact_document: Mapping[str, Any],
+    inventory_document: Mapping[str, Any],
+    source_sha256: str,
+    cross_repository: bool,
+    change_class: str,
+    family_graph: dict[str, Any] | None,
+    commons_root: Path | None,
+    producer_repository: str,
+    contract_identity: str | None,
+    cwd: Path,
+    libraries: Sequence[Path],
+    timeout: float,
+) -> dict[str, Any]:
+    """Run the canonical native planner application through one host boundary."""
+
+    request = _native_planner_request(
+        impact_document=impact_document,
+        inventory_document=inventory_document,
+        source_path=source_path,
+        source_sha256=source_sha256,
+        cross_repository=cross_repository,
+        change_class=change_class,
+        family_graph=family_graph,
+        commons_root=commons_root,
+        producer_repository=producer_repository,
+        contract_identity=contract_identity,
+    )
+    descriptor = Path(__file__).resolve().parents[2] / "native-applications" / "ravel-planner.json"
+    if not descriptor.is_file():
+        raise ImpactError(f"native RAVEL planner descriptor is unavailable: {descriptor}")
+    try:
+        with tempfile.TemporaryDirectory(prefix=".ravel-native-", dir=cwd) as directory:
+            work = Path(directory)
+            request_path = work / "planner-request.json"
+            decision_path = work / "planner-decision.json"
+            plan_path = work / "verification-plan.json"
+            request_path.write_text(
+                json.dumps(request, separators=(",", ":"), ensure_ascii=False),
+                encoding="utf-8",
+            )
+            command = [str(mncs), "run-app", str(descriptor)]
+            for library in libraries:
+                command.extend(("--library", str(library)))
+            command.extend(
+                (
+                    "--grant-structured",
+                    "ravel_artifact",
+                    "--grant-structured",
+                    "ravel_digest",
+                    "--",
+                    os.path.relpath(request_path, cwd),
+                    os.path.relpath(decision_path, cwd),
+                    os.path.relpath(plan_path, cwd),
+                )
+            )
+            completed = subprocess.run(
+                command,
+                cwd=cwd,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=timeout,
+                stdin=subprocess.DEVNULL,
+            )
+            if completed.returncode != 0:
+                raise ImpactError(
+                    "native RAVEL planner failed: "
+                    + (completed.stderr.strip() or completed.stdout.strip() or f"exit {completed.returncode}")
+                )
+            try:
+                plan = json.loads(plan_path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+                raise ImpactError(f"native RAVEL planner produced no canonical plan: {error}") from error
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise ImpactError(f"native RAVEL planner unavailable: {error}") from error
+    if not isinstance(plan, dict):
+        raise ImpactError("native RAVEL planner returned a non-object plan")
+    try:
+        return validate_plan(plan, source_path=source_path, commons_root=commons_root)
+    except ValueError as error:
+        raise ImpactError(f"native RAVEL plan failed canonical validation: {error}") from error
+
+
 def _run_json(command: Sequence[str], *, cwd: Path, environment: dict[str, str], timeout: float) -> Any:
     try:
         process = subprocess.run(
@@ -591,6 +788,30 @@ def request_verification_plan(
             "valid": True,
             "inventory": {"tests": []},
         }
+    if impact_error is None and inventory_error is None:
+        try:
+            source_sha256 = sha256_bytes(source_path.read_bytes())
+        except OSError as error:
+            raise ImpactError(f"source is unavailable for native verification planning: {source_path}") from error
+        return _run_native_planner(
+            mncs=mncs,
+            source_path=source_path,
+            impact_document=impact_document,
+            inventory_document=inventory_document,
+            source_sha256=source_sha256,
+            cross_repository=cross_repository,
+            change_class=change_class,
+            family_graph=family_graph,
+            commons_root=commons_root,
+            producer_repository=producer_repository,
+            contract_identity=contract_identity,
+            cwd=base,
+            libraries=libraries,
+            timeout=timeout,
+        )
+    # Compiler acquisition failures remain an explicit compatibility/oracle
+    # path: it preserves the previous conservative escalation and records the
+    # failure in provenance. The normal successful path above is native-only.
     return build_verification_plan(
         impact_document,
         inventory_document,
