@@ -594,6 +594,7 @@ def _native_planner_request(
         }
 
     return {
+        "schema_version": "mncs.ravel-planner-request/1",
         "source": {
             "path": str(source_path.resolve()),
             "sha256": source_sha256,
@@ -758,7 +759,10 @@ def request_verification_plan(
     cwd: Path | None = None,
     max_depth: int = 4,
     max_nodes: int = 256,
-    timeout: float = 60.0,
+    # A native application invocation may include a cold compiler pass. Keep
+    # this boundary budget above the observed cold-start envelope while still
+    # allowing callers to impose a tighter explicit limit.
+    timeout: float = 180.0,
     change_class: str = "implementation",
     cross_repository: bool = False,
     family_graph_path: Path | None = None,
@@ -890,7 +894,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--cwd", type=Path)
     parser.add_argument("--max-depth", type=int, default=4)
     parser.add_argument("--max-nodes", type=int, default=256)
-    parser.add_argument("--timeout", type=float, default=60.0)
+    parser.add_argument("--timeout", type=float, default=180.0)
     parser.add_argument("--change-class", choices=sorted(CHANGE_CLASSES), default="implementation")
     parser.add_argument("--cross-repository", action="store_true")
     parser.add_argument("--family-graph", type=Path)
