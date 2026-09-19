@@ -1,9 +1,16 @@
 {
   "schema_version": "mncs-family.repository-manifest/v0alpha1",
   "repository": "ravel",
-  "revision": 1,
+  "revision": 3,
   "manifest_location": "in-repository",
   "authority": {"note": "RAVEL owns adaptive evidence strategy and scoped learning beneath MNCS/MNCDS authority; it cannot promote evidence."},
+  "organization": {
+    "layout": "mncs.repository-layout/1",
+    "surfaces": [
+      {"path": "src/ravel/", "class": "canonical", "authority": "ravel", "note": "Adaptive evidence strategy and compatibility orchestration; native planner/policy surfaces remain the canonical semantic path.", "classification": {"authority": "canonical", "lifecycle": "temporary", "boundary_kind": "none", "semantic_role": "canonical-host-semantic"}},
+      {"path": "src/ravel/impact.py", "class": "host-boundary", "note": "Filesystem/process transport around the native planner.", "classification": {"authority": "none", "lifecycle": "active", "boundary_kind": "process", "semantic_role": "platform-adapter"}}
+    ]
+  },
   "contracts": {
     "provides": [{"contract": "adaptive-evidence-strategy", "version": "1", "kind": "research-service", "stability": "experimental", "fingerprint_sources": ["src/ravel/", "mncs/"]}],
     "consumes": [],

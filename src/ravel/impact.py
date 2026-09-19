@@ -667,7 +667,7 @@ def _run_native_planner(
                 encoding="utf-8",
             )
             command = [str(mncs), "run-app", str(descriptor)]
-            command.extend(("--library", str(Path(__file__).resolve().parents[1] / "mncs" / "workspace" / "ravel")))
+            command.extend(("--library", str(Path(__file__).resolve().parents[2] / "mncs" / "workspace" / "ravel")))
             for library in libraries:
                 command.extend(("--library", str(library)))
             command.extend(

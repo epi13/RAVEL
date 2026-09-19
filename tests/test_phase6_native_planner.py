@@ -19,7 +19,12 @@ LANGUAGE_ROOT = Path(
         "/home/epi13/Documents/Projects/mncs-language",
     )
 )
-COMMONS_ROOT = Path("/home/epi13/Documents/Projects/MNCS-Commons")
+COMMONS_ROOT = Path(
+    os.environ.get(
+        "MNCS_COMMONS_ROOT",
+        "/home/epi13/Documents/Projects/MNCS-Commons",
+    )
+)
 
 
 def runtime() -> Path:
