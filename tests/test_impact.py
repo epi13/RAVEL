@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 from ravel.family_contract import load_family_graph
 from ravel.impact import (
+    ImpactError,
     _native_selection_policy,
     build_verification_plan,
     request_verification_plan,
@@ -246,6 +247,7 @@ class ImpactPlanTests(unittest.TestCase):
                     mncs="mncs",
                     roots=["mncs:fn:one"],
                     cwd=Path(directory),
+                    allow_python_oracle=True,
                 )
         self.assertEqual(plan["selection"]["level"], "repository_canonical")
         self.assertIn("impact_evidence_truncated", plan["selection"]["escalation_reasons"])
@@ -254,6 +256,24 @@ class ImpactPlanTests(unittest.TestCase):
         self.assertFalse(plan["proof"]["sufficient_to_stop"])
         self.assertFalse(plan["proof"]["boundary"]["established"])
         self.assertIsNotNone(plan["provenance"]["impact_provider_error"])
+
+    def test_normal_request_fails_closed_instead_of_using_python_semantics(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "source.mncs"
+            source.write_text("source", encoding="utf-8")
+            from subprocess import CompletedProcess
+
+            with patch(
+                "subprocess.run",
+                return_value=CompletedProcess(["mncs", "impact"], 2, "", "compiler unavailable"),
+            ):
+                with self.assertRaisesRegex(ImpactError, "Python semantic plan construction is disabled"):
+                    request_verification_plan(
+                        source_path=source,
+                        mncs="mncs",
+                        roots=["mncs:fn:one"],
+                        cwd=Path(directory),
+                    )
 
 
 if __name__ == "__main__":

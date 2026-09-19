@@ -1,7 +1,7 @@
 {
   "schema_version": "mncs.native-userland-status/1",
   "repository_id": "RAVEL",
-  "status": "hybrid",
+  "status": "native_authoritative",
   "canonical_entrypoint": "ravel CLI → rich MNCS workspace planning module (host transport adapter retained)",
   "native_sources": {
     "impact-inventory-selection": "mncs/workspace/ravel/planning.mncs",
@@ -12,9 +12,8 @@
     "planner": "native-applications/ravel-planner.json"
   },
   "native_shadow_slices": [
-    "semantic impact identities",
-    "verification-plan contract and exact selection semantics",
-    "complete plan proof boundary, provenance, graph coverage, and native identity publication"
+    "Python build_verification_plan differential oracle (explicit opt-in only)"
   ],
-  "next_migration_slice": "remove Python canonical plan construction after the native workspace module is the sole successful plan producer; retain Python only as transport/oracle code"
+  "next_migration_slice": "retain Python plan construction only as an explicit differential oracle; normal RAVEL requests fail closed when native compiler facts or planning are unavailable",
+  "python_oracle_entrypoint": "request_verification_plan(..., allow_python_oracle=True) or CLI --python-oracle"
 }

@@ -271,7 +271,12 @@ def build_verification_plan(
     policy_timeout: float = 60.0,
     provenance: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Join compiler evidence into a deterministic minimum-proof plan."""
+    """Build the Python differential oracle plan from compiler evidence.
+
+    The normal RAVEL path never calls this function.  It remains available
+    for explicit parity tests and offline compatibility diagnostics while the
+    native workspace planner is the semantic authority.
+    """
 
     if change_class not in CHANGE_CLASSES:
         raise ImpactError(f"unsupported change class: {change_class}")
@@ -760,6 +765,7 @@ def request_verification_plan(
     commons_root: Path | None = None,
     producer_repository: str = "ravel",
     contract_identity: str | None = None,
+    allow_python_oracle: bool = False,
 ) -> dict[str, Any]:
     if not roots:
         raise ImpactError("at least one changed semantic identity is required")
@@ -827,9 +833,24 @@ def request_verification_plan(
             libraries=libraries,
             timeout=timeout,
         )
-    # Compiler acquisition failures remain an explicit compatibility/oracle
-    # path: it preserves the previous conservative escalation and records the
-    # failure in provenance. The normal successful path above is native-only.
+    if not allow_python_oracle:
+        detail = "; ".join(
+            item
+            for item in (
+                str(impact_error) if impact_error is not None else "",
+                str(inventory_error) if inventory_error is not None else "",
+            )
+            if item
+        )
+        raise ImpactError(
+            "native RAVEL planning could not acquire compiler facts; "
+            "Python semantic plan construction is disabled on the normal path"
+            + (f": {detail}" if detail else "")
+            + "; pass allow_python_oracle=True only for differential tests"
+        )
+    # This is an explicit compatibility/differential-oracle path.  It
+    # preserves the conservative escalation and records the provider failure;
+    # it is never selected implicitly by a successful normal request.
     return build_verification_plan(
         impact_document,
         inventory_document,
@@ -876,6 +897,11 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--commons-root", type=Path)
     parser.add_argument("--repository", default="ravel")
     parser.add_argument("--contract-identity")
+    parser.add_argument(
+        "--python-oracle",
+        action="store_true",
+        help="explicitly use the Python differential oracle if compiler facts are unavailable",
+    )
     parser.add_argument("--output", type=Path)
     return parser
 
@@ -898,6 +924,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             commons_root=args.commons_root,
             producer_repository=args.repository,
             contract_identity=args.contract_identity,
+            allow_python_oracle=args.python_oracle,
         )
     except (ImpactError, OSError, ValueError) as error:
         print(json.dumps({"schema_version": PLAN_SCHEMA, "status": "UNKNOWN", "error": str(error)}, indent=2, sort_keys=True), file=sys.stderr)
