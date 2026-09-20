@@ -8,10 +8,10 @@
     "typed_call_schema_version": "mncs.typed-call/1",
     "generator_version": "ravel-provider-facts/0.1",
     "binding_content_identity": "d14688d8eb414b8a18525f09bcffcf2eddfb35638360e1e3a50b2f88981ff570",
-    "provider_fact_identity": "15152c1cc1b8b1506174593c5f2f59c9c1fb5c6ef046a11bacb7c84e59594a64",
+    "provider_fact_identity": "82e82fffcc8c0cbbce2141e0c76604e89b6cd9199e5549420b3b2ca35e8594b6",
     "evidence_digests": {
       "mncs/workspace/ravel/verification_policy.mncs": "3e2f53dcd9bcc3ca63d6661c9076b3121dd5ae7801051c46ca4dc98b5f85719d",
-      "src/ravel/obligations.py": "9dbf74b9143fe3e0760b85f7730c58231ca96138f365a5c7b6b7592e5a51c63d"
+      "src/ravel/obligations.py": "94cb41ec084ae48c61898fba49985f85e471f08715b7fefdf9725b5df3b8590d"
     }
   },
   "providers": [
