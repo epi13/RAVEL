@@ -8,12 +8,19 @@
     "typed_call_schema_version": "mncs.typed-call/1",
     "generator_version": "ravel-provider-facts/0.1",
     "binding_content_identity": "d14688d8eb414b8a18525f09bcffcf2eddfb35638360e1e3a50b2f88981ff570",
-    "provider_fact_identity": "2cc59b030d8cfb62bbac147151f09ee1ba308c10b18a221038275f3a538b42d1",
+    "provider_fact_identity": "15152c1cc1b8b1506174593c5f2f59c9c1fb5c6ef046a11bacb7c84e59594a64",
     "evidence_digests": {
-      "mncs/workspace/ravel/verification_policy.mncs": "3e2f53dcd9bcc3ca63d6661c9076b3121dd5ae7801051c46ca4dc98b5f85719d"
+      "mncs/workspace/ravel/verification_policy.mncs": "3e2f53dcd9bcc3ca63d6661c9076b3121dd5ae7801051c46ca4dc98b5f85719d",
+      "src/ravel/obligations.py": "9dbf74b9143fe3e0760b85f7730c58231ca96138f365a5c7b6b7592e5a51c63d"
     }
   },
   "providers": [
+    {
+      "contract_identity": "mncs.verification-obligation-plan/1",
+      "contract_revision": "1",
+      "exported_identity": "ravel:verification-obligation-plan",
+      "evidence": "src/ravel/obligations.py"
+    },
     {
       "contract_identity": "mncs.verification-plan/1",
       "contract_revision": "1",

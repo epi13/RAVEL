@@ -57,9 +57,15 @@ except ImportError:  # direct script execution
         SelectionInput,
     )
 
+try:
+    from .obligations import build_obligation_plan, load_current_evidence
+except ImportError:  # direct script execution
+    from obligations import build_obligation_plan, load_current_evidence
+
 
 IMPACT_SCHEMA = "mncs.semantic-impact/1"
 PLAN_SCHEMA = "mncs.verification-plan/1"
+OBLIGATION_PLAN_SCHEMA = "mncs.verification-obligation-plan/1"
 SEMANTIC_PROVIDER = "ravel.verification_policy"
 CHANGE_CLASSES = {
     "implementation",
@@ -73,6 +79,31 @@ CHANGE_CLASSES = {
     "language_profile",
     "cross_repository_contract",
 }
+GUARANTEE_DOMAINS = {
+    "semantic",
+    "parser_front_end",
+    "type_system",
+    "compiler",
+    "runtime",
+    "backend_portability",
+    "integration",
+    "family_contract",
+}
+CHANGE_KINDS = {
+    "private_implementation",
+    "public_contract",
+    "shared_type",
+    "parser_semantics",
+    "type_system",
+    "effect_capability",
+    "abi",
+    "runtime_semantics",
+    "backend_lowering",
+    "language_profile",
+    "canonical_fixture",
+    "cross_repository_contract",
+    "unknown",
+}
 class ImpactError(ValueError):
     """Impact evidence or plan input was malformed or unavailable."""
 
@@ -85,6 +116,24 @@ def _strings(value: Any, field: str) -> list[str]:
     if not isinstance(value, list) or not all(isinstance(item, str) and item for item in value):
         raise ImpactError(f"{field} must be a list of non-empty strings")
     return sorted(set(value))
+
+
+def _ordered_strings(value: Any, field: str) -> list[str]:
+    """Validate an ordered compiler classification without rewriting it.
+
+    Classification arrays are compiler-owned facts transported through the
+    native planner.  Their order is part of the parity surface, so preserve
+    the first occurrence while still rejecting empty values and duplicates.
+    """
+
+    if not isinstance(value, list) or not all(isinstance(item, str) and item for item in value):
+        raise ImpactError(f"{field} must be a list of non-empty strings")
+    result: list[str] = []
+    for item in value:
+        if item in result:
+            continue
+        result.append(item)
+    return result
 
 
 def validate_impact(document: Any) -> dict[str, Any]:
@@ -109,6 +158,41 @@ def validate_impact(document: Any) -> dict[str, Any]:
     result["test_identities"] = _strings(document["test_identities"], "impact test_identities")
     result["risk_flags"] = _strings(document["risk_flags"], "impact risk_flags")
     result["limitations"] = _strings(document["limitations"], "impact limitations")
+    guarantee_domains = document.get("guarantee_domains")
+    if guarantee_domains is None:
+        guarantee_domains = ["semantic"] if not result["risk_flags"] else []
+        if "shared_type" in result["risk_flags"]:
+            guarantee_domains.extend(["type_system", "compiler", "runtime", "backend_portability"])
+        if "public_contract" in result["risk_flags"]:
+            guarantee_domains.extend(["semantic", "compiler", "family_contract", "integration"])
+        if "effect_semantics" in result["risk_flags"]:
+            guarantee_domains.extend(["semantic", "runtime", "integration"])
+        if "abi_boundary" in result["risk_flags"]:
+            guarantee_domains.extend(["compiler", "runtime", "backend_portability"])
+        if "unknown_root" in result["risk_flags"] or "truncated" in result["risk_flags"]:
+            guarantee_domains.extend(["compiler", "integration"])
+    result["guarantee_domains"] = _ordered_strings(guarantee_domains, "impact guarantee_domains")
+    unknown_domains = sorted(set(result["guarantee_domains"]) - GUARANTEE_DOMAINS)
+    if unknown_domains:
+        raise ImpactError(f"impact guarantee_domains contain unsupported values: {unknown_domains}")
+    change_kinds = document.get("change_kinds")
+    if change_kinds is None:
+        change_kinds = ["unknown"] if ("unknown_root" in result["risk_flags"] or not result["complete"]) else ["private_implementation"]
+        if "public_contract" in result["risk_flags"]:
+            change_kinds.append("public_contract")
+        if "shared_type" in result["risk_flags"]:
+            change_kinds.append("shared_type")
+        if "effect_semantics" in result["risk_flags"]:
+            change_kinds.append("effect_capability")
+        if "abi_boundary" in result["risk_flags"]:
+            change_kinds.append("abi")
+    result["change_kinds"] = _ordered_strings(change_kinds, "impact change_kinds")
+    unknown_kinds = sorted(set(result["change_kinds"]) - CHANGE_KINDS)
+    if unknown_kinds:
+        raise ImpactError(f"impact change_kinds contain unsupported values: {unknown_kinds}")
+    result["classification_schema_version"] = document.get(
+        "classification_schema_version", "mncs.semantic-impact-classification/1"
+    )
     result["affected_count"] = len(nodes)
     return result
 
@@ -438,6 +522,9 @@ def build_verification_plan(
             "direct_dependents": impact["direct_dependents"],
             "test_identities": impact["test_identities"],
             "risk_flags": impact["risk_flags"],
+            "guarantee_domains": impact["guarantee_domains"],
+            "change_kinds": impact["change_kinds"],
+            "classification_schema_version": impact["classification_schema_version"],
             "complete": impact["complete"],
             "limitations": impact["limitations"],
             "cross_repository": cross_repository_projection,
@@ -608,6 +695,9 @@ def _native_planner_request(
             "direct_dependents": impact["direct_dependents"],
             "test_identities": impact["test_identities"],
             "risk_flags": impact["risk_flags"],
+            "guarantee_domains": impact["guarantee_domains"],
+            "change_kinds": impact["change_kinds"],
+            "classification_schema_version": impact["classification_schema_version"],
             "complete": impact["complete"],
             "limitations": impact["limitations"],
             "cross_repository": cross_projection,
@@ -770,6 +860,9 @@ def request_verification_plan(
     producer_repository: str = "ravel",
     contract_identity: str | None = None,
     allow_python_oracle: bool = False,
+    obligation_inventory_path: Path | None = None,
+    current_evidence_path: Path | None = None,
+    obligation_output_path: Path | None = None,
 ) -> dict[str, Any]:
     if not roots:
         raise ImpactError("at least one changed semantic identity is required")
@@ -821,7 +914,7 @@ def request_verification_plan(
             source_sha256 = sha256_bytes(source_path.read_bytes())
         except OSError as error:
             raise ImpactError(f"source is unavailable for native verification planning: {source_path}") from error
-        return _run_native_planner(
+        plan = _run_native_planner(
             mncs=mncs,
             source_path=source_path,
             impact_document=impact_document,
@@ -837,6 +930,18 @@ def request_verification_plan(
             libraries=libraries,
             timeout=timeout,
         )
+        _write_obligation_plan_if_requested(
+            plan,
+            impact_document=impact_document,
+            compiler_inventory_document=inventory_document,
+            source_path=source_path,
+            obligation_inventory_path=obligation_inventory_path,
+            current_evidence_path=current_evidence_path,
+            obligation_output_path=obligation_output_path,
+            cwd=base,
+            commons_root=commons_root,
+        )
+        return plan
     if not allow_python_oracle:
         detail = "; ".join(
             item
@@ -855,7 +960,7 @@ def request_verification_plan(
     # This is an explicit compatibility/differential-oracle path.  It
     # preserves the conservative escalation and records the provider failure;
     # it is never selected implicitly by a successful normal request.
-    return build_verification_plan(
+    plan = build_verification_plan(
         impact_document,
         inventory_document,
         source_path=source_path,
@@ -883,6 +988,59 @@ def request_verification_plan(
             "inventory_provider_error": str(inventory_error) if inventory_error is not None else None,
         },
     )
+    _write_obligation_plan_if_requested(
+        plan,
+        impact_document=impact_document,
+        compiler_inventory_document=inventory_document,
+        source_path=source_path,
+        obligation_inventory_path=obligation_inventory_path,
+        current_evidence_path=current_evidence_path,
+        obligation_output_path=obligation_output_path,
+        cwd=base,
+        commons_root=commons_root,
+    )
+    return plan
+
+
+def _write_obligation_plan_if_requested(
+    verification_plan: Mapping[str, Any],
+    *,
+    impact_document: Mapping[str, Any],
+    compiler_inventory_document: Mapping[str, Any],
+    source_path: Path,
+    obligation_inventory_path: Path | None,
+    current_evidence_path: Path | None,
+    obligation_output_path: Path | None,
+    cwd: Path,
+    commons_root: Path | None,
+) -> dict[str, Any] | None:
+    if obligation_inventory_path is None and obligation_output_path is None:
+        return None
+    inventory_path = obligation_inventory_path or (cwd / ".mncs" / "verification-obligations.json")
+    try:
+        obligation_inventory_document = json.loads(inventory_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ImpactError(f"verification obligation inventory is unavailable: {inventory_path}: {error}") from error
+    enriched_plan = dict(verification_plan)
+    enriched_plan["impact"] = {
+        **dict(verification_plan.get("impact", {})),
+        "guarantee_domains": list(impact_document.get("guarantee_domains", [])),
+        "change_kinds": list(impact_document.get("change_kinds", [])),
+    }
+    obligation_plan = build_obligation_plan(
+        enriched_plan,
+        obligation_inventory_document,
+        source_path=source_path,
+        compiler_inventory=compiler_inventory_document,
+        current_evidence=load_current_evidence(current_evidence_path),
+        commons_root=commons_root,
+    )
+    if obligation_output_path is not None:
+        output_path = obligation_output_path if obligation_output_path.is_absolute() else cwd / obligation_output_path
+        output_path = output_path.resolve()
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(json.dumps(obligation_plan, indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
+    return obligation_plan
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -901,6 +1059,21 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--commons-root", type=Path)
     parser.add_argument("--repository", default="ravel")
     parser.add_argument("--contract-identity")
+    parser.add_argument(
+        "--obligation-inventory",
+        type=Path,
+        help="repository-owned mncs-family.verification-obligation-inventory/v1",
+    )
+    parser.add_argument(
+        "--current-evidence",
+        type=Path,
+        help="identity-bound evidence records available for reuse",
+    )
+    parser.add_argument(
+        "--obligation-output",
+        type=Path,
+        help="write the companion mncs.verification-obligation-plan/1 document",
+    )
     parser.add_argument(
         "--python-oracle",
         action="store_true",
@@ -929,6 +1102,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             producer_repository=args.repository,
             contract_identity=args.contract_identity,
             allow_python_oracle=args.python_oracle,
+            obligation_inventory_path=args.obligation_inventory,
+            current_evidence_path=args.current_evidence,
+            obligation_output_path=args.obligation_output,
         )
     except (ImpactError, OSError, ValueError) as error:
         print(json.dumps({"schema_version": PLAN_SCHEMA, "status": "UNKNOWN", "error": str(error)}, indent=2, sort_keys=True), file=sys.stderr)

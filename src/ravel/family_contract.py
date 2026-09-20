@@ -109,6 +109,44 @@ def _commons_module_from_graph(*, commons_root: Path | None = None) -> ModuleTyp
     return module
 
 
+def _commons_obligation_module(*, commons_root: Path | None = None) -> ModuleType:
+    verification_module = _commons_module(commons_root=commons_root)
+    module_path = Path(verification_module.__file__).with_name("obligation_plan.py")
+    name = _module_name("_mncs_commons_obligation_plan_canonical", module_path)
+    existing = sys.modules.get(name)
+    if existing is not None:
+        return existing
+    if not module_path.is_file():
+        raise RuntimeError(f"canonical MNCS-Commons obligation-plan contract is unavailable: {module_path}")
+    spec = importlib.util.spec_from_file_location(name, module_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load canonical obligation-plan module: {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def validate_obligation_inventory(
+    value: Any, *, commons_root: Path | None = None, repository: str | None = None
+) -> dict[str, Any]:
+    return _commons_obligation_module(commons_root=commons_root).validate_inventory(
+        value, repository=repository
+    )
+
+
+def obligation_inventory_identity(value: Mapping[str, Any], *, commons_root: Path | None = None) -> str:
+    return _commons_obligation_module(commons_root=commons_root).inventory_identity(value)
+
+
+def obligation_plan_identity(value: Mapping[str, Any], *, commons_root: Path | None = None) -> str:
+    return _commons_obligation_module(commons_root=commons_root).obligation_plan_identity(value)
+
+
+def validate_obligation_plan(value: Any, *, commons_root: Path | None = None) -> dict[str, Any]:
+    return _commons_obligation_module(commons_root=commons_root).validate_obligation_plan(value)
+
+
 def consumers_for(
     graph: Mapping[str, Any],
     *,
