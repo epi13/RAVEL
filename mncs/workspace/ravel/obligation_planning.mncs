@@ -1,0 +1,666 @@
+mncs 0.18;
+
+// Native RAVEL obligation/evidence join.
+//
+// The caller supplies compiler-owned impact facts, a validated Commons
+// obligation inventory, compiler test declarations, and current evidence.
+// This module owns lifecycle selection, impact matching, evidence freshness /
+// contradiction classification, test-case joining, and stop sufficiency.
+// Python remains a JSON/file/process adapter and an explicit differential
+// oracle only.
+module ravel.obligation_planning;
+
+use mncs.std.application.v1;
+use mncs.core.sequences.v1 as sequences;
+use mncs.commons.family.obligations.v1 as contracts;
+use mncs.commons.family.contracts.v1 as family_contracts;
+
+record PlannerRequest {
+    schema_version: [byte; up_to 64],
+    inventory_identity: [byte; up_to 1024],
+    subject_identity: [byte; up_to 1024],
+    subject_fingerprint: [byte; up_to 1024],
+    proof_sufficient_to_stop: bool,
+    boundary: [byte; up_to 1024],
+    impact_roots: [[byte; up_to 1024]; up_to 256],
+    impact_direct_dependents: [[byte; up_to 1024]; up_to 256],
+    impact_test_identities: [[byte; up_to 1024]; up_to 256],
+    impact_node_identities: [[byte; up_to 1024]; up_to 256],
+    impact_guarantee_domains: [[byte; up_to 1024]; up_to 16],
+    selection_escalation_reasons: [[byte; up_to 1024]; up_to 64],
+    obligations: [contracts.ObligationFact; up_to 256],
+    compiler_tests: [contracts.CompilerTestFact; up_to 256],
+    evidence: [contracts.EvidenceFact; up_to 256]
+}
+
+record EvidenceScan {
+    related_count: u64,
+    exact_count: u64,
+    pass_seen: bool,
+    fail_seen: bool,
+    unknown_seen: bool,
+    evidence_identities: sequences.ByteViewBuilder256
+}
+
+record EvidenceResult {
+    status: contracts.ObligationStatus,
+    reason: [byte; up_to 1024],
+    evidence_identities: [[byte; up_to 1024]; up_to 256]
+}
+
+record ObligationEvaluation {
+    status: contracts.ObligationStatus,
+    reason: [byte; up_to 1024],
+    evidence_identities: [[byte; up_to 1024]; up_to 256],
+    test_case_identities: [[byte; up_to 1024]; up_to 256]
+}
+
+record SelectedBuilder {
+    values: [contracts.SelectedObligation; 256],
+    length: u64
+}
+
+record ExcludedBuilder {
+    values: [contracts.ExcludedObligation; 256],
+    length: u64
+}
+
+record PlanFold {
+    selected: SelectedBuilder,
+    excluded: ExcludedBuilder,
+    required: sequences.ByteViewBuilder256,
+    new_execution: sequences.ByteViewBuilder256,
+    reasons: sequences.ByteViewBuilder64,
+    selected_count: u64,
+    blocked_selection: bool,
+    blocked_stale: bool,
+    blocked_contradictory: bool,
+    blocked_escalation: bool,
+    blocked_plan: bool
+}
+
+fn empty_executor() -> (result: contracts.ObligationExecutor) {
+    return contracts.ObligationExecutor {
+        provider: [0; 0],
+        kind: contracts.ExecutorKind.external_integration,
+        entrypoint: [0; 0],
+        declaration_identities: [[0; 0]; 64],
+        test_case_identities: [[0; 0]; 64]
+    };
+}
+
+fn empty_selected() -> (result: contracts.SelectedObligation) {
+    return contracts.SelectedObligation {
+        identity: [0; 0],
+        status: contracts.ObligationStatus.required,
+        lifecycle: contracts.ObligationLifecycle.permanent,
+        guarantee_domain: contracts.GuaranteeDomain.semantic,
+        evidence_role: contracts.EvidenceRole.canonical_regression,
+        reason: [0; 0],
+        evidence_identities: [[0; 0]; 256],
+        test_case_identities: [[0; 0]; 256],
+        executor: empty_executor()
+    };
+}
+
+fn empty_excluded() -> (result: contracts.ExcludedObligation) {
+    return contracts.ExcludedObligation {
+        identity: [0; 0],
+        lifecycle: contracts.ObligationLifecycle.permanent,
+        reason: [0; 0]
+    };
+}
+
+fn selected_empty() -> (result: SelectedBuilder) {
+    return SelectedBuilder { values: [empty_selected(); 256], length: 0 };
+}
+
+fn excluded_empty() -> (result: ExcludedBuilder) {
+    return ExcludedBuilder { values: [empty_excluded(); 256], length: 0 };
+}
+
+fn selected_push(
+    builder: SelectedBuilder,
+    value: contracts.SelectedObligation,
+    include: bool
+) -> (result: SelectedBuilder) {
+    if !include || builder.length >= 256 {
+        return builder;
+    }
+    return SelectedBuilder {
+        values: replace(builder.values, builder.length, value),
+        length: builder.length +% 1
+    };
+}
+
+fn excluded_push(
+    builder: ExcludedBuilder,
+    value: contracts.ExcludedObligation,
+    include: bool
+) -> (result: ExcludedBuilder) {
+    if !include || builder.length >= 256 {
+        return builder;
+    }
+    return ExcludedBuilder {
+        values: replace(builder.values, builder.length, value),
+        length: builder.length +% 1
+    };
+}
+
+fn contains_identity64(
+    values: [[byte; up_to 1024]; up_to 64],
+    candidate: [byte; up_to 1024]
+) -> (result: bool) {
+    iterate i over values carrying found: bool = false {
+        next found = found || sequences.equals_byte_view<1024>(values[i], candidate);
+    }
+    return found;
+}
+
+fn contains_identity256(
+    values: [[byte; up_to 1024]; up_to 256],
+    candidate: [byte; up_to 1024]
+) -> (result: bool) {
+    iterate i over values carrying found: bool = false {
+        next found = found || sequences.equals_byte_view<1024>(values[i], candidate);
+    }
+    return found;
+}
+
+fn contains_builder256(
+    builder: sequences.ByteViewBuilder256,
+    candidate: [byte; up_to 1024]
+) -> (result: bool) {
+    iterate i over builder.values carrying found: bool = false {
+        next found = found || (i < builder.length && sequences.equals_byte_view<1024>(builder.values[i], candidate));
+    }
+    return found;
+}
+
+fn contains_builder64(
+    builder: sequences.ByteViewBuilder64,
+    candidate: [byte; up_to 1024]
+) -> (result: bool) {
+    iterate i over builder.values carrying found: bool = false {
+        next found = found || (i < builder.length && sequences.equals_byte_view<1024>(builder.values[i], candidate));
+    }
+    return found;
+}
+
+fn push_unique256(
+    builder: sequences.ByteViewBuilder256,
+    value: [byte; up_to 1024],
+    include: bool
+) -> (result: sequences.ByteViewBuilder256) {
+    return sequences.byte_view_builder_push(
+        builder,
+        value,
+        include && value.len > 0 && !contains_builder256(builder, value)
+    );
+}
+
+fn push_unique64(
+    builder: sequences.ByteViewBuilder64,
+    value: [byte; up_to 1024],
+    include: bool
+) -> (result: sequences.ByteViewBuilder64) {
+    return sequences.byte_view_builder64_push(
+        builder,
+        value,
+        include && value.len > 0 && !contains_builder64(builder, value)
+    );
+}
+
+fn intersects256(
+    left: [[byte; up_to 1024]; up_to 256],
+    right: [[byte; up_to 1024]; up_to 256]
+) -> (result: bool) {
+    iterate i over left carrying found: bool = false {
+        next found = found || contains_identity256(right, left[i]);
+    }
+    return found;
+}
+
+fn wildcard(values: [[byte; up_to 1024]; up_to 256]) -> (result: bool) {
+    return contains_identity256(values, [42]);
+}
+
+fn domain_label(value: contracts.GuaranteeDomain) -> (result: [byte; up_to 1024]) {
+    return match value {
+        contracts.GuaranteeDomain.semantic => [115, 101, 109, 97, 110, 116, 105, 99],
+        contracts.GuaranteeDomain.parser_front_end => [112, 97, 114, 115, 101, 114, 95, 102, 114, 111, 110, 116, 95, 101, 110, 100],
+        contracts.GuaranteeDomain.type_system => [116, 121, 112, 101, 95, 115, 121, 115, 116, 101, 109],
+        contracts.GuaranteeDomain.compiler => [99, 111, 109, 112, 105, 108, 101, 114],
+        contracts.GuaranteeDomain.runtime => [114, 117, 110, 116, 105, 109, 101],
+        contracts.GuaranteeDomain.backend_portability => [98, 97, 99, 107, 101, 110, 100, 95, 112, 111, 114, 116, 97, 98, 105, 108, 105, 116, 121],
+        contracts.GuaranteeDomain.integration => [105, 110, 116, 101, 103, 114, 97, 116, 105, 111, 110],
+        contracts.GuaranteeDomain.family_contract => [102, 97, 109, 105, 108, 121, 95, 99, 111, 110, 116, 114, 97, 99, 116]
+    };
+}
+
+fn domain_matches(
+    domains: [[byte; up_to 1024]; up_to 16],
+    domain: contracts.GuaranteeDomain
+) -> (result: bool) {
+    let expected: [byte; up_to 1024] = domain_label(domain);
+    iterate i over domains carrying found: bool = false {
+        next found = found || sequences.equals_byte_view<1024>(domains[i], expected);
+    }
+    return found;
+}
+
+fn lifecycle_active(value: contracts.ObligationLifecycle) -> (result: bool) {
+    return contracts.lifecycle_is_active(value);
+}
+
+fn lifecycle_ordinary_excluded(value: contracts.ObligationLifecycle) -> (result: bool) {
+    return contracts.lifecycle_is_ordinary_excluded(value);
+}
+
+fn matches_impact(
+    obligation: contracts.ObligationFact,
+    request: PlannerRequest
+) -> (result: bool) {
+    let direct_match: bool = intersects256(obligation.subjects, request.impact_roots)
+        || intersects256(obligation.subjects, request.impact_direct_dependents)
+        || intersects256(obligation.subjects, request.impact_test_identities)
+        || intersects256(obligation.subjects, request.impact_node_identities)
+        || intersects256(obligation.invalidation_dependencies, request.impact_roots)
+        || intersects256(obligation.invalidation_dependencies, request.impact_direct_dependents)
+        || intersects256(obligation.invalidation_dependencies, request.impact_test_identities)
+        || intersects256(obligation.invalidation_dependencies, request.impact_node_identities);
+    return wildcard(obligation.subjects)
+        || wildcard(obligation.invalidation_dependencies)
+        || direct_match
+        || (domain_matches(request.impact_guarantee_domains, obligation.guarantee_domain)
+            && (request.impact_roots.len > 0
+                || request.impact_direct_dependents.len > 0
+                || request.impact_test_identities.len > 0
+                || request.impact_node_identities.len > 0));
+}
+
+fn evidence_status_pass(value: contracts.EvidenceVerdict) -> (result: bool) {
+    return match value {
+        contracts.EvidenceVerdict.PASS => true,
+        contracts.EvidenceVerdict.FAIL => false,
+        contracts.EvidenceVerdict.UNKNOWN => false
+    };
+}
+
+fn evidence_status_fail(value: contracts.EvidenceVerdict) -> (result: bool) {
+    return match value {
+        contracts.EvidenceVerdict.PASS => false,
+        contracts.EvidenceVerdict.FAIL => true,
+        contracts.EvidenceVerdict.UNKNOWN => false
+    };
+}
+
+fn evidence_status_unknown(value: contracts.EvidenceVerdict) -> (result: bool) {
+    return match value {
+        contracts.EvidenceVerdict.PASS => false,
+        contracts.EvidenceVerdict.FAIL => false,
+        contracts.EvidenceVerdict.UNKNOWN => true
+    };
+}
+
+fn status_is_stale(value: contracts.ObligationStatus) -> (result: bool) {
+    return match value {
+        contracts.ObligationStatus.required => false,
+        contracts.ObligationStatus.current => false,
+        contracts.ObligationStatus.new_execution_required => false,
+        contracts.ObligationStatus.stale => true,
+        contracts.ObligationStatus.contradictory => false,
+        contracts.ObligationStatus.selection_unresolved => false,
+        contracts.ObligationStatus.escalation_required => false,
+        contracts.ObligationStatus.not_selected => false
+    };
+}
+
+fn status_is_contradictory(value: contracts.ObligationStatus) -> (result: bool) {
+    return match value {
+        contracts.ObligationStatus.required => false,
+        contracts.ObligationStatus.current => false,
+        contracts.ObligationStatus.new_execution_required => false,
+        contracts.ObligationStatus.stale => false,
+        contracts.ObligationStatus.contradictory => true,
+        contracts.ObligationStatus.selection_unresolved => false,
+        contracts.ObligationStatus.escalation_required => false,
+        contracts.ObligationStatus.not_selected => false
+    };
+}
+
+fn status_is_escalation(value: contracts.ObligationStatus) -> (result: bool) {
+    return match value {
+        contracts.ObligationStatus.required => false,
+        contracts.ObligationStatus.current => false,
+        contracts.ObligationStatus.new_execution_required => false,
+        contracts.ObligationStatus.stale => false,
+        contracts.ObligationStatus.contradictory => false,
+        contracts.ObligationStatus.selection_unresolved => false,
+        contracts.ObligationStatus.escalation_required => true,
+        contracts.ObligationStatus.not_selected => false
+    };
+}
+
+fn status_is_selection_unresolved(value: contracts.ObligationStatus) -> (result: bool) {
+    return match value {
+        contracts.ObligationStatus.required => false,
+        contracts.ObligationStatus.current => false,
+        contracts.ObligationStatus.new_execution_required => false,
+        contracts.ObligationStatus.stale => false,
+        contracts.ObligationStatus.contradictory => false,
+        contracts.ObligationStatus.selection_unresolved => true,
+        contracts.ObligationStatus.escalation_required => false,
+        contracts.ObligationStatus.not_selected => false
+    };
+}
+
+fn status_needs_execution(value: contracts.ObligationStatus) -> (result: bool) {
+    return contracts.status_requires_execution(value);
+}
+
+fn is_native_test_executor(value: contracts.ExecutorKind) -> (result: bool) {
+    return contracts.executor_is_native_test(value);
+}
+
+fn evidence_exact(
+    evidence: contracts.EvidenceFact,
+    request: PlannerRequest
+) -> (result: bool) {
+    let subject_matches: bool = request.subject_identity.len == 0
+        || evidence.subject_identity.len == 0
+        || sequences.equals_byte_view<1024>(evidence.subject_identity, request.subject_identity);
+    let fingerprint_matches: bool = request.subject_fingerprint.len == 0
+        || evidence.subject_fingerprint.len == 0
+        || sequences.equals_byte_view<1024>(evidence.subject_fingerprint, request.subject_fingerprint);
+    let definition_matches: bool = evidence.definition_identity.len == 0
+        || sequences.equals_byte_view<1024>(evidence.definition_identity, request.inventory_identity);
+    return subject_matches && fingerprint_matches && definition_matches;
+}
+
+fn evidence_state(
+    obligation_identity: [byte; up_to 1024],
+    request: PlannerRequest
+) -> (result: EvidenceResult) {
+    let seed: EvidenceScan = EvidenceScan {
+        related_count: 0,
+        exact_count: 0,
+        pass_seen: false,
+        fail_seen: false,
+        unknown_seen: false,
+        evidence_identities: sequences.byte_view_builder_empty()
+    };
+    iterate i over request.evidence carrying scan: EvidenceScan = seed {
+        let item: contracts.EvidenceFact = request.evidence[i];
+        let related: bool = sequences.equals_byte_view<1024>(item.obligation_identity, obligation_identity);
+        let exact: bool = related && evidence_exact(item, request);
+        next scan = EvidenceScan {
+            related_count: scan.related_count +% select(related, 1, 0),
+            exact_count: scan.exact_count +% select(exact, 1, 0),
+            pass_seen: scan.pass_seen || (exact && evidence_status_pass(item.status)),
+            fail_seen: scan.fail_seen || (exact && evidence_status_fail(item.status)),
+            unknown_seen: scan.unknown_seen || (exact && evidence_status_unknown(item.status)),
+            evidence_identities: push_unique256(scan.evidence_identities, item.evidence_identity, exact)
+        };
+    }
+    let identities: [[byte; up_to 1024]; up_to 256] = sequences.byte_view_builder_finish(scan.evidence_identities);
+    if scan.related_count == 0 {
+        return EvidenceResult {
+            status: contracts.ObligationStatus.new_execution_required,
+            reason: [110, 111, 32, 105, 100, 101, 110, 116, 105, 116, 121, 45, 98, 111, 117, 110, 100, 32, 101, 118, 105, 100, 101, 110, 99, 101, 32, 105, 115, 32, 97, 118, 97, 105, 108, 97, 98, 108, 101],
+            evidence_identities: identities
+        };
+    }
+    if scan.exact_count > 0 && (scan.pass_seen && (scan.fail_seen || scan.unknown_seen) || scan.fail_seen && scan.unknown_seen) {
+        return EvidenceResult {
+            status: contracts.ObligationStatus.contradictory,
+            reason: [105, 100, 101, 110, 116, 105, 116, 121, 45, 98, 111, 117, 110, 100, 32, 101, 118, 105, 100, 101, 110, 99, 101, 32, 104, 97, 115, 32, 99, 111, 110, 116, 114, 97, 100, 105, 99, 116, 111, 114, 121, 32, 118, 101, 101, 114, 100, 105, 99, 116, 115],
+            evidence_identities: identities
+        };
+    }
+    if scan.exact_count > 0 && scan.pass_seen && !scan.fail_seen && !scan.unknown_seen {
+        return EvidenceResult {
+            status: contracts.ObligationStatus.current,
+            reason: [99, 117, 114, 114, 101, 110, 116, 32, 105, 100, 101, 110, 116, 105, 116, 121, 45, 98, 111, 117, 110, 100, 32, 80, 65, 83, 83, 32, 101, 118, 105, 100, 101, 110, 99, 101, 32, 99, 97, 110, 32, 98, 101, 32, 114, 101, 117, 115, 101, 100],
+            evidence_identities: identities
+        };
+    }
+    if scan.exact_count > 0 && scan.fail_seen {
+        return EvidenceResult {
+            status: contracts.ObligationStatus.escalation_required,
+            reason: [99, 117, 114, 114, 101, 110, 116, 32, 105, 100, 101, 110, 116, 105, 116, 121, 45, 98, 111, 117, 110, 100, 32, 101, 118, 105, 100, 101, 110, 99, 101, 32, 105, 115, 32, 70, 65, 73, 76],
+            evidence_identities: identities
+        };
+    }
+    if scan.exact_count > 0 && scan.unknown_seen {
+        return EvidenceResult {
+            status: contracts.ObligationStatus.escalation_required,
+            reason: [99, 117, 114, 114, 101, 110, 116, 32, 105, 100, 101, 110, 116, 105, 116, 121, 45, 98, 111, 117, 110, 100, 32, 101, 118, 105, 100, 101, 110, 99, 101, 32, 105, 115, 32, 85, 78, 75, 78, 79, 87, 78],
+            evidence_identities: identities
+        };
+    }
+    return EvidenceResult {
+        status: contracts.ObligationStatus.stale,
+        reason: [101, 118, 105, 100, 101, 110, 99, 101, 32, 101, 120, 105, 115, 116, 115, 32, 98, 117, 116, 32, 105, 116, 115, 32, 115, 117, 98, 106, 101, 99, 116, 32, 111, 114, 32, 100, 101, 102, 105, 110, 105, 116, 105, 111, 110, 32, 105, 100, 101, 110, 116, 105, 116, 121, 32, 105, 115, 32, 115, 116, 97, 108, 101],
+        evidence_identities: identities
+    };
+}
+
+fn test_case_identities(
+    obligation: contracts.ObligationFact,
+    request: PlannerRequest
+) -> (result: [[byte; up_to 1024]; up_to 256]) {
+    let seed: sequences.ByteViewBuilder256 = sequences.byte_view_builder_empty();
+    let with_explicit: sequences.ByteViewBuilder256 = seed;
+    let explicit_values: [[byte; up_to 1024]; up_to 64] = obligation.executor.test_case_identities;
+    iterate i over explicit_values carrying explicit_builder: sequences.ByteViewBuilder256 = with_explicit {
+        let explicit_identity: [byte; up_to 1024] = explicit_values[i];
+        next explicit_builder = push_unique256(explicit_builder, explicit_identity, true);
+    }
+    iterate i over request.compiler_tests carrying compiler_builder: sequences.ByteViewBuilder256 = explicit_builder {
+        let test: contracts.CompilerTestFact = request.compiler_tests[i];
+        let wildcard_identity: [byte; up_to 1024] = [42];
+        let declaration_match: bool = contains_identity64(obligation.executor.declaration_identities, wildcard_identity)
+            || contains_identity64(obligation.executor.declaration_identities, test.declaration_identity);
+        let subject_match: bool = contains_identity256(obligation.subjects, test.function_identity)
+            || contains_identity256(obligation.invalidation_dependencies, test.function_identity);
+        next compiler_builder = push_unique256(
+            compiler_builder,
+            test.test_case_identity,
+            test.test_case_identity.len > 0 && (declaration_match || subject_match)
+        );
+    }
+    return sequences.byte_view_builder_finish(compiler_builder);
+}
+
+fn evaluate_obligation(
+    obligation: contracts.ObligationFact,
+    request: PlannerRequest
+) -> (result: ObligationEvaluation) {
+    let evidence: EvidenceResult = evidence_state(obligation.identity, request);
+    let tests: [[byte; up_to 1024]; up_to 256] = test_case_identities(obligation, request);
+    if is_native_test_executor(obligation.executor.kind) && tests.len == 0 {
+        return ObligationEvaluation {
+            status: contracts.ObligationStatus.selection_unresolved,
+            reason: [110, 97, 116, 105, 118, 101, 32, 111, 98, 108, 105, 103, 97, 116, 105, 111, 110, 32, 104, 97, 115, 32, 110, 111, 32, 99, 117, 114, 114, 101, 110, 116, 32, 99, 111, 109, 112, 105, 108, 101, 114, 32, 116, 101, 115, 116, 45, 99, 97, 115, 101, 32, 105, 100, 101, 110, 116, 105, 116, 121],
+            evidence_identities: evidence.evidence_identities,
+            test_case_identities: tests
+        };
+    }
+    return ObligationEvaluation {
+        status: evidence.status,
+        reason: evidence.reason,
+        evidence_identities: evidence.evidence_identities,
+        test_case_identities: tests
+    };
+}
+
+fn exclusion_reason(
+    obligation: contracts.ObligationFact,
+    request: PlannerRequest
+) -> (result: [byte; up_to 1024]) {
+    if lifecycle_ordinary_excluded(obligation.lifecycle) {
+        return [108, 105, 102, 101, 99, 121, 99, 108, 101, 32, 105, 115, 32, 110, 111, 116, 32, 112, 97, 114, 116, 32, 111, 102, 32, 111, 114, 100, 105, 110, 97, 114, 121, 32, 118, 101, 114, 105, 102, 105, 99, 97, 116, 105, 111, 110];
+    }
+    if !lifecycle_active(obligation.lifecycle) {
+        return [105, 110, 118, 101, 110, 116, 111, 114, 121, 32, 108, 105, 102, 101, 99, 121, 99, 108, 101, 32, 105, 115, 32, 110, 111, 116, 32, 101, 120, 101, 99, 117, 116, 97, 98, 108, 101];
+    }
+    let unused: bool = matches_impact(obligation, request);
+    if !unused {
+        return [110, 111, 32, 99, 111, 109, 112, 105, 108, 101, 114, 45, 111, 119, 110, 101, 100, 32, 115, 117, 98, 106, 101, 99, 116, 44, 32, 100, 101, 112, 101, 110, 100, 101, 110, 99, 121, 44, 32, 111, 114, 32, 103, 117, 97, 114, 97, 110, 116, 101, 101, 45, 100, 111, 109, 97, 105, 110, 32, 105, 110, 116, 101, 114, 115, 101, 99, 116, 105, 111, 110];
+    }
+    return [105, 110, 118, 97, 108, 105, 100, 32, 111, 98, 108, 105, 103, 97, 116, 105, 111, 110];
+}
+
+fn add_status_reason(
+    builder: sequences.ByteViewBuilder64,
+    status: contracts.ObligationStatus
+) -> (result: sequences.ByteViewBuilder64) {
+    if status_is_stale(status) {
+        return push_unique64(builder, [101, 118, 105, 100, 101, 110, 99, 101, 95, 115, 116, 97, 108, 101], true);
+    }
+    if status_is_contradictory(status) {
+        return push_unique64(builder, [101, 118, 105, 100, 101, 110, 99, 101, 95, 99, 111, 110, 116, 114, 97, 100, 105, 99, 116, 111, 114, 121], true);
+    }
+    if status_is_escalation(status) {
+        return push_unique64(builder, [101, 118, 105, 100, 101, 110, 99, 101, 95, 101, 115, 99, 97, 108, 97, 116, 105, 111, 110, 95, 114, 101, 113, 117, 105, 114, 101, 100], true);
+    }
+    return builder;
+}
+
+fn add_selection_reason(
+    builder: sequences.ByteViewBuilder64,
+    included: bool,
+    status: contracts.ObligationStatus
+) -> (result: sequences.ByteViewBuilder64) {
+    if included && status_is_selection_unresolved(status) {
+        return push_unique64(builder, [111, 98, 108, 105, 103, 97, 116, 105, 111, 110, 95, 115, 101, 108, 101, 99, 116, 105, 111, 110, 95, 117, 110, 114, 101, 115, 111, 108, 118, 101, 100], true);
+    }
+    return builder;
+}
+
+fn seed_reasons(request: PlannerRequest) -> (result: sequences.ByteViewBuilder64) {
+    let seed: sequences.ByteViewBuilder64 = sequences.byte_view_builder64_empty();
+    iterate i over request.selection_escalation_reasons carrying builder: sequences.ByteViewBuilder64 = seed {
+        next builder = push_unique64(builder, request.selection_escalation_reasons[i], true);
+    }
+    return builder;
+}
+
+fn fold_obligations(request: PlannerRequest) -> (result: PlanFold) {
+    let seed: PlanFold = PlanFold {
+        selected: selected_empty(),
+        excluded: excluded_empty(),
+        required: sequences.byte_view_builder_empty(),
+        new_execution: sequences.byte_view_builder_empty(),
+        reasons: seed_reasons(request),
+        selected_count: 0,
+        blocked_selection: false,
+        blocked_stale: false,
+        blocked_contradictory: false,
+        blocked_escalation: false,
+        blocked_plan: !request.proof_sufficient_to_stop
+    };
+    iterate i over request.obligations carrying fold: PlanFold = seed {
+        let obligation: contracts.ObligationFact = request.obligations[i];
+        let included: bool = lifecycle_active(obligation.lifecycle) && matches_impact(obligation, request);
+        let evaluation: ObligationEvaluation = evaluate_obligation(obligation, request);
+        let selected: contracts.SelectedObligation = contracts.SelectedObligation {
+            identity: obligation.identity,
+            status: evaluation.status,
+            lifecycle: obligation.lifecycle,
+            guarantee_domain: obligation.guarantee_domain,
+            evidence_role: obligation.evidence_role,
+            reason: evaluation.reason,
+            evidence_identities: evaluation.evidence_identities,
+            test_case_identities: evaluation.test_case_identities,
+            executor: obligation.executor
+        };
+        let excluded: contracts.ExcludedObligation = contracts.ExcludedObligation {
+            identity: obligation.identity,
+            lifecycle: obligation.lifecycle,
+            reason: exclusion_reason(obligation, request)
+        };
+        let required: sequences.ByteViewBuilder256 = push_unique256(fold.required, obligation.identity, included);
+        let needs_execution: bool = status_needs_execution(evaluation.status);
+        let new_execution: sequences.ByteViewBuilder256 = push_unique256(fold.new_execution, obligation.identity, included && needs_execution);
+        let reasons0: sequences.ByteViewBuilder64 = add_status_reason(fold.reasons, evaluation.status);
+        let reasons1: sequences.ByteViewBuilder64 = add_selection_reason(reasons0, included, evaluation.status);
+        next fold = PlanFold {
+            selected: selected_push(fold.selected, selected, included),
+            excluded: excluded_push(fold.excluded, excluded, !included),
+            required: required,
+            new_execution: new_execution,
+            reasons: reasons1,
+            selected_count: fold.selected_count +% select(included, 1, 0),
+            blocked_selection: fold.blocked_selection || (included && status_is_selection_unresolved(evaluation.status)),
+            blocked_stale: fold.blocked_stale || (included && status_is_stale(evaluation.status)),
+            blocked_contradictory: fold.blocked_contradictory || (included && status_is_contradictory(evaluation.status)),
+            blocked_escalation: fold.blocked_escalation || (included && status_is_escalation(evaluation.status)),
+            blocked_plan: fold.blocked_plan
+        };
+    }
+    return fold;
+}
+
+fn add_empty_selection_reason(
+    builder: sequences.ByteViewBuilder64,
+    selected_count: u64
+) -> (result: sequences.ByteViewBuilder64) {
+    if selected_count == 0 {
+        return push_unique64(builder, [111, 98, 108, 105, 103, 97, 116, 105, 111, 110, 95, 115, 101, 108, 101, 99, 116, 105, 111, 110, 95, 117, 110, 114, 101, 115, 111, 108, 118, 101, 100], true);
+    }
+    return builder;
+}
+
+fn finish_plan(request: PlannerRequest, folded: PlanFold) -> (result: contracts.ObligationPlanKernel) {
+    let reasons1: sequences.ByteViewBuilder64 = add_empty_selection_reason(folded.reasons, folded.selected_count);
+    let reasons: [[byte; up_to 1024]; up_to 64] = sequences.byte_view_builder64_finish(reasons1);
+    let sufficient: bool = request.proof_sufficient_to_stop
+        && folded.selected_count > 0
+        && folded.new_execution.length == 0
+        && !folded.blocked_selection
+        && !folded.blocked_stale
+        && !folded.blocked_contradictory
+        && !folded.blocked_escalation;
+    let selected_storage: [contracts.SelectedObligation; 256] = folded.selected.values;
+    let excluded_storage: [contracts.ExcludedObligation; 256] = folded.excluded.values;
+    let selected_values: [contracts.SelectedObligation; up_to 256] = selected_storage[0..folded.selected.length];
+    let excluded_values: [contracts.ExcludedObligation; up_to 256] = excluded_storage[0..folded.excluded.length];
+    return contracts.ObligationPlanKernel {
+        obligations: selected_values,
+        excluded: excluded_values,
+        stop: contracts.ObligationStop {
+            sufficient_to_stop: sufficient,
+            required_obligation_identities: sequences.byte_view_builder_finish(folded.required),
+            new_execution_required: sequences.byte_view_builder_finish(folded.new_execution),
+            escalation_reasons: reasons,
+            boundary: request.boundary
+        }
+    };
+}
+
+fn planner_app(context: ApplicationContext) -> (result: ApplicationExit)
+    capability ravel_artifact
+    effect structured_read authorized_by ravel_artifact
+    effect structured_read_identity authorized_by ravel_artifact
+    effect structured_write authorized_by ravel_artifact
+{
+    if !context_is_bounded(context) || context.argv_count < 2 {
+        return failure([97, 114, 103, 118, 32, 114, 101, 113, 117, 105, 114, 101, 115, 32, 50, 32, 111, 98, 108, 105, 103, 97, 116, 105, 111, 32, 112, 108, 97, 110, 110, 101, 114, 32, 112, 97, 116, 104, 115], 2);
+    }
+    let request_schema: [byte; up_to 64] = [109, 110, 99, 115, 46, 114, 97, 118, 101, 108, 45, 111, 98, 108, 105, 103, 97, 116, 105, 111, 110, 45, 107, 101, 114, 110, 101, 108, 45, 114, 101, 113, 117, 101, 115, 116, 47, 49];
+    let output_schema: [byte; up_to 64] = [109, 110, 99, 115, 46, 114, 97, 118, 101, 108, 45, 111, 98, 108, 105, 103, 97, 116, 105, 111, 110, 45, 107, 101, 114, 110, 101, 108, 47, 49];
+    let request: PlannerRequest = structured_read_identity(
+        context.argv[0],
+        request_schema,
+        family_contracts.identity_extension_policy()
+    );
+    let folded: PlanFold = fold_obligations(request);
+    let plan: contracts.ObligationPlanKernel = finish_plan(request, folded);
+    let published: u64 = structured_write(context.argv[1], output_schema, plan);
+    if published == 0 {
+        return failure([111, 98, 108, 108, 105, 103, 97, 116, 105, 111, 110, 32, 112, 108, 97, 110, 32, 112, 117, 98, 108, 105, 115, 104, 32, 102, 97, 105, 108, 101, 100], 3);
+    }
+    return success([]);
+}

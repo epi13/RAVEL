@@ -4,7 +4,8 @@
   "status": "hybrid",
   "canonical_mncs_surfaces": [
     "semantic impact identities",
-    "verification-plan contract and exact selection semantics"
+    "verification-plan contract and exact selection semantics",
+    "obligation lifecycle filtering, impact matching, evidence classification, test joining, and stop sufficiency"
   ],
   "host_canonical_responsibilities": [
     {
@@ -14,8 +15,8 @@
     },
     {
       "area": "verification-plan serialization and provider invocation",
-      "classification": "missing_reusable_runtime_capability",
-      "eliminating_capability": "native typed structured-data and in-process family APIs"
+      "classification": "external_interoperability_only",
+      "eliminating_capability": "none for JSON/process transport; native obligation policy is no longer hosted here"
     },
     {
       "area": "Git/provider integrations",
@@ -28,12 +29,12 @@
     "MNCS-TOOLING-C5FD211E05C1",
     "MNCS-VERIFY-CF7230C4396D"
   ],
-  "migration_order": 5,
-  "next_native_slice": "move the canonical RAVEL path from native transport mediation to the workspace planning module",
-  "native_shadow_candidate": "ravel.planning impact identities and bounded selection policy",
+  "migration_order": 6,
+  "next_native_slice": "move obligation-plan interpretation and executor admission into mncs-test's native provider",
+  "native_shadow_candidate": "Python obligations.py differential oracle",
   "remaining_blockers": [
     "RAVEL still obtains repository/filesystem facts through host orchestration",
-    "VerificationPlan contains dynamic external identities that need the shared structured-data/direct-call boundary",
-    "the current native modules are corpus-exercised but not yet exposed as a repository-owned application entrypoint"
+    "mncs-test still needs a native obligation-plan consumer and provider admission path",
+    "the Python compatibility module still computes an equivalent oracle for differential tests"
   ]
 }

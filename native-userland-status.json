@@ -5,15 +5,17 @@
   "canonical_entrypoint": "ravel CLI → rich MNCS workspace planning module (host transport adapter retained)",
   "native_sources": {
     "impact-inventory-selection": "mncs/workspace/ravel/planning.mncs",
-    "verification-plan-construction-publication": "mncs/workspace/ravel/planning.mncs"
+    "verification-plan-construction-publication": "mncs/workspace/ravel/planning.mncs",
+    "obligation-lifecycle-impact-evidence-join": "mncs/workspace/ravel/obligation_planning.mncs"
   },
   "native_application_descriptor": "native-applications/ravel-planner.json",
   "native_application_descriptors": {
-    "planner": "native-applications/ravel-planner.json"
+    "planner": "native-applications/ravel-planner.json",
+    "obligation-planner": "native-applications/ravel-obligation-planner.json"
   },
   "native_shadow_slices": [
-    "Python build_verification_plan differential oracle (explicit opt-in only)"
+    "Python build_verification_plan and build_obligation_plan differential oracles (explicit opt-in only)"
   ],
-  "next_migration_slice": "retain Python plan construction only as an explicit differential oracle; normal RAVEL requests fail closed when native compiler facts or planning are unavailable",
+  "next_migration_slice": "move native obligation-plan consumption and executor admission into the native Test provider; retain Python only for transport and explicit differential parity",
   "python_oracle_entrypoint": "request_verification_plan(..., allow_python_oracle=True) or CLI --python-oracle"
 }

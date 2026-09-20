@@ -1,0 +1,18 @@
+{
+  "schema_version": "mncs.native-application/1",
+  "application_identity": "ravel.native-obligation-planner",
+  "source": "../mncs/workspace/ravel/obligation_planning.mncs",
+  "module": "ravel.obligation_planning",
+  "entry_function": "planner_app",
+  "profile": "0.18",
+  "interface_identity": "b97309006427762119eb64e965cbe4efbc9521ea28d26b2c1adaf7a65f03c494",
+  "libraries": [
+    "../../mncs-language/library",
+    "../../MNCS-Commons/src/mncs_commons/mesh/mncs",
+    "../mncs/workspace/ravel"
+  ],
+  "environment_keys": [],
+  "required_capabilities": [
+    "ravel_artifact"
+  ]
+}

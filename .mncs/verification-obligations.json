@@ -31,11 +31,12 @@
       "lifecycle": "permanent",
       "scope": "consumer",
       "subjects": ["mncs.verification-obligation-plan/1"],
-      "invalidation_dependencies": ["src/ravel/obligations.py", "mncs.verification-plan/1"],
+      "invalidation_dependencies": ["mncs/workspace/ravel/obligation_planning.mncs", "mncs.verification-plan/1"],
       "executor": {
         "provider": "ravel",
-        "kind": "compile_experiment",
-        "entrypoint": "tests/test_obligations.py"
+        "kind": "migration_parity",
+        "entrypoint": "native-applications/ravel-obligation-planner.json",
+        "test_case_identities": ["ravel:test:native-obligation-kernel"]
       },
       "evidence_identity": {
         "subject_fields": ["impact_identity", "source_identity"],

@@ -9,7 +9,11 @@ provider and never upgrades evidence to PASS.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+import json
+import os
 from pathlib import Path
+import subprocess
+import tempfile
 from typing import Any
 
 try:
@@ -30,6 +34,7 @@ except ImportError:  # direct script execution
 
 ACTIVE_LIFECYCLES = {"permanent", "transitional"}
 ORDINARY_EXCLUDED_LIFECYCLES = {"scheduled", "reference_only", "retired"}
+NATIVE_KERNEL_SCHEMA = "mncs.ravel-obligation-kernel/1"
 
 
 def _strings(value: Any) -> list[str]:
@@ -147,7 +152,12 @@ def build_obligation_plan(
     current_evidence: Sequence[Mapping[str, Any]] = (),
     commons_root: Path | None = None,
 ) -> dict[str, Any]:
-    """Join a native RAVEL plan to a repository-owned obligation inventory."""
+    """Explicit Python differential oracle for the native obligation kernel.
+
+    Normal RAVEL planning calls :func:`build_native_obligation_plan`. This
+    implementation remains available only so parity tests can compare the
+    canonical native decisions with the historical transport implementation.
+    """
 
     normalized_inventory = validate_obligation_inventory(
         dict(obligation_inventory), commons_root=commons_root
@@ -263,6 +273,214 @@ def build_obligation_plan(
             "new_execution_required": needs_execution,
             "escalation_reasons": sorted(reasons),
             "boundary": str(verification_plan.get("proof", {}).get("boundary", {}).get("claimed_scope", "unknown")),
+        },
+    }
+    payload["obligation_plan_id"] = obligation_plan_identity(payload, commons_root=commons_root)
+    return validate_obligation_plan(payload, commons_root=commons_root)
+
+
+def _native_text(value: Any) -> str:
+    return value if isinstance(value, str) else ""
+
+
+def _native_executor(executor: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "provider": _native_text(executor.get("provider")),
+        "kind": _native_text(executor.get("kind")),
+        "entrypoint": _native_text(executor.get("entrypoint")),
+        "declaration_identities": _strings(executor.get("declaration_identities")),
+        "test_case_identities": _strings(executor.get("test_case_identities")),
+    }
+
+
+def _native_obligation_request(
+    verification_plan: Mapping[str, Any],
+    normalized_inventory: Mapping[str, Any],
+    *,
+    impact: Mapping[str, Any],
+    compiler_inventory: Mapping[str, Any] | None,
+    current_evidence: Sequence[Mapping[str, Any]],
+    commons_root: Path | None,
+) -> dict[str, Any]:
+    source_identity, source_fingerprint = _source_identity(verification_plan)
+    tests = _compiler_tests(compiler_inventory)
+    nodes = impact.get("nodes", [])
+    node_identities = [
+        item.get("identity")
+        for item in nodes
+        if isinstance(item, Mapping) and isinstance(item.get("identity"), str)
+    ]
+    obligations = []
+    for item in normalized_inventory["obligations"]:
+        obligations.append(
+            {
+                "identity": item["identity"],
+                "lifecycle": item["lifecycle"],
+                "guarantee_domain": item["guarantee_domain"],
+                "evidence_role": item["evidence_role"],
+                "subjects": list(item["subjects"]),
+                "invalidation_dependencies": list(item["invalidation_dependencies"]),
+                "executor": _native_executor(item["executor"]),
+            }
+        )
+    compiler_tests = [
+        {
+            "declaration_identity": _native_text(item.get("declaration_identity")),
+            "test_case_identity": _native_text(item.get("test_case_identity")),
+            "function_identity": _native_text(item.get("function_identity")),
+        }
+        for item in tests
+    ]
+    evidence = []
+    for item in current_evidence:
+        status = item.get("status")
+        if status not in {"PASS", "FAIL", "UNKNOWN"}:
+            raise ValueError(f"unsupported evidence status for native obligation planning: {status!r}")
+        evidence.append(
+            {
+                "obligation_identity": _native_text(item.get("obligation_identity")),
+                "evidence_identity": _native_text(item.get("evidence_identity")),
+                "status": status,
+                "subject_identity": _native_text(item.get("subject_identity")),
+                "subject_fingerprint": _native_text(item.get("subject_fingerprint")),
+                "definition_identity": _native_text(item.get("definition_identity")),
+            }
+        )
+    proof = verification_plan.get("proof")
+    proof_mapping = proof if isinstance(proof, Mapping) else {}
+    boundary = proof_mapping.get("boundary")
+    boundary_mapping = boundary if isinstance(boundary, Mapping) else {}
+    selection = verification_plan.get("selection")
+    selection_mapping = selection if isinstance(selection, Mapping) else {}
+    impact_domains = _strings(impact.get("guarantee_domains")) or ["semantic"]
+    return {
+        "schema_version": "mncs.ravel-obligation-kernel-request/1",
+        "inventory_identity": obligation_inventory_identity(normalized_inventory, commons_root=commons_root),
+        "subject_identity": source_identity or "",
+        "subject_fingerprint": source_fingerprint or "",
+        "proof_sufficient_to_stop": bool(proof_mapping.get("sufficient_to_stop")),
+        "boundary": _native_text(boundary_mapping.get("claimed_scope")) or "unknown",
+        "impact_roots": _strings(impact.get("roots")),
+        "impact_direct_dependents": _strings(impact.get("direct_dependents")),
+        "impact_test_identities": _strings(impact.get("test_identities")),
+        "impact_node_identities": sorted(set(node_identities)),
+        "impact_guarantee_domains": impact_domains,
+        "selection_escalation_reasons": _strings(selection_mapping.get("escalation_reasons")),
+        "obligations": obligations,
+        "compiler_tests": compiler_tests,
+        "evidence": evidence,
+    }
+
+
+def build_native_obligation_plan(
+    verification_plan: Mapping[str, Any],
+    obligation_inventory: Mapping[str, Any],
+    *,
+    source_path: Path,
+    mncs: str | Path,
+    cwd: Path,
+    libraries: Sequence[Path] = (),
+    timeout: float = 180.0,
+    compiler_inventory: Mapping[str, Any] | None = None,
+    current_evidence: Sequence[Mapping[str, Any]] = (),
+    commons_root: Path | None = None,
+) -> dict[str, Any]:
+    """Run the canonical native RAVEL obligation kernel through transport."""
+
+    normalized_inventory = validate_obligation_inventory(
+        dict(obligation_inventory), commons_root=commons_root
+    )
+    impact = verification_plan.get("impact")
+    if not isinstance(impact, Mapping):
+        raise ValueError("verification plan impact is unavailable")
+    source = verification_plan.get("source")
+    source_sha256 = source.get("sha256") if isinstance(source, Mapping) else None
+    if not isinstance(source_sha256, str):
+        raise ValueError("verification plan source sha256 is unavailable")
+    request = _native_obligation_request(
+        verification_plan,
+        normalized_inventory,
+        impact=impact,
+        compiler_inventory=compiler_inventory,
+        current_evidence=current_evidence,
+        commons_root=commons_root,
+    )
+    descriptor = Path(__file__).resolve().parents[2] / "native-applications" / "ravel-obligation-planner.json"
+    if not descriptor.is_file():
+        raise ValueError(f"native RAVEL obligation planner descriptor is unavailable: {descriptor}")
+    base = cwd.resolve()
+    try:
+        with tempfile.TemporaryDirectory(prefix=".ravel-obligation-native-", dir=base) as directory:
+            work = Path(directory)
+            request_path = work / "obligation-request.json"
+            output_path = work / "obligation-kernel.json"
+            request_path.write_text(
+                json.dumps(request, separators=(",", ":"), ensure_ascii=False),
+                encoding="utf-8",
+            )
+            command = [str(mncs), "run-app", str(descriptor)]
+            command.extend(("--library", str(Path(__file__).resolve().parents[2] / "mncs" / "workspace" / "ravel")))
+            for library in libraries:
+                command.extend(("--library", str(library)))
+            command.extend(
+                (
+                    "--grant-structured",
+                    "ravel_artifact",
+                    "--",
+                    os.path.relpath(request_path, base),
+                    os.path.relpath(output_path, base),
+                )
+            )
+            completed = subprocess.run(
+                command,
+                cwd=base,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=timeout,
+                stdin=subprocess.DEVNULL,
+            )
+            if completed.returncode != 0:
+                raise ValueError(
+                    "native RAVEL obligation planner failed: "
+                    + (completed.stderr.strip() or completed.stdout.strip() or f"exit {completed.returncode}")
+                )
+            kernel = json.loads(output_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, subprocess.TimeoutExpired) as error:
+        raise ValueError(f"native RAVEL obligation planner unavailable: {error}") from error
+    if not isinstance(kernel, Mapping) or kernel.get("schema_version") != NATIVE_KERNEL_SCHEMA:
+        raise ValueError("native RAVEL obligation planner returned an invalid kernel document")
+    selected = kernel.get("obligations")
+    excluded = kernel.get("excluded")
+    stop = kernel.get("stop")
+    if not isinstance(selected, list) or not isinstance(excluded, list) or not isinstance(stop, Mapping):
+        raise ValueError("native RAVEL obligation planner returned an incomplete kernel document")
+    normalized_impact_domains = _strings(impact.get("guarantee_domains")) or ["semantic"]
+    change_kinds = _strings(impact.get("change_kinds"))
+    payload: dict[str, Any] = {
+        "schema_version": "mncs.verification-obligation-plan/1",
+        "verification_plan_id": str(verification_plan.get("plan_id", "")),
+        "source": {"path": str(source_path.resolve()), "sha256": source_sha256},
+        "impact_identity": str(impact.get("graph_identity", "")),
+        "impact": {
+            "guarantee_domains": normalized_impact_domains,
+            "change_kinds": change_kinds,
+            "roots": _strings(impact.get("roots")),
+        },
+        "inventory": {
+            "repository": normalized_inventory["repository"],
+            "revision": normalized_inventory["revision"],
+            "identity": obligation_inventory_identity(normalized_inventory, commons_root=commons_root),
+        },
+        "obligations": [dict(item) for item in selected],
+        "excluded": [dict(item) for item in excluded],
+        "evidence": [dict(item) for item in current_evidence],
+        "stop": {
+            "sufficient_to_stop": bool(stop.get("sufficient_to_stop")),
+            "required_obligation_identities": list(stop.get("required_obligation_identities", [])),
+            "new_execution_required": list(stop.get("new_execution_required", [])),
+            "escalation_reasons": list(stop.get("escalation_reasons", [])),
+            "boundary": _native_text(stop.get("boundary")) or "unknown",
         },
     }
     payload["obligation_plan_id"] = obligation_plan_identity(payload, commons_root=commons_root)

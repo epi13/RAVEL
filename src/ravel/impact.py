@@ -58,9 +58,17 @@ except ImportError:  # direct script execution
     )
 
 try:
-    from .obligations import build_obligation_plan, load_current_evidence
+    from .obligations import (
+        build_native_obligation_plan,
+        build_obligation_plan,
+        load_current_evidence,
+    )
 except ImportError:  # direct script execution
-    from obligations import build_obligation_plan, load_current_evidence
+    from obligations import (  # type: ignore
+        build_native_obligation_plan,
+        build_obligation_plan,
+        load_current_evidence,
+    )
 
 
 IMPACT_SCHEMA = "mncs.semantic-impact/1"
@@ -940,6 +948,10 @@ def request_verification_plan(
             obligation_output_path=obligation_output_path,
             cwd=base,
             commons_root=commons_root,
+            mncs=mncs,
+            libraries=libraries,
+            timeout=timeout,
+            use_native=True,
         )
         return plan
     if not allow_python_oracle:
@@ -998,6 +1010,10 @@ def request_verification_plan(
         obligation_output_path=obligation_output_path,
         cwd=base,
         commons_root=commons_root,
+        mncs=mncs,
+        libraries=libraries,
+        timeout=timeout,
+        use_native=False,
     )
     return plan
 
@@ -1013,6 +1029,10 @@ def _write_obligation_plan_if_requested(
     obligation_output_path: Path | None,
     cwd: Path,
     commons_root: Path | None,
+    mncs: str | Path,
+    libraries: Sequence[Path],
+    timeout: float,
+    use_native: bool,
 ) -> dict[str, Any] | None:
     if obligation_inventory_path is None and obligation_output_path is None:
         return None
@@ -1027,14 +1047,29 @@ def _write_obligation_plan_if_requested(
         "guarantee_domains": list(impact_document.get("guarantee_domains", [])),
         "change_kinds": list(impact_document.get("change_kinds", [])),
     }
-    obligation_plan = build_obligation_plan(
-        enriched_plan,
-        obligation_inventory_document,
-        source_path=source_path,
-        compiler_inventory=compiler_inventory_document,
-        current_evidence=load_current_evidence(current_evidence_path),
-        commons_root=commons_root,
-    )
+    current_evidence = load_current_evidence(current_evidence_path)
+    if use_native:
+        obligation_plan = build_native_obligation_plan(
+            enriched_plan,
+            obligation_inventory_document,
+            source_path=source_path,
+            mncs=mncs,
+            cwd=cwd,
+            libraries=libraries,
+            timeout=timeout,
+            compiler_inventory=compiler_inventory_document,
+            current_evidence=current_evidence,
+            commons_root=commons_root,
+        )
+    else:
+        obligation_plan = build_obligation_plan(
+            enriched_plan,
+            obligation_inventory_document,
+            source_path=source_path,
+            compiler_inventory=compiler_inventory_document,
+            current_evidence=current_evidence,
+            commons_root=commons_root,
+        )
     if obligation_output_path is not None:
         output_path = obligation_output_path if obligation_output_path.is_absolute() else cwd / obligation_output_path
         output_path = output_path.resolve()

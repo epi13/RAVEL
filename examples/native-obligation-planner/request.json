@@ -1,0 +1,54 @@
+{
+  "schema_version": "mncs.ravel-obligation-kernel-request/1",
+  "inventory_identity": "mncs:inventory:ravel",
+  "subject_identity": "ravel:source",
+  "subject_fingerprint": "ravel:fingerprint",
+  "proof_sufficient_to_stop": true,
+  "boundary": "direct_dependents",
+  "impact_roots": ["ravel.obligation-planning"],
+  "impact_direct_dependents": [],
+  "impact_test_identities": ["ravel:test:obligation-join"],
+  "impact_node_identities": [],
+  "impact_guarantee_domains": ["family_contract"],
+  "selection_escalation_reasons": [],
+  "obligations": [
+    {
+      "identity": "ravel.verification-obligation-plan.join",
+      "lifecycle": "permanent",
+      "guarantee_domain": "family_contract",
+      "evidence_role": "conformance",
+      "subjects": ["ravel.obligation-planning"],
+      "invalidation_dependencies": [],
+      "executor": {
+        "provider": "ravel",
+        "kind": "native_first_class_test",
+        "entrypoint": "ravel.test.obligation_join",
+        "declaration_identities": [],
+        "test_case_identities": []
+      }
+    },
+    {
+      "identity": "ravel.reference-only-obligation",
+      "lifecycle": "reference_only",
+      "guarantee_domain": "family_contract",
+      "evidence_role": "historical_reference",
+      "subjects": ["ravel.obligation-planning"],
+      "invalidation_dependencies": [],
+      "executor": {
+        "provider": "ravel",
+        "kind": "differential_oracle",
+        "entrypoint": "ravel.python_oracle",
+        "declaration_identities": [],
+        "test_case_identities": []
+      }
+    }
+  ],
+  "compiler_tests": [
+    {
+      "declaration_identity": "ravel.test.obligation_join",
+      "test_case_identity": "ravel:test:obligation-join",
+      "function_identity": "ravel.obligation-planning"
+    }
+  ],
+  "evidence": []
+}
