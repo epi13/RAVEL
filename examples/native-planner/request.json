@@ -18,6 +18,9 @@
     "risk_flags": [],
     "complete": true,
     "limitations": [],
+    "guarantee_domains": ["semantic", "compiler", "runtime"],
+    "change_kinds": ["private_implementation"],
+    "classification_schema_version": "mncs.semantic-impact-classification/1",
     "cross_repository": {
       "graph_identity": "7be6180a4150615b9e75090e4db938d1cb86968ca82d8ef04aec77a9695ebc83",
       "edges": [],

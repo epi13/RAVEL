@@ -1,7 +1,7 @@
 {
   "schema_version": "mncs-family.repository-manifest/v0alpha1",
   "repository": "ravel",
-  "revision": 3,
+  "revision": 4,
   "manifest_location": "in-repository",
   "authority": {"note": "RAVEL owns adaptive evidence strategy and scoped learning beneath MNCS/MNCDS authority; it cannot promote evidence."},
   "organization": {
@@ -11,9 +11,19 @@
       {"path": "src/ravel/impact.py", "class": "host-boundary", "note": "Filesystem/process transport around the native planner.", "classification": {"authority": "none", "lifecycle": "active", "boundary_kind": "process", "semantic_role": "platform-adapter"}}
     ]
   },
+  "verification": {
+    "schema_version": "mncs-family.verification-obligation-inventory/v1",
+    "obligation_inventory": ".mncs/verification-obligations.json"
+  },
   "contracts": {
-    "provides": [{"contract": "adaptive-evidence-strategy", "version": "1", "kind": "research-service", "stability": "experimental", "fingerprint_sources": ["src/ravel/", "mncs/"]}],
-    "consumes": [],
+    "provides": [
+      {"contract": "adaptive-evidence-strategy", "version": "1", "kind": "research-service", "stability": "experimental", "fingerprint_sources": ["src/ravel/", "mncs/"]},
+      {"contract": "verification-obligation-plan", "version": "1", "kind": "typed-obligation-plan", "stability": "experimental", "fingerprint_sources": ["src/ravel/obligations.py", "src/ravel/impact.py"]}
+    ],
+    "consumes": [
+      {"contract": "mncs-language.semantic-impact", "envelope": {"op": "exact", "version": "1"}, "required": true, "evidence_refs": ["src/ravel/impact.py"]},
+      {"contract": "mncs-commons.family-architecture", "envelope": {"op": "any"}, "required": false}
+    ],
     "tests": [{"test": "ravel-tests", "covers": ["adaptive-evidence-strategy"], "obligation": "self", "command": {"argv": ["python", "-m", "pytest", "tests", "-q"]}}]
   }
 }

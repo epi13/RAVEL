@@ -1,0 +1,47 @@
+{
+  "schema_version": "mncs-family.verification-obligation-inventory/v1",
+  "repository": "ravel",
+  "revision": 1,
+  "obligations": [
+    {
+      "identity": "ravel.verification-policy.native-plan",
+      "title": "Native RAVEL policy selects a bounded verification level and proof boundary",
+      "guarantee_domain": "family_contract",
+      "evidence_role": "canonical_regression",
+      "lifecycle": "permanent",
+      "scope": "family",
+      "subjects": ["mncs.verification-plan/1", "verification-policy"],
+      "invalidation_dependencies": ["mncs/workspace/ravel/verification_policy.mncs"],
+      "executor": {
+        "provider": "ravel",
+        "kind": "compile_experiment",
+        "entrypoint": "mncs/workspace/ravel/verification_policy.mncs"
+      },
+      "evidence_identity": {
+        "subject_fields": ["impact_identity"],
+        "definition_fields": ["policy_identity"],
+        "execution_fields": ["plan_identity"]
+      }
+    },
+    {
+      "identity": "ravel.verification-obligation-plan.join",
+      "title": "RAVEL joins compiler impact, repository obligations, and identity-bound evidence",
+      "guarantee_domain": "family_contract",
+      "evidence_role": "conformance",
+      "lifecycle": "permanent",
+      "scope": "consumer",
+      "subjects": ["mncs.verification-obligation-plan/1"],
+      "invalidation_dependencies": ["src/ravel/obligations.py", "mncs.verification-plan/1"],
+      "executor": {
+        "provider": "ravel",
+        "kind": "compile_experiment",
+        "entrypoint": "tests/test_obligations.py"
+      },
+      "evidence_identity": {
+        "subject_fields": ["impact_identity", "source_identity"],
+        "definition_fields": ["inventory_identity", "plan_identity"],
+        "execution_fields": ["evidence_identity"]
+      }
+    }
+  ]
+}
