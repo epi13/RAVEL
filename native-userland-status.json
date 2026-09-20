@@ -16,6 +16,6 @@
   "native_shadow_slices": [
     "Python build_verification_plan and build_obligation_plan differential oracles (explicit opt-in only)"
   ],
-  "next_migration_slice": "move native obligation-plan consumption and executor admission into the native Test provider; retain Python only for transport and explicit differential parity",
+  "next_migration_slice": "move Commons obligation identity reduction into a native contract kernel; retain Python only for transport and explicit differential parity",
   "python_oracle_entrypoint": "request_verification_plan(..., allow_python_oracle=True) or CLI --python-oracle"
 }
