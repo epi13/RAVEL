@@ -147,7 +147,7 @@ class ImpactPlanTests(unittest.TestCase):
             "mncs-forge",
             "mncs-test",
         ]
-        assert plan["selection"]["available_repository_count"] == 7
+        assert plan["selection"]["available_repository_count"] == len(graph["repositories"])
         assert plan["proof"]["sufficient_to_stop"] is False
         assert plan["selection"]["routing_scope"] == "selected_repositories"
         assert plan["proof"]["boundary"]["claimed_scope"] == "selected_repositories"
