@@ -15,6 +15,11 @@ use mncs.core.sequences.v1 as sequences;
 use mncs.commons.family.obligations.v1 as contracts;
 use mncs.commons.family.contracts.v1 as family_contracts;
 
+record EvidenceRange {
+    start: u64,
+    count: u64
+}
+
 record PlannerRequest {
     schema_version: [byte; up_to 64],
     inventory_identity: [byte; up_to 1024],
@@ -38,6 +43,7 @@ record PlannerRequest {
     impact_guarantee_domains: [[byte; up_to 1024]; up_to 16],
     selection_escalation_reasons: [[byte; up_to 1024]; up_to 64],
     obligations: [contracts.ObligationFact; up_to 256],
+    evidence_ranges: [EvidenceRange; up_to 256],
     compiler_tests: [contracts.CompilerTestFact; up_to 256],
     evidence: [contracts.EvidenceFact; up_to 256]
 }
@@ -48,6 +54,7 @@ record EvidenceScan {
     pass_seen: bool,
     fail_seen: bool,
     unknown_seen: bool,
+    range_valid: bool,
     evidence_identities: sequences.ByteViewBuilder256
 }
 
@@ -421,18 +428,36 @@ fn evidence_exact(
 fn evidence_state(
     obligation_identity: [byte; up_to 1024],
     obligation: contracts.ObligationFact,
+    evidence_range: EvidenceRange,
     request: PlannerRequest
 ) -> (result: EvidenceResult) {
+    if evidence_range.start > request.evidence.len {
+        return EvidenceResult {
+            status: contracts.ObligationStatus.selection_unresolved,
+            reason: [105, 110, 118, 97, 108, 105, 100, 32, 101, 118, 105, 100, 101, 110, 99, 101, 32, 105, 110, 100, 101, 120],
+            evidence_identities: sequences.byte_view_builder_finish(sequences.byte_view_builder_empty())
+        };
+    }
+    if evidence_range.count > request.evidence.len - evidence_range.start {
+        return EvidenceResult {
+            status: contracts.ObligationStatus.selection_unresolved,
+            reason: [105, 110, 118, 97, 108, 105, 100, 32, 101, 118, 105, 100, 101, 110, 99, 101, 32, 105, 110, 100, 101, 120],
+            evidence_identities: sequences.byte_view_builder_finish(sequences.byte_view_builder_empty())
+        };
+    }
+    let evidence_end: u64 = evidence_range.start + evidence_range.count;
+    let evidence_items: [contracts.EvidenceFact; up_to 256] = request.evidence[evidence_range.start..evidence_end];
     let seed: EvidenceScan = EvidenceScan {
         related_count: 0,
         exact_count: 0,
         pass_seen: false,
         fail_seen: false,
         unknown_seen: false,
+        range_valid: true,
         evidence_identities: sequences.byte_view_builder_empty()
     };
-    iterate i over request.evidence carrying scan: EvidenceScan = seed {
-        let item: contracts.EvidenceFact = request.evidence[i];
+    iterate i over evidence_items carrying scan: EvidenceScan = seed {
+        let item: contracts.EvidenceFact = evidence_items[i];
         let related: bool = sequences.equals_byte_view<1024>(item.obligation_identity, obligation_identity);
         let exact: bool = related && evidence_exact(item, obligation, request);
         next scan = EvidenceScan {
@@ -441,10 +466,18 @@ fn evidence_state(
             pass_seen: scan.pass_seen || (exact && evidence_status_pass(item.status)),
             fail_seen: scan.fail_seen || (exact && evidence_status_fail(item.status)),
             unknown_seen: scan.unknown_seen || (exact && evidence_status_unknown(item.status)),
+            range_valid: scan.range_valid && related,
             evidence_identities: push_unique256(scan.evidence_identities, item.evidence_identity, related)
         };
     }
     let identities: [[byte; up_to 1024]; up_to 256] = sequences.byte_view_builder_finish(scan.evidence_identities);
+    if !scan.range_valid {
+        return EvidenceResult {
+            status: contracts.ObligationStatus.selection_unresolved,
+            reason: [101, 118, 105, 100, 101, 110, 99, 101, 32, 105, 110, 100, 101, 120, 32, 105, 100, 101, 110, 116, 105, 116, 121, 32, 109, 105, 115, 109, 97, 116, 99, 104],
+            evidence_identities: identities
+        };
+    }
     if scan.related_count == 0 {
         return EvidenceResult {
             status: contracts.ObligationStatus.new_execution_required,
@@ -516,9 +549,10 @@ fn test_case_identities(
 
 fn evaluate_obligation(
     obligation: contracts.ObligationFact,
+    evidence_range: EvidenceRange,
     request: PlannerRequest
 ) -> (result: ObligationEvaluation) {
-    let evidence: EvidenceResult = evidence_state(obligation.identity, obligation, request);
+    let evidence: EvidenceResult = evidence_state(obligation.identity, obligation, evidence_range, request);
     if is_native_test_executor(obligation.executor.kind) {
         let tests: [[byte; up_to 1024]; up_to 256] = test_case_identities(obligation, request);
         if tests.len == 0 {
@@ -546,11 +580,20 @@ fn evaluate_obligation(
 
 fn evaluate_included_obligation(
     obligation: contracts.ObligationFact,
+    obligation_index: u64,
     request: PlannerRequest,
     included: bool
 ) -> (result: ObligationEvaluation) {
     if included {
-        return evaluate_obligation(obligation, request);
+        if obligation_index >= request.evidence_ranges.len {
+            return ObligationEvaluation {
+                status: contracts.ObligationStatus.selection_unresolved,
+                reason: [101, 118, 105, 100, 101, 110, 99, 101, 32, 114, 97, 110, 103, 101, 32, 105, 115, 32, 117, 110, 97, 118, 97, 105, 108, 97, 98, 108, 101],
+                evidence_identities: sequences.byte_view_builder_finish(sequences.byte_view_builder_empty()),
+                test_case_identities: sequences.byte_view_builder_finish(sequences.byte_view_builder_empty())
+            };
+        }
+        return evaluate_obligation(obligation, request.evidence_ranges[obligation_index], request);
     }
     return ObligationEvaluation {
         status: contracts.ObligationStatus.not_selected,
@@ -634,7 +677,7 @@ fn fold_obligations(request: PlannerRequest) -> (result: PlanFold) {
     iterate i over request.obligations carrying fold: PlanFold = seed {
         let obligation: contracts.ObligationFact = request.obligations[i];
         let included: bool = lifecycle_active(obligation.lifecycle) && matches_impact(obligation, request);
-        let evaluation: ObligationEvaluation = evaluate_included_obligation(obligation, request, included);
+        let evaluation: ObligationEvaluation = evaluate_included_obligation(obligation, i, request, included);
         let selected: contracts.SelectedObligation = contracts.SelectedObligation {
             identity: obligation.identity,
             status: evaluation.status,

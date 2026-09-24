@@ -9,6 +9,7 @@ from ravel.obligations import (
     _cargo_test_target_declarations,
     _manifest_host_grants,
     _native_obligation_execution_limits,
+    _native_obligation_request,
     build_obligation_plan,
     build_repository_context,
 )
@@ -248,6 +249,51 @@ def test_project_host_executor_identity_declares_library_environment_policy(
     executor = context["obligations"][0]["executor"]
     assert executor["library_paths"] == []
     assert context["obligations"][0]["executor_identity"] == obligations._digest(executor)
+
+
+def test_native_request_indexes_all_evidence_by_exact_obligation_identity(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(obligations, "obligation_inventory_identity", lambda *_args, **_kwargs: "inventory")
+    request = _native_obligation_request(
+        _plan(),
+        _inventory(),
+        impact=_plan()["impact"],
+        compiler_inventory=None,
+        current_evidence=[
+            {
+                "obligation_identity": "fixture.semantic.regression",
+                "evidence_identity": "pass",
+                "status": "PASS",
+            },
+            {
+                "obligation_identity": "fixture.retired.obligation",
+                "evidence_identity": "orphan",
+                "status": "PASS",
+            },
+            {
+                "obligation_identity": "fixture.semantic.regression",
+                "evidence_identity": "fail",
+                "status": "FAIL",
+            },
+            {
+                "obligation_identity": "fixture.migration.parity",
+                "evidence_identity": "unknown",
+                "status": "UNKNOWN",
+            },
+        ],
+        commons_root=None,
+    )
+
+    assert request["evidence_ranges"] == [
+        {"start": 0, "count": 2},
+        {"start": 2, "count": 1},
+    ]
+    assert [item["evidence_identity"] for item in request["evidence"]] == [
+        "pass",
+        "fail",
+        "unknown",
+    ]
 
 
 def test_repository_grants_are_exact_and_unknown_selectors_fail_closed() -> None:

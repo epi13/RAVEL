@@ -1090,13 +1090,17 @@ def _native_obligation_request(
         for item in tests
     ]
     evidence = []
+    evidence_by_obligation: dict[str, list[dict[str, Any]]] = {}
     for item in current_evidence:
         status = item.get("status")
         if status not in {"PASS", "FAIL", "UNKNOWN"}:
             raise ValueError(f"unsupported evidence status for native obligation planning: {status!r}")
-        evidence.append(
+        identity = item.get("obligation_identity")
+        if not isinstance(identity, str) or not identity:
+            continue
+        evidence_by_obligation.setdefault(identity, []).append(
             {
-                "obligation_identity": _native_text(item.get("obligation_identity")),
+                "obligation_identity": _native_text(identity),
                 "evidence_identity": _native_text(item.get("evidence_identity")),
                 "status": status,
                 "subject_identity": _native_text(item.get("subject_identity")),
@@ -1111,6 +1115,11 @@ def _native_obligation_request(
                 "reason": _native_text(item.get("reason")),
             }
         )
+    evidence_ranges: list[dict[str, int]] = []
+    for obligation in obligations:
+        start = len(evidence)
+        evidence.extend(evidence_by_obligation.get(obligation["identity"], []))
+        evidence_ranges.append({"start": start, "count": len(evidence) - start})
     proof = verification_plan.get("proof")
     proof_mapping = proof if isinstance(proof, Mapping) else {}
     boundary = proof_mapping.get("boundary")
@@ -1143,6 +1152,7 @@ def _native_obligation_request(
         "impact_guarantee_domains": impact_domains,
         "selection_escalation_reasons": _strings(selection_mapping.get("escalation_reasons")),
         "obligations": obligations,
+        "evidence_ranges": evidence_ranges,
         "compiler_tests": compiler_tests,
         "evidence": evidence,
     }
