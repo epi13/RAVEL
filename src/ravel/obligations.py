@@ -986,6 +986,29 @@ def _native_executor(executor: Mapping[str, Any]) -> dict[str, Any]:
     return result
 
 
+def _native_obligation_execution_limits(
+    request: Mapping[str, Any], requested_timeout: float
+) -> tuple[int, float]:
+    obligations = request.get("obligations", [])
+    tests = request.get("compiler_tests", [])
+    evidence = request.get("evidence", [])
+    obligation_count = len(obligations) if isinstance(obligations, list) else 0
+    test_count = len(tests) if isinstance(tests, list) else 0
+    evidence_count = len(evidence) if isinstance(evidence, list) else 0
+    step_budget = min(
+        8_388_608,
+        max(
+            1_048_576,
+            1_048_576
+            + 32_768 * obligation_count
+            + 8_192 * test_count
+            + 4_096 * evidence_count,
+        ),
+    )
+    timeout_seconds = min(600.0, max(requested_timeout, 60.0 + 4.0 * obligation_count))
+    return step_budget, timeout_seconds
+
+
 def _clean_selected_obligation(value: Mapping[str, Any]) -> dict[str, Any]:
     result = dict(value)
     for field in (
@@ -1189,7 +1212,8 @@ def build_native_obligation_plan(
                 encoding="utf-8",
             )
             command = [str(mncs), "run-app", str(descriptor)]
-            command.extend(("--step-budget", "1048576"))
+            step_budget, planner_timeout = _native_obligation_execution_limits(request, timeout)
+            command.extend(("--step-budget", str(step_budget)))
             for library in libraries:
                 resolved_library = library.resolve()
                 overlaps_declared_library = any(
@@ -1215,7 +1239,7 @@ def build_native_obligation_plan(
                 capture_output=True,
                 text=True,
                 check=False,
-                timeout=timeout,
+                timeout=planner_timeout,
                 stdin=subprocess.DEVNULL,
             )
             if completed.returncode != 0:

@@ -5,6 +5,7 @@ from pathlib import Path
 from ravel.obligations import (
     _cargo_test_target_declarations,
     _manifest_host_grants,
+    _native_obligation_execution_limits,
     build_obligation_plan,
 )
 
@@ -185,3 +186,24 @@ def test_repository_grants_are_exact_and_unknown_selectors_fail_closed() -> None
     )
     assert complete is False
     assert stale == []
+
+
+def test_native_obligation_planner_limits_scale_with_declared_work_and_stay_bounded() -> None:
+    small = {"obligations": [{}], "compiler_tests": [], "evidence": []}
+    language = {
+        "obligations": [{}] * 104,
+        "compiler_tests": [{}],
+        "evidence": [{}] * 10,
+    }
+    maximum = {"obligations": [{}] * 256, "compiler_tests": [{}] * 256, "evidence": [{}] * 256}
+
+    small_steps, small_timeout = _native_obligation_execution_limits(small, 180.0)
+    language_steps, language_timeout = _native_obligation_execution_limits(language, 180.0)
+    max_steps, max_timeout = _native_obligation_execution_limits(maximum, 180.0)
+
+    assert small_steps == 1_081_344
+    assert small_timeout == 180.0
+    assert language_steps == 4_505_600
+    assert language_timeout == 476.0
+    assert max_steps == 8_388_608
+    assert max_timeout == 600.0
