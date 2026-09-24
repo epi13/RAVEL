@@ -195,8 +195,9 @@ fn contains_builder256(
     builder: sequences.ByteViewBuilder256,
     candidate: [byte; up_to 1024]
 ) -> (result: bool) {
-    iterate i over builder.values carrying found: bool = false {
-        next found = found || (i < builder.length && sequences.equals_byte_view<1024>(builder.values[i], candidate));
+    let occupied: [[byte; up_to 1024]; up_to 256] = builder.values[0..builder.length];
+    iterate i over occupied carrying found: bool = false {
+        next found = found || sequences.equals_byte_view<1024>(occupied[i], candidate);
     }
     return found;
 }
@@ -205,8 +206,9 @@ fn contains_builder64(
     builder: sequences.ByteViewBuilder64,
     candidate: [byte; up_to 1024]
 ) -> (result: bool) {
-    iterate i over builder.values carrying found: bool = false {
-        next found = found || (i < builder.length && sequences.equals_byte_view<1024>(builder.values[i], candidate));
+    let occupied: [[byte; up_to 1024]; up_to 64] = builder.values[0..builder.length];
+    iterate i over occupied carrying found: bool = false {
+        next found = found || sequences.equals_byte_view<1024>(occupied[i], candidate);
     }
     return found;
 }
