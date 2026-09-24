@@ -22,6 +22,15 @@ record PlannerRequest {
     subject_fingerprint: [byte; up_to 1024],
     proof_sufficient_to_stop: bool,
     boundary: [byte; up_to 1024],
+    repository_scope_requested: bool,
+    repository_scope_complete: bool,
+    repository_impact_complete: bool,
+    repository_unknown_root: bool,
+    repository_identity: [byte; up_to 1024],
+    repository_revision: [byte; up_to 128],
+    repository_fingerprint: [byte; up_to 128],
+    repository_inventory_identity: [byte; up_to 128],
+    required_repository_obligation_identities: [[byte; up_to 1024]; up_to 256],
     impact_roots: [[byte; up_to 1024]; up_to 256],
     impact_direct_dependents: [[byte; up_to 1024]; up_to 256],
     impact_test_identities: [[byte; up_to 1024]; up_to 256],
@@ -69,6 +78,7 @@ record PlanFold {
     selected: SelectedBuilder,
     excluded: ExcludedBuilder,
     required: sequences.ByteViewBuilder256,
+    repository_selected: sequences.ByteViewBuilder256,
     new_execution: sequences.ByteViewBuilder256,
     reasons: sequences.ByteViewBuilder64,
     selected_count: u64,
@@ -85,7 +95,14 @@ fn empty_executor() -> (result: contracts.ObligationExecutor) {
         kind: contracts.ExecutorKind.external_integration,
         entrypoint: [0; 0],
         declaration_identities: [[0; 0]; 64],
-        test_case_identities: [[0; 0]; 64]
+        test_case_identities: [[0; 0]; 64],
+        source_paths: [[0; 0]; 8],
+        library_paths: [[0; 0]; 8],
+        verifier_identity: [0; 0],
+        target_identity: [0; 0],
+        argv: [[0; 0]; 16],
+        working_directory: [0; 0],
+        timeout_seconds: 0
     };
 }
 
@@ -94,8 +111,15 @@ fn empty_selected() -> (result: contracts.SelectedObligation) {
         identity: [0; 0],
         status: contracts.ObligationStatus.required,
         lifecycle: contracts.ObligationLifecycle.permanent,
+        scope: contracts.ObligationScope.local,
         guarantee_domain: contracts.GuaranteeDomain.semantic,
         evidence_role: contracts.EvidenceRole.canonical_regression,
+        definition_identity: [0; 0],
+        subject_identity: [0; 0],
+        subject_fingerprint: [0; 0],
+        executor_identity: [0; 0],
+        verifier_identity: [0; 0],
+        invalidation_identity: [0; 0],
         reason: [0; 0],
         evidence_identities: [[0; 0]; 256],
         test_case_identities: [[0; 0]; 256],
@@ -261,6 +285,9 @@ fn matches_impact(
     obligation: contracts.ObligationFact,
     request: PlannerRequest
 ) -> (result: bool) {
+    if request.repository_scope_requested {
+        return contracts.obligation_scope_is_repository_canonical(obligation.scope);
+    }
     let direct_match: bool = intersects256(obligation.subjects, request.impact_roots)
         || intersects256(obligation.subjects, request.impact_direct_dependents)
         || intersects256(obligation.subjects, request.impact_test_identities)
@@ -365,8 +392,19 @@ fn is_native_test_executor(value: contracts.ExecutorKind) -> (result: bool) {
 
 fn evidence_exact(
     evidence: contracts.EvidenceFact,
+    obligation: contracts.ObligationFact,
     request: PlannerRequest
 ) -> (result: bool) {
+    if contracts.obligation_scope_is_repository_canonical(obligation.scope) {
+        return sequences.equals_byte_view<1024>(evidence.repository_identity, request.repository_identity)
+            && sequences.equals_byte_view<128>(evidence.repository_fingerprint, request.repository_fingerprint)
+            && sequences.equals_byte_view<1024>(evidence.subject_identity, obligation.subject_identity)
+            && sequences.equals_byte_view<128>(evidence.subject_fingerprint, obligation.subject_fingerprint)
+            && sequences.equals_byte_view<128>(evidence.definition_identity, obligation.definition_identity)
+            && sequences.equals_byte_view<128>(evidence.executor_identity, obligation.executor_identity)
+            && sequences.equals_byte_view<128>(evidence.verifier_identity, obligation.verifier_identity)
+            && sequences.equals_byte_view<128>(evidence.invalidation_identity, obligation.invalidation_identity);
+    }
     let subject_matches: bool = request.subject_identity.len == 0
         || evidence.subject_identity.len == 0
         || sequences.equals_byte_view<1024>(evidence.subject_identity, request.subject_identity);
@@ -380,6 +418,7 @@ fn evidence_exact(
 
 fn evidence_state(
     obligation_identity: [byte; up_to 1024],
+    obligation: contracts.ObligationFact,
     request: PlannerRequest
 ) -> (result: EvidenceResult) {
     let seed: EvidenceScan = EvidenceScan {
@@ -393,14 +432,14 @@ fn evidence_state(
     iterate i over request.evidence carrying scan: EvidenceScan = seed {
         let item: contracts.EvidenceFact = request.evidence[i];
         let related: bool = sequences.equals_byte_view<1024>(item.obligation_identity, obligation_identity);
-        let exact: bool = related && evidence_exact(item, request);
+        let exact: bool = related && evidence_exact(item, obligation, request);
         next scan = EvidenceScan {
             related_count: scan.related_count +% select(related, 1, 0),
             exact_count: scan.exact_count +% select(exact, 1, 0),
             pass_seen: scan.pass_seen || (exact && evidence_status_pass(item.status)),
             fail_seen: scan.fail_seen || (exact && evidence_status_fail(item.status)),
             unknown_seen: scan.unknown_seen || (exact && evidence_status_unknown(item.status)),
-            evidence_identities: push_unique256(scan.evidence_identities, item.evidence_identity, exact)
+            evidence_identities: push_unique256(scan.evidence_identities, item.evidence_identity, related)
         };
     }
     let identities: [[byte; up_to 1024]; up_to 256] = sequences.byte_view_builder_finish(scan.evidence_identities);
@@ -477,7 +516,7 @@ fn evaluate_obligation(
     obligation: contracts.ObligationFact,
     request: PlannerRequest
 ) -> (result: ObligationEvaluation) {
-    let evidence: EvidenceResult = evidence_state(obligation.identity, request);
+    let evidence: EvidenceResult = evidence_state(obligation.identity, obligation, request);
     let tests: [[byte; up_to 1024]; up_to 256] = test_case_identities(obligation, request);
     if is_native_test_executor(obligation.executor.kind) && tests.len == 0 {
         return ObligationEvaluation {
@@ -542,7 +581,11 @@ fn add_selection_reason(
 fn seed_reasons(request: PlannerRequest) -> (result: sequences.ByteViewBuilder64) {
     let seed: sequences.ByteViewBuilder64 = sequences.byte_view_builder64_empty();
     iterate i over request.selection_escalation_reasons carrying builder: sequences.ByteViewBuilder64 = seed {
-        next builder = push_unique64(builder, request.selection_escalation_reasons[i], true);
+        let reason: [byte; up_to 1024] = request.selection_escalation_reasons[i];
+        let ignored_repository_plan_reason: bool = request.repository_scope_requested
+            && (sequences.equals_byte_view<1024>(reason, [118, 101, 114, 105, 102, 105, 99, 97, 116, 105, 111, 110, 95, 112, 108, 97, 110, 95, 110, 111, 116, 95, 115, 117, 102, 102, 105, 99, 105, 101, 110, 116])
+                || sequences.equals_byte_view<1024>(reason, [116, 101, 115, 116, 95, 115, 101, 108, 101, 99, 116, 105, 111, 110, 95, 117, 110, 114, 101, 115, 111, 108, 118, 101, 100]));
+        next builder = push_unique64(builder, reason, !ignored_repository_plan_reason);
     }
     return builder;
 }
@@ -552,6 +595,7 @@ fn fold_obligations(request: PlannerRequest) -> (result: PlanFold) {
         selected: selected_empty(),
         excluded: excluded_empty(),
         required: sequences.byte_view_builder_empty(),
+        repository_selected: sequences.byte_view_builder_empty(),
         new_execution: sequences.byte_view_builder_empty(),
         reasons: seed_reasons(request),
         selected_count: 0,
@@ -559,7 +603,7 @@ fn fold_obligations(request: PlannerRequest) -> (result: PlanFold) {
         blocked_stale: false,
         blocked_contradictory: false,
         blocked_escalation: false,
-        blocked_plan: !request.proof_sufficient_to_stop
+        blocked_plan: !request.proof_sufficient_to_stop && !request.repository_scope_requested
     };
     iterate i over request.obligations carrying fold: PlanFold = seed {
         let obligation: contracts.ObligationFact = request.obligations[i];
@@ -569,8 +613,15 @@ fn fold_obligations(request: PlannerRequest) -> (result: PlanFold) {
             identity: obligation.identity,
             status: evaluation.status,
             lifecycle: obligation.lifecycle,
+            scope: obligation.scope,
             guarantee_domain: obligation.guarantee_domain,
             evidence_role: obligation.evidence_role,
+            definition_identity: obligation.definition_identity,
+            subject_identity: obligation.subject_identity,
+            subject_fingerprint: obligation.subject_fingerprint,
+            executor_identity: obligation.executor_identity,
+            verifier_identity: obligation.verifier_identity,
+            invalidation_identity: obligation.invalidation_identity,
             reason: evaluation.reason,
             evidence_identities: evaluation.evidence_identities,
             test_case_identities: evaluation.test_case_identities,
@@ -582,6 +633,11 @@ fn fold_obligations(request: PlannerRequest) -> (result: PlanFold) {
             reason: exclusion_reason(obligation, request)
         };
         let required: sequences.ByteViewBuilder256 = push_unique256(fold.required, obligation.identity, included);
+        let repository_selected: sequences.ByteViewBuilder256 = push_unique256(
+            fold.repository_selected,
+            obligation.identity,
+            included && request.repository_scope_requested && contracts.obligation_scope_is_repository_canonical(obligation.scope)
+        );
         let needs_execution: bool = status_needs_execution(evaluation.status);
         let new_execution: sequences.ByteViewBuilder256 = push_unique256(fold.new_execution, obligation.identity, included && needs_execution);
         let reasons0: sequences.ByteViewBuilder64 = add_status_reason(fold.reasons, evaluation.status);
@@ -590,6 +646,7 @@ fn fold_obligations(request: PlannerRequest) -> (result: PlanFold) {
             selected: selected_push(fold.selected, selected, included),
             excluded: excluded_push(fold.excluded, excluded, !included),
             required: required,
+            repository_selected: repository_selected,
             new_execution: new_execution,
             reasons: reasons1,
             selected_count: fold.selected_count +% select(included, 1, 0),
@@ -613,16 +670,81 @@ fn add_empty_selection_reason(
     return builder;
 }
 
+fn missing_repository_obligations(
+    required: [[byte; up_to 1024]; up_to 256],
+    selected: sequences.ByteViewBuilder256
+) -> (result: sequences.ByteViewBuilder256) {
+    let seed: sequences.ByteViewBuilder256 = sequences.byte_view_builder_empty();
+    iterate i over required carrying builder: sequences.ByteViewBuilder256 = seed {
+        let identity: [byte; up_to 1024] = required[i];
+        next builder = push_unique256(builder, identity, !contains_builder256(selected, identity));
+    }
+    return builder;
+}
+
+fn repository_proof_scope(requested: bool) -> (result: contracts.RepositoryProofScope) {
+    if requested {
+        return contracts.RepositoryProofScope.repository_canonical;
+    }
+    return contracts.RepositoryProofScope.source_module;
+}
+
+fn stop_required_obligations(
+    request: PlannerRequest,
+    folded: PlanFold
+) -> (result: sequences.ByteViewBuilder256) {
+    if !request.repository_scope_requested {
+        return folded.required;
+    }
+    let seed: sequences.ByteViewBuilder256 = sequences.byte_view_builder_empty();
+    iterate i over request.required_repository_obligation_identities carrying builder: sequences.ByteViewBuilder256 = seed {
+        next builder = push_unique256(builder, request.required_repository_obligation_identities[i], true);
+    }
+    return builder;
+}
+
+fn stop_new_execution(
+    folded: PlanFold,
+    missing: [[byte; up_to 1024]; up_to 256]
+) -> (result: sequences.ByteViewBuilder256) {
+    iterate i over missing carrying builder: sequences.ByteViewBuilder256 = folded.new_execution {
+        next builder = push_unique256(builder, missing[i], true);
+    }
+    return builder;
+}
+
 fn finish_plan(request: PlannerRequest, folded: PlanFold) -> (result: contracts.ObligationPlanKernel) {
     let reasons1: sequences.ByteViewBuilder64 = add_empty_selection_reason(folded.reasons, folded.selected_count);
     let reasons: [[byte; up_to 1024]; up_to 64] = sequences.byte_view_builder64_finish(reasons1);
-    let sufficient: bool = request.proof_sufficient_to_stop
+    let missing_repository_builder: sequences.ByteViewBuilder256 = missing_repository_obligations(
+        request.required_repository_obligation_identities,
+        folded.repository_selected
+    );
+    let missing_repository: [[byte; up_to 1024]; up_to 256] = sequences.byte_view_builder_finish(missing_repository_builder);
+    let repository_selected_values: [[byte; up_to 1024]; up_to 256] = sequences.byte_view_builder_finish(folded.repository_selected);
+    let required_stop_builder: sequences.ByteViewBuilder256 = stop_required_obligations(request, folded);
+    let new_execution_stop_builder: sequences.ByteViewBuilder256 = stop_new_execution(folded, missing_repository);
+    let repository_complete: bool = request.repository_scope_requested
+        && request.repository_scope_complete
+        && request.repository_impact_complete
+        && !request.repository_unknown_root
+        && missing_repository_builder.length == 0
+        && folded.repository_selected.length == request.required_repository_obligation_identities.len;
+    let ordinary_sufficient: bool = request.proof_sufficient_to_stop
         && folded.selected_count > 0
-        && folded.new_execution.length == 0
+        && new_execution_stop_builder.length == 0
         && !folded.blocked_selection
         && !folded.blocked_stale
         && !folded.blocked_contradictory
         && !folded.blocked_escalation;
+    let repository_sufficient: bool = repository_complete
+        && folded.selected_count > 0
+        && new_execution_stop_builder.length == 0
+        && !folded.blocked_selection
+        && !folded.blocked_stale
+        && !folded.blocked_contradictory
+        && !folded.blocked_escalation;
+    let sufficient: bool = select(request.repository_scope_requested, repository_sufficient, ordinary_sufficient);
     let selected_storage: [contracts.SelectedObligation; 256] = folded.selected.values;
     let excluded_storage: [contracts.ExcludedObligation; 256] = folded.excluded.values;
     let selected_values: [contracts.SelectedObligation; up_to 256] = selected_storage[0..folded.selected.length];
@@ -632,8 +754,18 @@ fn finish_plan(request: PlannerRequest, folded: PlanFold) -> (result: contracts.
         excluded: excluded_values,
         stop: contracts.ObligationStop {
             sufficient_to_stop: sufficient,
-            required_obligation_identities: sequences.byte_view_builder_finish(folded.required),
-            new_execution_required: sequences.byte_view_builder_finish(folded.new_execution),
+            repository_scope_requested: request.repository_scope_requested,
+            repository_complete: repository_complete,
+            repository_identity: request.repository_identity,
+            repository_revision: request.repository_revision,
+            repository_fingerprint: request.repository_fingerprint,
+            repository_inventory_identity: request.repository_inventory_identity,
+            repository_scope: repository_proof_scope(request.repository_scope_requested),
+            required_repository_obligation_identities: request.required_repository_obligation_identities,
+            selected_repository_obligation_identities: repository_selected_values[0..folded.repository_selected.length],
+            missing_repository_obligation_identities: missing_repository[0..missing_repository_builder.length],
+            required_obligation_identities: sequences.byte_view_builder_finish(required_stop_builder),
+            new_execution_required: sequences.byte_view_builder_finish(new_execution_stop_builder),
             escalation_reasons: reasons,
             boundary: request.boundary
         }
