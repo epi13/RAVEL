@@ -996,13 +996,13 @@ def _native_obligation_execution_limits(
     test_count = len(tests) if isinstance(tests, list) else 0
     evidence_count = len(evidence) if isinstance(evidence, list) else 0
     step_budget = min(
-        8_388_608,
+        33_554_432,
         max(
             1_048_576,
             1_048_576
-            + 32_768 * obligation_count
-            + 8_192 * test_count
-            + 4_096 * evidence_count,
+            + 131_072 * obligation_count
+            + 16_384 * test_count
+            + 8_192 * evidence_count,
         ),
     )
     timeout_seconds = min(600.0, max(requested_timeout, 60.0 + 4.0 * obligation_count))

@@ -201,9 +201,9 @@ def test_native_obligation_planner_limits_scale_with_declared_work_and_stay_boun
     language_steps, language_timeout = _native_obligation_execution_limits(language, 180.0)
     max_steps, max_timeout = _native_obligation_execution_limits(maximum, 180.0)
 
-    assert small_steps == 1_081_344
+    assert small_steps == 1_179_648
     assert small_timeout == 180.0
-    assert language_steps == 4_505_600
+    assert language_steps == 14_778_368
     assert language_timeout == 476.0
-    assert max_steps == 8_388_608
+    assert max_steps == 33_554_432
     assert max_timeout == 600.0
