@@ -396,8 +396,9 @@ def build_repository_context(
         complete = False
 
     metadata, _ = _cargo_metadata(root, timeout=timeout)
-    if metadata is None:
-        complete = False
+    # Repository closures may consist entirely of declared host integrations
+    # and compiler-owned MNCS tests. Missing Cargo metadata only makes such a
+    # closure incomplete when a Cargo target actually needs expansion below.
     test_manifest_path = root / "mncs-test.toml"
     try:
         test_manifest = tomllib.loads(test_manifest_path.read_text(encoding="utf-8"))

@@ -223,10 +223,7 @@ def test_project_host_executor_identity_declares_library_environment_policy(
     monkeypatch.setattr(
         obligations,
         "_cargo_metadata",
-        lambda repository_root, *, timeout: (
-            {"workspace_root": str(repository_root), "workspace_members": [], "packages": []},
-            None,
-        ),
+        lambda repository_root, *, timeout: (None, None),
     )
     monkeypatch.setattr(obligations, "_tool_identity", lambda argv, *, cwd: "python3 fixture")
     monkeypatch.setattr(
