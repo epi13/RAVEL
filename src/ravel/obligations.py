@@ -8,13 +8,14 @@ provider and never upgrades evidence to PASS.
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
 import hashlib
 import json
 import os
-from pathlib import Path
 import subprocess
 import tempfile
+import tomllib
+from collections.abc import Mapping, Sequence
+from pathlib import Path
 from typing import Any
 
 try:
@@ -213,6 +214,138 @@ def _cargo_closure_paths(metadata: Mapping[str, Any], package_name: str) -> list
     return sorted(paths)
 
 
+def _cargo_test_target_declarations(
+    metadata: Mapping[str, Any], package_name: str, parent_name: str, argv: Sequence[str]
+) -> list[dict[str, Any]]:
+    packages = metadata.get("packages")
+    workspace_ids = set(metadata.get("workspace_members", []))
+    named = [
+        item for item in packages if isinstance(item, Mapping)
+        and item.get("name") == package_name and item.get("id") in workspace_ids
+    ] if isinstance(packages, list) else []
+    if len(named) != 1:
+        return []
+    workspace_root = Path(str(metadata.get("workspace_root", ""))).resolve()
+    output: list[dict[str, Any]] = []
+    targets = named[0].get("targets", [])
+    if not isinstance(targets, list):
+        return []
+    for target in targets:
+        if not isinstance(target, Mapping) or (target.get("test") is not True and target.get("doctest") is not True):
+            continue
+        kinds = target.get("kind", [])
+        name = target.get("name")
+        source_path = target.get("src_path")
+        if not isinstance(kinds, list) or not isinstance(name, str) or not isinstance(source_path, str):
+            continue
+        try:
+            relative_source = Path(source_path).resolve().relative_to(workspace_root).as_posix()
+        except ValueError:
+            continue
+        if target.get("test") is True:
+            target_kind = next((kind for kind in ("lib", "bin", "test", "example") if kind in kinds), None)
+            if target_kind is not None:
+                selector = {
+                    "lib": ["--lib"],
+                    "bin": ["--bin", name],
+                    "test": ["--test", name],
+                    "example": ["--example", name],
+                }[target_kind]
+                output.append({
+                    "name": f"{parent_name}.cargo.{target_kind}.{name}",
+                    "target_identity": f"{package_name}:{target_kind}:{name}",
+                    "source_path": relative_source,
+                    "argv": [*argv, *selector],
+                })
+        if "lib" in kinds and target.get("doctest") is True:
+            output.append({
+                "name": f"{parent_name}.cargo.doc.{name}",
+                "target_identity": f"{package_name}:doc:{name}",
+                "source_path": relative_source,
+                "argv": [*argv, "--doc"],
+            })
+    return sorted(output, key=lambda item: str(item["target_identity"]))
+
+
+def _cargo_test_target_paths(
+    metadata: Mapping[str, Any], package_name: str, target_source_path: str
+) -> list[str] | None:
+    closure_paths = _cargo_closure_paths(metadata, package_name)
+    if closure_paths is None:
+        return None
+    workspace_root = Path(str(metadata.get("workspace_root", ""))).resolve()
+    paths: set[str] = set()
+    for package_path in closure_paths:
+        candidate = workspace_root / package_path
+        if package_path in {"Cargo.toml", "Cargo.lock", "rust-toolchain", "rust-toolchain.toml", ".cargo"}:
+            paths.add(package_path)
+            continue
+        if (candidate / "Cargo.toml").is_file():
+            paths.add((Path(package_path) / "Cargo.toml").as_posix())
+        if (candidate / "src").is_dir():
+            paths.add((Path(package_path) / "src").as_posix())
+        if (candidate / "build.rs").is_file():
+            paths.add((Path(package_path) / "build.rs").as_posix())
+    paths.add(target_source_path)
+    return sorted(paths)
+
+
+def _manifest_host_grants(
+    manifest: Mapping[str, Any], test_identities: set[str]
+) -> tuple[list[dict[str, Any]], bool]:
+    raw_sets = manifest.get("host_grant_sets", [])
+    if not isinstance(raw_sets, list):
+        return [], False
+    output: list[dict[str, Any]] = []
+    seen_tests: set[str] = set()
+    complete = True
+    for item in raw_sets:
+        if not isinstance(item, Mapping) or set(item) != {"test_case_identity", "grants"}:
+            complete = False
+            continue
+        test_identity = item.get("test_case_identity")
+        grants = item.get("grants")
+        if (
+            not isinstance(test_identity, str)
+            or not test_identity
+            or test_identity in seen_tests
+            or test_identity not in test_identities
+            or not isinstance(grants, list)
+            or not grants
+        ):
+            complete = False
+            continue
+        seen_tests.add(test_identity)
+        normalized: list[dict[str, Any]] = []
+        seen_grants: set[tuple[str, str]] = set()
+        for grant in grants:
+            if not isinstance(grant, Mapping) or set(grant) - {"capability", "locator", "bytes"}:
+                complete = False
+                continue
+            capability = grant.get("capability")
+            locator = grant.get("locator", "")
+            byte_values = grant.get("bytes", [])
+            if (
+                not isinstance(capability, str)
+                or not capability
+                or not isinstance(locator, str)
+                or not isinstance(byte_values, list)
+                or len(byte_values) > 4096
+                or any(not isinstance(value, int) or isinstance(value, bool) or not 0 <= value <= 255 for value in byte_values)
+                or (capability, locator) in seen_grants
+            ):
+                complete = False
+                continue
+            seen_grants.add((capability, locator))
+            normalized.append({"capability": capability, "locator": locator, "bytes": byte_values})
+        if normalized:
+            output.append({"test_case_identity": test_identity, "grants": normalized})
+        else:
+            complete = False
+    output.sort(key=lambda item: item["test_case_identity"])
+    return output, complete
+
+
 def build_repository_context(
     *,
     source_path: Path,
@@ -264,6 +397,12 @@ def build_repository_context(
 
     metadata, _ = _cargo_metadata(root, timeout=timeout)
     if metadata is None:
+        complete = False
+    test_manifest_path = root / "mncs-test.toml"
+    try:
+        test_manifest = tomllib.loads(test_manifest_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, tomllib.TOMLDecodeError):
+        test_manifest = {}
         complete = False
     contracts = project.get("contracts", {})
     project_tests = contracts.get("tests", []) if isinstance(contracts, Mapping) else []
@@ -381,11 +520,20 @@ def build_repository_context(
             executor["source_paths"] = sorted(set(resolved_sources))
             executor["library_paths"] = list(raw_library_paths)
             executor["test_case_identities"] = sorted(test_ids)
+            host_grants, grants_complete = _manifest_host_grants(test_manifest, test_ids)
+            executor["host_grants"] = host_grants
+            complete = complete and grants_complete
             verifier = executor.get("verifier_identity") or "mncs-test-runner/0.2.0"
             executor["verifier_identity"] = verifier
             invalidation, paths_complete, invalidated_paths = _declared_path_fingerprint(
-                root, [item for item in obligation.get("invalidation_dependencies", []) if isinstance(item, str)]
+                root,
+                [
+                    *[item for item in obligation.get("invalidation_dependencies", []) if isinstance(item, str)],
+                    "mncs-test.toml",
+                ],
             )
+            if "mncs-test.toml" not in invalidated_paths:
+                invalidated_paths = sorted(set(invalidated_paths + ["mncs-test.toml"]))
             external_libraries_identity, libraries_complete, _ = _declared_path_fingerprint(
                 root.parent,
                 external_library_names,
@@ -397,7 +545,7 @@ def build_repository_context(
                 "definition_identity": _digest(raw),
                 "subject_identity": str((obligation.get("subjects") or [identity])[0]),
                 "subject_fingerprint": _digest({"identity": identity, "invalidation": invalidation}),
-                "executor_identity": _digest({"provider": executor.get("provider"), "kind": executor.get("kind"), "entrypoint": executor.get("entrypoint"), "source_paths": executor.get("source_paths"), "library_paths": executor.get("library_paths"), "test_case_identities": executor.get("test_case_identities"), "verifier_identity": verifier}),
+                "executor_identity": _digest({"provider": executor.get("provider"), "kind": executor.get("kind"), "entrypoint": executor.get("entrypoint"), "source_paths": executor.get("source_paths"), "library_paths": executor.get("library_paths"), "test_case_identities": executor.get("test_case_identities"), "host_grants": host_grants, "verifier_identity": verifier}),
                 "verifier_identity": _digest({"verifier": verifier, "runner": runner_identity}),
                 "invalidation_identity": invalidation,
             }
@@ -415,22 +563,26 @@ def build_repository_context(
             complete = False
             continue
         seen_test_names.add(name)
-        identity = f"{repository_identity}.project-test.{name}"
-        required_identities.append(identity)
         command = raw_test.get("command")
         argv = command.get("argv") if isinstance(command, Mapping) else None
         if not isinstance(argv, list) or not argv or not all(isinstance(arg, str) and arg for arg in argv):
             complete = False
             continue
+        parent_identity = f"{repository_identity}.project-test.{name}"
+        declared_tests.append({"identity": parent_identity, "name": name, "command": argv})
         timeout_seconds = command.get("timeout_seconds", raw_test.get("timeout_seconds"))
         if not isinstance(timeout_seconds, int) or isinstance(timeout_seconds, bool) or not 1 <= timeout_seconds <= 3600:
             complete = False
             continue
-        tool_version = _tool_identity(argv, cwd=root)
+        tool_version = tool_versions.get(argv[0])
         if tool_version is None:
-            complete = False
-            tool_version = "unavailable"
-        tool_versions[argv[0]] = tool_version
+            detected_version = _tool_identity(argv, cwd=root)
+            if detected_version is None:
+                complete = False
+                tool_version = "unavailable"
+            else:
+                tool_version = detected_version
+            tool_versions[argv[0]] = tool_version
         covers = raw_test.get("covers", [])
         dependency_paths = sorted({
             path
@@ -440,54 +592,93 @@ def build_repository_context(
         explicit_dependencies = raw_test.get("invalidation_dependencies", [])
         if isinstance(explicit_dependencies, list):
             dependency_paths = sorted(set(dependency_paths + [item for item in explicit_dependencies if isinstance(item, str)]))
-        for argument in argv[1:]:
-            if not argument.startswith("-") and (root / argument).exists():
-                dependency_paths.append(argument)
-        dependency_paths = sorted(set(dependency_paths))
-        if argv[0] == "cargo":
-            package = _cargo_package_name(argv)
-            package_paths = _cargo_closure_paths(metadata, package) if metadata and package else None
-            if package_paths is None:
+        base_dependency_paths = sorted(set(dependency_paths))
+        target_mode = command.get("target_mode") if isinstance(command, Mapping) else None
+        package = _cargo_package_name(argv)
+        if target_mode is None:
+            targets = [{
+                "name": name,
+                "argv": argv,
+                "target_identity": package or name,
+                "source_path": None,
+            }]
+        elif target_mode == "cargo_test_targets" and argv[0] == "cargo" and package and metadata:
+            targets = _cargo_test_target_declarations(metadata, package, name, argv)
+            if not targets:
                 complete = False
-                package_paths = []
-            dependency_paths = sorted(set(dependency_paths + package_paths))
-        invalidation, paths_complete, invalidated_paths = _declared_path_fingerprint(root, dependency_paths)
-        complete = complete and paths_complete
-        executor = {
-            "provider": "mncs-test",
-            "kind": "external_integration",
-            "entrypoint": f"project-test:{name}",
-            "argv": argv,
-            "working_directory": ".",
-            "timeout_seconds": timeout_seconds,
-            "target_identity": _cargo_package_name(argv) or name,
-            "verifier_identity": tool_version,
-        }
-        definition = {"project_test": dict(raw_test), "repository": repository_identity, "runner_identity": runner_identity}
-        subject_identity = f"mncs.repository-test:{repository_identity}:{name}"
-        derived = {
-            "definition_identity": _digest(definition),
-            "subject_identity": subject_identity,
-            "subject_fingerprint": _digest({"subject": subject_identity, "invalidation": invalidation}),
-            "executor_identity": _digest(executor),
-            "verifier_identity": _digest({"verifier": tool_version, "runner": runner_identity}),
-            "invalidation_identity": invalidation,
-        }
-        canonical_obligations.append({
-            "identity": identity,
-            "title": f"Repository self-test: {name}",
-            "guarantee_domain": "integration",
-            "evidence_role": "canonical_regression",
-            "lifecycle": "permanent",
-            "scope": "repository_canonical",
-            "subjects": [subject_identity],
-            "invalidation_dependencies": dependency_paths,
-            "executor": executor,
-            "evidence_identity": {"subject_fields": ["repository_fingerprint", "subject_fingerprint"], "definition_fields": ["definition_identity"], "execution_fields": ["executor_identity", "verifier_identity", "invalidation_identity"]},
-            **derived,
-        })
-        repository_evidence.append({"identity": identity, **derived, "dependency_paths": invalidated_paths})
-        declared_tests.append({"identity": identity, "name": name, "command": argv})
+                continue
+        else:
+            complete = False
+            continue
+
+        for target in targets:
+            target_name = str(target["name"])
+            identity = f"{repository_identity}.project-test.{target_name}"
+            if identity in required_identities:
+                complete = False
+                continue
+            required_identities.append(identity)
+            target_argv = target["argv"]
+            dependency_paths = list(base_dependency_paths)
+            for argument in target_argv[1:]:
+                if not argument.startswith("-") and (root / argument).exists():
+                    dependency_paths.append(argument)
+            dependency_paths = sorted(set(dependency_paths))
+            if target_mode == "cargo_test_targets":
+                target_paths = _cargo_test_target_paths(metadata, package, str(target["source_path"]))
+                if target_paths is None:
+                    complete = False
+                    target_paths = []
+            elif target_argv[0] == "cargo":
+                target_paths = _cargo_closure_paths(metadata, package) if metadata and package else None
+                if target_paths is None:
+                    complete = False
+                    target_paths = []
+            else:
+                target_paths = []
+            child_dependencies = sorted(set(dependency_paths + target_paths))
+            invalidation, paths_complete, invalidated_paths = _declared_path_fingerprint(root, child_dependencies)
+            complete = complete and paths_complete
+            executor = {
+                "provider": "mncs-test",
+                "kind": "external_integration",
+                "entrypoint": f"project-test:{target_name}",
+                "argv": target_argv,
+                "working_directory": ".",
+                "timeout_seconds": timeout_seconds,
+                "target_identity": target["target_identity"],
+                "verifier_identity": tool_version,
+            }
+            definition = {
+                "project_test": dict(raw_test),
+                "repository": repository_identity,
+                "runner_identity": runner_identity,
+            }
+            if target_mode == "cargo_test_targets":
+                definition["cargo_target_identity"] = target["target_identity"]
+            subject_identity = f"mncs.repository-test:{repository_identity}:{target_name}"
+            derived = {
+                "definition_identity": _digest(definition),
+                "subject_identity": subject_identity,
+                "subject_fingerprint": _digest({"subject": subject_identity, "invalidation": invalidation}),
+                "executor_identity": _digest(executor),
+                "verifier_identity": _digest({"verifier": tool_version, "runner": runner_identity}),
+                "invalidation_identity": invalidation,
+            }
+            canonical_obligations.append({
+                "identity": identity,
+                "title": f"Repository self-test: {target_name}",
+                "guarantee_domain": "integration",
+                "evidence_role": "canonical_regression",
+                "lifecycle": "permanent",
+                "scope": "repository_canonical",
+                "subjects": [subject_identity],
+                "invalidation_dependencies": child_dependencies,
+                "executor": executor,
+                "evidence_identity": {"subject_fields": ["repository_fingerprint", "subject_fingerprint"], "definition_fields": ["definition_identity"], "execution_fields": ["executor_identity", "verifier_identity", "invalidation_identity"]},
+                **derived,
+            })
+            repository_evidence.append({"identity": identity, **derived, "dependency_paths": invalidated_paths})
 
     duplicate_identities = len(required_identities) != len(set(required_identities))
     if duplicate_identities:
@@ -1044,6 +1235,26 @@ def build_native_obligation_plan(
         raise ValueError("native RAVEL obligation planner returned an incomplete kernel document")
     normalized_impact_domains = _strings(impact.get("guarantee_domains")) or ["semantic"]
     change_kinds = _strings(impact.get("change_kinds"))
+    execution_details = {
+        str(item.get("identity")): item.get("executor", {})
+        for item in normalized_inventory["obligations"]
+        if isinstance(item, Mapping) and isinstance(item.get("identity"), str)
+    }
+    selected_projection: list[dict[str, Any]] = []
+    for item in selected:
+        if not isinstance(item, Mapping):
+            continue
+        projected = _clean_selected_obligation(item)
+        identity = projected.get("identity")
+        declared_executor = execution_details.get(str(identity))
+        if isinstance(declared_executor, Mapping) and declared_executor.get("kind") == "native_first_class_test":
+            executor = projected.get("executor")
+            if isinstance(executor, Mapping):
+                projected["executor"] = {
+                    **executor,
+                    "host_grants": declared_executor.get("host_grants", []),
+                }
+        selected_projection.append(projected)
     payload: dict[str, Any] = {
         "schema_version": "mncs.verification-obligation-plan/1",
         "verification_plan_id": str(verification_plan.get("plan_id", "")),
@@ -1059,11 +1270,7 @@ def build_native_obligation_plan(
             "revision": normalized_inventory["revision"],
             "identity": obligation_inventory_identity(normalized_inventory, commons_root=commons_root),
         },
-        "obligations": [
-            _clean_selected_obligation(item)
-            for item in selected
-            if isinstance(item, Mapping)
-        ],
+        "obligations": selected_projection,
         "excluded": [dict(item) for item in excluded],
         "evidence": [dict(item) for item in current_evidence],
         "stop": {

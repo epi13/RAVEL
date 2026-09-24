@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ravel.obligations import build_obligation_plan
+from ravel.obligations import (
+    _cargo_test_target_declarations,
+    _manifest_host_grants,
+    build_obligation_plan,
+)
 
 
 def _inventory() -> dict:
@@ -133,3 +137,51 @@ def test_exact_pass_evidence_is_reusable() -> None:
     )
     assert plan["obligations"][0]["status"] == "current"
     assert plan["stop"]["sufficient_to_stop"] is True
+
+
+def test_cargo_package_test_declaration_expands_to_stable_target_obligations() -> None:
+    metadata = {
+        "workspace_root": "/workspace",
+        "workspace_members": ["path+file:///workspace#fixture@0.1.0"],
+        "packages": [{
+            "id": "path+file:///workspace#fixture@0.1.0",
+            "name": "fixture",
+            "targets": [
+                {"name": "fixture", "kind": ["lib"], "src_path": "/workspace/src/lib.rs", "test": True, "doctest": True},
+                {"name": "parser", "kind": ["test"], "src_path": "/workspace/tests/parser.rs", "test": True, "doctest": False},
+                {"name": "fixture-tool", "kind": ["bin"], "src_path": "/workspace/src/bin/fixture-tool.rs", "test": True, "doctest": False},
+            ],
+        }],
+    }
+    targets = _cargo_test_target_declarations(
+        metadata, "fixture", "fixture-tests", ["cargo", "test", "--package", "fixture"]
+    )
+    assert [target["target_identity"] for target in targets] == [
+        "fixture:bin:fixture-tool",
+        "fixture:doc:fixture",
+        "fixture:lib:fixture",
+        "fixture:test:parser",
+    ]
+    assert [target["argv"][4:] for target in targets] == [
+        ["--bin", "fixture-tool"],
+        ["--doc"],
+        ["--lib"],
+        ["--test", "parser"],
+    ]
+
+
+def test_repository_grants_are_exact_and_unknown_selectors_fail_closed() -> None:
+    test_identity = "mncs:0.2:test-case:process::cancel"
+    grant = {"capability": "process_capability", "locator": "/usr/bin/sleep", "bytes": []}
+    grants, complete = _manifest_host_grants(
+        {"host_grant_sets": [{"test_case_identity": test_identity, "grants": [grant]}]},
+        {test_identity},
+    )
+    assert complete is True
+    assert grants == [{"test_case_identity": test_identity, "grants": [grant]}]
+    stale, complete = _manifest_host_grants(
+        {"host_grant_sets": [{"test_case_identity": "stale-test", "grants": [grant]}]},
+        {test_identity},
+    )
+    assert complete is False
+    assert stale == []
