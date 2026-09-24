@@ -996,7 +996,7 @@ def _native_obligation_execution_limits(
     test_count = len(tests) if isinstance(tests, list) else 0
     evidence_count = len(evidence) if isinstance(evidence, list) else 0
     step_budget = min(
-        33_554_432,
+        8_000_000,
         max(
             1_048_576,
             1_048_576
