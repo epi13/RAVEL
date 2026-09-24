@@ -519,11 +519,19 @@ fn evaluate_obligation(
     request: PlannerRequest
 ) -> (result: ObligationEvaluation) {
     let evidence: EvidenceResult = evidence_state(obligation.identity, obligation, request);
-    let tests: [[byte; up_to 1024]; up_to 256] = test_case_identities(obligation, request);
-    if is_native_test_executor(obligation.executor.kind) && tests.len == 0 {
+    if is_native_test_executor(obligation.executor.kind) {
+        let tests: [[byte; up_to 1024]; up_to 256] = test_case_identities(obligation, request);
+        if tests.len == 0 {
+            return ObligationEvaluation {
+                status: contracts.ObligationStatus.selection_unresolved,
+                reason: [110, 97, 116, 105, 118, 101, 32, 111, 98, 108, 105, 103, 97, 116, 105, 111, 110, 32, 104, 97, 115, 32, 110, 111, 32, 99, 117, 114, 114, 101, 110, 116, 32, 99, 111, 109, 112, 105, 108, 101, 114, 32, 116, 101, 115, 116, 45, 99, 97, 115, 101, 32, 105, 100, 101, 110, 116, 105, 116, 121],
+                evidence_identities: evidence.evidence_identities,
+                test_case_identities: tests
+            };
+        }
         return ObligationEvaluation {
-            status: contracts.ObligationStatus.selection_unresolved,
-            reason: [110, 97, 116, 105, 118, 101, 32, 111, 98, 108, 105, 103, 97, 116, 105, 111, 110, 32, 104, 97, 115, 32, 110, 111, 32, 99, 117, 114, 114, 101, 110, 116, 32, 99, 111, 109, 112, 105, 108, 101, 114, 32, 116, 101, 115, 116, 45, 99, 97, 115, 101, 32, 105, 100, 101, 110, 116, 105, 116, 121],
+            status: evidence.status,
+            reason: evidence.reason,
             evidence_identities: evidence.evidence_identities,
             test_case_identities: tests
         };
@@ -532,7 +540,23 @@ fn evaluate_obligation(
         status: evidence.status,
         reason: evidence.reason,
         evidence_identities: evidence.evidence_identities,
-        test_case_identities: tests
+        test_case_identities: sequences.byte_view_builder_finish(sequences.byte_view_builder_empty())
+    };
+}
+
+fn evaluate_included_obligation(
+    obligation: contracts.ObligationFact,
+    request: PlannerRequest,
+    included: bool
+) -> (result: ObligationEvaluation) {
+    if included {
+        return evaluate_obligation(obligation, request);
+    }
+    return ObligationEvaluation {
+        status: contracts.ObligationStatus.not_selected,
+        reason: [0; 0],
+        evidence_identities: sequences.byte_view_builder_finish(sequences.byte_view_builder_empty()),
+        test_case_identities: sequences.byte_view_builder_finish(sequences.byte_view_builder_empty())
     };
 }
 
@@ -610,7 +634,7 @@ fn fold_obligations(request: PlannerRequest) -> (result: PlanFold) {
     iterate i over request.obligations carrying fold: PlanFold = seed {
         let obligation: contracts.ObligationFact = request.obligations[i];
         let included: bool = lifecycle_active(obligation.lifecycle) && matches_impact(obligation, request);
-        let evaluation: ObligationEvaluation = evaluate_obligation(obligation, request);
+        let evaluation: ObligationEvaluation = evaluate_included_obligation(obligation, request, included);
         let selected: contracts.SelectedObligation = contracts.SelectedObligation {
             identity: obligation.identity,
             status: evaluation.status,
