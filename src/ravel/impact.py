@@ -59,15 +59,21 @@ except ImportError:  # direct script execution
 
 try:
     from .obligations import (
+        build_repository_context,
         build_native_obligation_plan,
         build_obligation_plan,
         load_current_evidence,
+        obligation_plan_identity,
+        validate_obligation_plan,
     )
 except ImportError:  # direct script execution
     from obligations import (  # type: ignore
+        build_repository_context,
         build_native_obligation_plan,
         build_obligation_plan,
         load_current_evidence,
+        obligation_plan_identity,
+        validate_obligation_plan,
     )
 
 
@@ -938,7 +944,7 @@ def request_verification_plan(
             libraries=libraries,
             timeout=timeout,
         )
-        _write_obligation_plan_if_requested(
+        plan = _write_obligation_plan_if_requested(
             plan,
             impact_document=impact_document,
             compiler_inventory_document=inventory_document,
@@ -1000,7 +1006,7 @@ def request_verification_plan(
             "inventory_provider_error": str(inventory_error) if inventory_error is not None else None,
         },
     )
-    _write_obligation_plan_if_requested(
+    plan = _write_obligation_plan_if_requested(
         plan,
         impact_document=impact_document,
         compiler_inventory_document=inventory_document,
@@ -1033,10 +1039,11 @@ def _write_obligation_plan_if_requested(
     libraries: Sequence[Path],
     timeout: float,
     use_native: bool,
-) -> dict[str, Any] | None:
+) -> dict[str, Any]:
     if obligation_inventory_path is None and obligation_output_path is None:
-        return None
+        return dict(verification_plan)
     inventory_path = obligation_inventory_path or (cwd / ".mncs" / "verification-obligations.json")
+    inventory_path = inventory_path.resolve()
     try:
         obligation_inventory_document = json.loads(inventory_path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
@@ -1048,6 +1055,29 @@ def _write_obligation_plan_if_requested(
         "change_kinds": list(impact_document.get("change_kinds", [])),
     }
     current_evidence = load_current_evidence(current_evidence_path)
+    selection = verification_plan.get("selection")
+    selection_mapping = selection if isinstance(selection, Mapping) else {}
+    repository_requested = selection_mapping.get("level") == "repository_canonical"
+    repository_context: dict[str, Any] | None = None
+    if repository_requested:
+        if not use_native:
+            raise ImpactError("repository-canonical obligation closure requires the native RAVEL selector")
+        repository_context = build_repository_context(
+            source_path=source_path,
+            inventory_path=inventory_path,
+            inventory_document=obligation_inventory_document,
+            mncs=mncs,
+            cwd=cwd,
+            libraries=libraries,
+            timeout=timeout,
+        )
+        repository_context["impact_complete"] = bool(impact_document.get("complete"))
+        risk_flags = impact_document.get("risk_flags", [])
+        repository_context["unknown_root"] = (
+            not bool(impact_document.get("roots"))
+            or not isinstance(risk_flags, list)
+            or "unknown_root" in risk_flags
+        )
     if use_native:
         obligation_plan = build_native_obligation_plan(
             enriched_plan,
@@ -1060,6 +1090,7 @@ def _write_obligation_plan_if_requested(
             compiler_inventory=compiler_inventory_document,
             current_evidence=current_evidence,
             commons_root=commons_root,
+            repository_context=repository_context,
         )
     else:
         obligation_plan = build_obligation_plan(
@@ -1070,12 +1101,38 @@ def _write_obligation_plan_if_requested(
             current_evidence=current_evidence,
             commons_root=commons_root,
         )
+    updated_verification_plan = dict(verification_plan)
+    if repository_requested:
+        proof_value = updated_verification_plan.get("proof")
+        proof = dict(proof_value) if isinstance(proof_value, Mapping) else {}
+        sufficient = bool(obligation_plan.get("stop", {}).get("sufficient_to_stop"))
+        boundary_value = proof.get("boundary")
+        boundary = dict(boundary_value) if isinstance(boundary_value, Mapping) else {}
+        boundary["established"] = sufficient
+        proof["sufficient_to_stop"] = sufficient
+        proof["boundary"] = boundary
+        updated_verification_plan["proof"] = proof
+        updated_verification_plan["plan_id"] = plan_identity(updated_verification_plan, commons_root=commons_root)
+        try:
+            updated_verification_plan = validate_plan(
+                updated_verification_plan,
+                source_path=source_path,
+                commons_root=commons_root,
+            )
+        except ValueError as error:
+            raise ImpactError(f"repository-canonical proof projection failed validation: {error}") from error
+        obligation_plan["verification_plan_id"] = updated_verification_plan["plan_id"]
+        obligation_plan.pop("obligation_plan_id", None)
+        obligation_plan["obligation_plan_id"] = obligation_plan_identity(
+            obligation_plan, commons_root=commons_root
+        )
+        obligation_plan = validate_obligation_plan(obligation_plan, commons_root=commons_root)
     if obligation_output_path is not None:
         output_path = obligation_output_path if obligation_output_path.is_absolute() else cwd / obligation_output_path
         output_path = output_path.resolve()
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(json.dumps(obligation_plan, indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
-    return obligation_plan
+    return updated_verification_plan
 
 
 def _parser() -> argparse.ArgumentParser:
