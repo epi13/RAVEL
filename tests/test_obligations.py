@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
+from types import SimpleNamespace
 
+from ravel import obligations
 from ravel.obligations import (
     _cargo_test_target_declarations,
     _manifest_host_grants,
     _native_obligation_execution_limits,
     build_obligation_plan,
+    build_repository_context,
 )
 
 
@@ -169,6 +173,81 @@ def test_cargo_package_test_declaration_expands_to_stable_target_obligations() -
         ["--lib"],
         ["--test", "parser"],
     ]
+
+
+def test_project_host_executor_identity_declares_library_environment_policy(
+    tmp_path: Path, monkeypatch
+) -> None:
+    root = tmp_path / "fixture"
+    (root / ".mncs").mkdir(parents=True)
+    (root / "library/std").mkdir(parents=True)
+    (root / ".mncs/project.json").write_text(
+        json.dumps(
+            {
+                "repository": "fixture",
+                "revision": 1,
+                "verification": {
+                    "obligation_inventory": ".mncs/verification-obligations.json",
+                    "test_runner_identity": "mncs-test/fixture",
+                },
+                "contracts": {
+                    "tests": [
+                        {
+                            "test": "host-check",
+                            "obligation": "self",
+                            "command": {
+                                "argv": ["python3", "-m", "pytest"],
+                                "timeout_seconds": 60,
+                            },
+                        }
+                    ]
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    inventory_path = root / ".mncs/verification-obligations.json"
+    inventory = {
+        "schema_version": "mncs-family.verification-obligation-inventory/v1",
+        "repository": "fixture",
+        "revision": 1,
+        "obligations": [],
+    }
+    inventory_path.write_text(json.dumps(inventory), encoding="utf-8")
+    source_path = root / "library/std/fixture.mncs"
+    source_path.write_text("mncs 0.6;\nmodule fixture.std;\n", encoding="utf-8")
+    (root / "mncs-test.toml").write_text("", encoding="utf-8")
+
+    monkeypatch.setattr(obligations, "validate_obligation_inventory", lambda value: dict(value))
+    monkeypatch.setattr(
+        obligations,
+        "_cargo_metadata",
+        lambda repository_root, *, timeout: (
+            {"workspace_root": str(repository_root), "workspace_members": [], "packages": []},
+            None,
+        ),
+    )
+    monkeypatch.setattr(obligations, "_tool_identity", lambda argv, *, cwd: "python3 fixture")
+    monkeypatch.setattr(
+        obligations.subprocess,
+        "run",
+        lambda *args, **kwargs: SimpleNamespace(returncode=0, stdout="fixture-revision\n"),
+    )
+
+    context = build_repository_context(
+        source_path=source_path,
+        inventory_path=inventory_path,
+        inventory_document=inventory,
+        mncs="mncs",
+        cwd=root,
+        libraries=[],
+        timeout=1,
+    )
+
+    assert context["complete"] is True
+    executor = context["obligations"][0]["executor"]
+    assert executor["library_paths"] == []
+    assert context["obligations"][0]["executor_identity"] == obligations._digest(executor)
 
 
 def test_repository_grants_are_exact_and_unknown_selectors_fail_closed() -> None:

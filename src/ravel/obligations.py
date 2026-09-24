@@ -440,6 +440,12 @@ def build_repository_context(
         if isinstance(identity, str):
             required_identities.append(identity)
         executor = dict(obligation.get("executor", {}))
+        if executor.get("kind") != "native_first_class_test":
+            # Host repository executors receive only the MNCS libraries named
+            # by their executor identity. The runner's own --library paths are
+            # reserved for first-class MNCS inventory and must not leak into a
+            # Rust/Python integration process.
+            executor.setdefault("library_paths", [])
         sources = executor.get("source_paths", [])
         if executor.get("kind") == "native_first_class_test":
             if not isinstance(sources, list) or not sources:
@@ -647,6 +653,7 @@ def build_repository_context(
                 "working_directory": ".",
                 "timeout_seconds": timeout_seconds,
                 "target_identity": target["target_identity"],
+                "library_paths": [],
                 "verifier_identity": tool_version,
             }
             definition = {
