@@ -405,7 +405,12 @@ fn evidence_exact(
     obligation: contracts.ObligationFact,
     request: PlannerRequest
 ) -> (result: bool) {
-    if contracts.obligation_scope_is_repository_canonical(obligation.scope) {
+    // Repository identities are required only when this request actually
+    // plans the complete repository-canonical boundary. A bounded direct-
+    // dependent plan still binds evidence to its compiler source identity
+    // and the selected inventory, matching the ordinary local evidence rule.
+    if request.repository_scope_requested
+        && contracts.obligation_scope_is_repository_canonical(obligation.scope) {
         return sequences.equals_byte_view<1024>(evidence.repository_identity, request.repository_identity)
             && sequences.equals_byte_view<128>(evidence.repository_fingerprint, request.repository_fingerprint)
             && sequences.equals_byte_view<1024>(evidence.subject_identity, obligation.subject_identity)

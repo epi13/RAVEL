@@ -6,7 +6,12 @@ from pathlib import Path
 
 import pytest
 
-from ravel.obligations import build_native_obligation_plan, build_obligation_plan
+from ravel.obligations import (
+    build_native_obligation_plan,
+    build_obligation_plan,
+    obligation_inventory_identity,
+    validate_obligation_inventory,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 LANGUAGE_ROOT = Path(os.environ.get("MNCS_LANGUAGE_ROOT", "/home/epi13/Documents/Projects/mncs-language"))
@@ -129,6 +134,56 @@ def test_native_obligation_kernel_matches_python_oracle_projection(tmp_path: Pat
     assert native["excluded"] == oracle["excluded"]
     assert native["stop"]["required_obligation_identities"] == oracle["stop"]["required_obligation_identities"]
     assert native["stop"]["new_execution_required"] == oracle["stop"]["new_execution_required"]
+    assert native["stop"]["sufficient_to_stop"] is False
+
+
+def test_direct_plan_reuses_source_bound_evidence_for_repository_scoped_rows(tmp_path: Path) -> None:
+    binary = Path(os.environ.get("MNCS_BINARY", str(LANGUAGE_ROOT / "target" / "debug" / "mncs")))
+    if not binary.is_file():
+        pytest.skip(f"MNCS runtime is not built: {binary}")
+    source = tmp_path / "source.mncs"
+    source.write_text("direct evidence reuse fixture\n", encoding="utf-8")
+    inventory = _inventory()
+    inventory["obligations"][0]["scope"] = "repository_canonical"
+    normalized = validate_obligation_inventory(inventory, commons_root=COMMONS_ROOT)
+    evidence = [{
+        "obligation_identity": "fixture.semantic.regression",
+        "evidence_identity": "fixture:source-bound-pass",
+        "status": "PASS",
+        "subject_identity": "fixture:subject",
+        "subject_fingerprint": "fixture:fingerprint",
+        "definition_identity": obligation_inventory_identity(normalized, commons_root=COMMONS_ROOT),
+    }]
+    compiler_inventory = {
+        "inventory": {
+            "tests": [{
+                "declaration_identity": "fixture:test-declaration",
+                "test_case_identity": "fixture:test-case",
+                "function_identity": "fixture:function",
+            }]
+        }
+    }
+    verification_plan = _plan(source)
+    verification_plan["proof"] = {
+        "sufficient_to_stop": False,
+        "boundary": {"claimed_scope": "direct_dependents"},
+    }
+    native = build_native_obligation_plan(
+        verification_plan, inventory, source_path=source, mncs=binary, cwd=ROOT,
+        libraries=[LANGUAGE_ROOT / "library", COMMONS_ROOT / "src" / "mncs_commons" / "mesh"],
+        compiler_inventory=compiler_inventory, current_evidence=evidence,
+        commons_root=COMMONS_ROOT,
+    )
+    oracle = build_obligation_plan(
+        verification_plan, inventory, source_path=source,
+        compiler_inventory=compiler_inventory, current_evidence=evidence,
+        commons_root=COMMONS_ROOT,
+    )
+    native_selected = {item["identity"]: item for item in native["obligations"]}
+    oracle_selected = {item["identity"]: item for item in oracle["obligations"]}
+    assert native_selected["fixture.semantic.regression"]["status"] == "current"
+    assert native_selected["fixture.semantic.regression"]["status"] == oracle_selected["fixture.semantic.regression"]["status"]
+    assert native["stop"]["new_execution_required"] == oracle["stop"]["new_execution_required"] == []
     assert native["stop"]["sufficient_to_stop"] is False
 
 
