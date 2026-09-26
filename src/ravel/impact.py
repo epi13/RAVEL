@@ -894,6 +894,8 @@ def request_verification_plan(
     if libraries:
         environment["MNCS_LIBRARY_PATH"] = os.pathsep.join(str(path.resolve()) for path in libraries)
     impact_command = [mncs, "impact", str(source_path)]
+    # The combined response also supplies compiler-issued subject identity
+    # and fingerprint, which bind direct plans and reusable evidence.
     if source_path.suffix.lower() == ".mncs":
         impact_command.append("--include-test-inventory")
     for root in roots:
