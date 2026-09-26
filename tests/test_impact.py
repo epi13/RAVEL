@@ -257,20 +257,27 @@ class ImpactPlanTests(unittest.TestCase):
         self.assertFalse(plan["proof"]["boundary"]["established"])
         self.assertIsNotNone(plan["provenance"]["impact_provider_error"])
 
-    def test_source_impact_requests_combined_inventory_and_avoids_second_frontend(self) -> None:
+    def test_source_impact_includes_test_inventory_for_direct_selection(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "source.mncs"
             source.write_text("mncs 0.18; module test;", encoding="utf-8")
             combined = _impact(
+                source_subject={
+                    "source_artifact_identity": "source:module:test",
+                    "module": "test",
+                    "source_profile": "0.18",
+                    "subject_identity": "mncs:0.2:program:test",
+                    "subject_fingerprint": "c" * 64,
+                },
                 source_test_inventory={
                     "schema_version": "mncs.test-inventory/1",
                     "valid": True,
                     "inventory": {
-                        "subject_identity": "mncs:program:one",
+                        "subject_identity": "mncs:0.2:program:test",
                         "subject_fingerprint": "c" * 64,
                         "tests": [],
                     },
-                }
+                },
             )
             from unittest.mock import call
 
@@ -291,19 +298,17 @@ class ImpactPlanTests(unittest.TestCase):
             self.assertIn("--include-test-inventory", command)
             self.assertNotIn(call(["mncs", "test-inventory", str(source)]), run_json.call_args_list)
 
-    def test_repository_obligations_keep_combined_source_identity_inventory(self) -> None:
+    def test_repository_obligations_need_source_subject_not_test_cases(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "source.mncs"
             source.write_text("mncs 0.18; module test;", encoding="utf-8")
             combined = _impact(
-                source_test_inventory={
-                    "schema_version": "mncs.test-inventory/1",
-                    "valid": True,
-                    "inventory": {
-                        "subject_identity": "mncs:program:one",
-                        "subject_fingerprint": "c" * 64,
-                        "tests": [],
-                    },
+                source_subject={
+                    "source_artifact_identity": "source:module:test",
+                    "module": "test",
+                    "source_profile": "0.18",
+                    "subject_identity": "mncs:0.2:program:test",
+                    "subject_fingerprint": "c" * 64,
                 }
             )
             from unittest.mock import call
@@ -312,7 +317,7 @@ class ImpactPlanTests(unittest.TestCase):
                 pass
 
             with patch("ravel.impact._run_json", return_value=combined) as run_json:
-                with patch("ravel.impact._run_native_planner", side_effect=ReachedPlanner):
+                with patch("ravel.impact._run_native_planner", side_effect=ReachedPlanner) as planner:
                     with self.assertRaises(ReachedPlanner):
                         request_verification_plan(
                             source_path=source,
@@ -324,8 +329,11 @@ class ImpactPlanTests(unittest.TestCase):
 
             self.assertEqual(run_json.call_count, 1)
             command = run_json.call_args.args[0]
-            self.assertIn("--include-test-inventory", command)
+            self.assertNotIn("--include-test-inventory", command)
             self.assertNotIn(call(["mncs", "test-inventory", str(source)]), run_json.call_args_list)
+            compiler_inventory = planner.call_args.kwargs["inventory_document"]["inventory"]
+            self.assertEqual(compiler_inventory["tests"], [])
+            self.assertEqual(compiler_inventory["subject_identity"], "mncs:0.2:program:test")
 
     def test_normal_request_fails_closed_instead_of_using_python_semantics(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

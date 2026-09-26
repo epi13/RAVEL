@@ -894,9 +894,7 @@ def request_verification_plan(
     if libraries:
         environment["MNCS_LIBRARY_PATH"] = os.pathsep.join(str(path.resolve()) for path in libraries)
     impact_command = [mncs, "impact", str(source_path)]
-    # The combined response also supplies compiler-issued subject identity
-    # and fingerprint, which bind direct plans and reusable evidence.
-    if source_path.suffix.lower() == ".mncs":
+    if source_path.suffix.lower() == ".mncs" and obligation_inventory_path is None:
         impact_command.append("--include-test-inventory")
     for root in roots:
         impact_command.extend(("--root", root))
@@ -916,23 +914,46 @@ def request_verification_plan(
     if isinstance(combined_inventory, dict):
         inventory_document = combined_inventory
     else:
-        try:
-            inventory_document = _run_json(
-                [mncs, "test-inventory", str(source_path)],
-                cwd=base,
-                environment=environment,
-                timeout=timeout,
-            )
-        except ImpactError as error:
-            # No inventory means no executable identity can be selected. Emit
-            # an explicit non-stopping plan so mncs-test fails closed instead
-            # of treating provider failure as zero work.
-            inventory_error = error
+        source_subject = impact_document.get("source_subject")
+        if (
+            obligation_inventory_path is not None
+            and source_path.suffix.lower() == ".mncs"
+            and isinstance(source_subject, dict)
+            and isinstance(source_subject.get("subject_identity"), str)
+            and source_subject["subject_identity"]
+            and isinstance(source_subject.get("subject_fingerprint"), str)
+            and len(source_subject["subject_fingerprint"]) == 64
+        ):
+            # Repository-owned obligations do not need per-source test cases.
+            # Preserve the compiler-issued subject binding with an empty test
+            # list so the native planner can select declared repository suites.
             inventory_document = {
                 "schema_version": "mncs.test-inventory/1",
                 "valid": True,
-                "inventory": {"tests": []},
+                "inventory": {
+                    "subject_identity": source_subject["subject_identity"],
+                    "subject_fingerprint": source_subject["subject_fingerprint"],
+                    "tests": [],
+                },
             }
+        else:
+            try:
+                inventory_document = _run_json(
+                    [mncs, "test-inventory", str(source_path)],
+                    cwd=base,
+                    environment=environment,
+                    timeout=timeout,
+                )
+            except ImpactError as error:
+                # No inventory means no executable identity can be selected. Emit
+                # an explicit non-stopping plan so mncs-test fails closed instead
+                # of treating provider failure as zero work.
+                inventory_error = error
+                inventory_document = {
+                    "schema_version": "mncs.test-inventory/1",
+                    "valid": True,
+                    "inventory": {"tests": []},
+                }
     if impact_error is None and inventory_error is None:
         try:
             source_sha256 = sha256_bytes(source_path.read_bytes())

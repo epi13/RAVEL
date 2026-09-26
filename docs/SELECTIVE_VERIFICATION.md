@@ -76,11 +76,13 @@ inventory commands. Selection policy is deterministic and native in the normal
 path; the adapter does not become semantic authority merely because it
 serializes or validates the result.
 
-For MNCS source paths, the compiler can return semantic impact and its
-compiler-owned source test inventory from one front-end session with
-`mncs impact --include-test-inventory`. RAVEL consumes that inventory from the
-same response and does not launch a second cold source compilation. When a
-repository provides a canonical external verification-obligation inventory,
-that inventory supplies repository verification selection directly; source
-test inventory remains separate evidence about compiler-recognized local
-tests and is not required to plan the repository obligations.
+For MNCS source paths, `mncs impact` returns semantic impact and a compact
+compiler-issued `source_subject` binding (artifact identity, module, profile,
+semantic identity, and fingerprint) from one front-end session. Direct
+source-test selection requests `--include-test-inventory` so the compiler's
+recognized test cases remain available from that same session. When RAVEL
+plans against a repository-owned external verification-obligation inventory,
+it uses `source_subject` for evidence binding and does not request source test
+inventory or launch a second cold source compilation. The repository
+inventory supplies the external verification selection; source test inventory
+remains separate evidence and is not required for that plan.
