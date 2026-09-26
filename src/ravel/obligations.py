@@ -779,7 +779,11 @@ def _matches_impact(obligation: Mapping[str, Any], impact: Mapping[str, Any]) ->
     if tokens.intersection(subjects | dependencies):
         return True
     domains = set(_strings(impact.get("guarantee_domains")))
-    return obligation.get("guarantee_domain") in domains and bool(tokens)
+    # A declared subject is the repository's explicit compiler-identity
+    # mapping. Broad compiler-owned guarantee domains must not select an
+    # unrelated corpus when that mapping does not intersect the impact.
+    # Domain fallback is reserved for obligations with no subjects at all.
+    return not subjects and obligation.get("guarantee_domain") in domains and bool(tokens)
 
 
 def _source_identity(verification_plan: Mapping[str, Any]) -> tuple[str | None, str | None]:

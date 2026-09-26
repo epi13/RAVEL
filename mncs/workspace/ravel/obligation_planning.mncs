@@ -308,7 +308,8 @@ fn matches_impact(
     return wildcard(obligation.subjects)
         || wildcard(obligation.invalidation_dependencies)
         || direct_match
-        || (domain_matches(request.impact_guarantee_domains, obligation.guarantee_domain)
+        || (obligation.subjects.len == 0
+            && domain_matches(request.impact_guarantee_domains, obligation.guarantee_domain)
             && (request.impact_roots.len > 0
                 || request.impact_direct_dependents.len > 0
                 || request.impact_test_identities.len > 0

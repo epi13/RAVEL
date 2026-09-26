@@ -257,6 +257,40 @@ class ImpactPlanTests(unittest.TestCase):
         self.assertFalse(plan["proof"]["boundary"]["established"])
         self.assertIsNotNone(plan["provenance"]["impact_provider_error"])
 
+    def test_source_impact_requests_combined_inventory_and_avoids_second_frontend(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "source.mncs"
+            source.write_text("mncs 0.18; module test;", encoding="utf-8")
+            combined = _impact(
+                source_test_inventory={
+                    "schema_version": "mncs.test-inventory/1",
+                    "valid": True,
+                    "inventory": {
+                        "subject_identity": "mncs:program:one",
+                        "subject_fingerprint": "c" * 64,
+                        "tests": [],
+                    },
+                }
+            )
+            from unittest.mock import call
+
+            class ReachedPlanner(Exception):
+                pass
+
+            with patch("ravel.impact._run_json", return_value=combined) as run_json:
+                with patch("ravel.impact._run_native_planner", side_effect=ReachedPlanner):
+                    with self.assertRaises(ReachedPlanner):
+                        request_verification_plan(
+                            source_path=source,
+                            mncs="mncs",
+                            roots=["mncs:fn:changed"],
+                            cwd=Path(directory),
+                        )
+            self.assertEqual(run_json.call_count, 1)
+            command = run_json.call_args.args[0]
+            self.assertIn("--include-test-inventory", command)
+            self.assertNotIn(call(["mncs", "test-inventory", str(source)]), run_json.call_args_list)
+
     def test_normal_request_fails_closed_instead_of_using_python_semantics(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "source.mncs"

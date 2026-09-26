@@ -93,6 +93,8 @@ CHANGE_CLASSES = {
     "language_profile",
     "cross_repository_contract",
 }
+
+
 GUARANTEE_DOMAINS = {
     "semantic",
     "parser_front_end",
@@ -892,6 +894,8 @@ def request_verification_plan(
     if libraries:
         environment["MNCS_LIBRARY_PATH"] = os.pathsep.join(str(path.resolve()) for path in libraries)
     impact_command = [mncs, "impact", str(source_path)]
+    if source_path.suffix.lower() == ".mncs":
+        impact_command.append("--include-test-inventory")
     for root in roots:
         impact_command.extend(("--root", root))
     impact_command.extend(("--max-depth", str(max_depth), "--max-nodes", str(max_nodes)))
@@ -906,23 +910,27 @@ def request_verification_plan(
         impact_error = error
         impact_document = _unavailable_impact(roots, error)
     inventory_error: ImpactError | None = None
-    try:
-        inventory_document = _run_json(
-            [mncs, "test-inventory", str(source_path)],
-            cwd=base,
-            environment=environment,
-            timeout=timeout,
-        )
-    except ImpactError as error:
-        # No inventory means no executable identity can be selected. Emit an
-        # explicit non-stopping plan so mncs-test fails closed with the
-        # provider diagnosis instead of treating zero tests as proof.
-        inventory_error = error
-        inventory_document = {
-            "schema_version": "mncs.test-inventory/1",
-            "valid": True,
-            "inventory": {"tests": []},
-        }
+    combined_inventory = impact_document.get("source_test_inventory")
+    if isinstance(combined_inventory, dict):
+        inventory_document = combined_inventory
+    else:
+        try:
+            inventory_document = _run_json(
+                [mncs, "test-inventory", str(source_path)],
+                cwd=base,
+                environment=environment,
+                timeout=timeout,
+            )
+        except ImpactError as error:
+            # No inventory means no executable identity can be selected. Emit
+            # an explicit non-stopping plan so mncs-test fails closed instead
+            # of treating provider failure as zero work.
+            inventory_error = error
+            inventory_document = {
+                "schema_version": "mncs.test-inventory/1",
+                "valid": True,
+                "inventory": {"tests": []},
+            }
     if impact_error is None and inventory_error is None:
         try:
             source_sha256 = sha256_bytes(source_path.read_bytes())

@@ -116,6 +116,21 @@ def test_reference_only_parity_is_excluded_and_missing_evidence_requires_executi
     ]
 
 
+def test_explicit_subjects_prevent_guarantee_domain_wide_selection() -> None:
+    inventory = _inventory()
+    inventory["obligations"][0]["subjects"] = ["unrelated:function"]
+    inventory["obligations"][0]["invalidation_dependencies"] = ["src/unrelated.mncs"]
+
+    plan = build_obligation_plan(
+        _plan(), inventory, source_path=Path("/tmp/source.mncs"),
+        compiler_inventory={"inventory": {"tests": []}},
+    )
+
+    assert plan["obligations"] == []
+    assert plan["stop"]["sufficient_to_stop"] is False
+    assert "obligation_selection_unresolved" in plan["stop"]["escalation_reasons"]
+
+
 def test_exact_pass_evidence_is_reusable() -> None:
     plan = build_obligation_plan(
         _plan(),
