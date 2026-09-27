@@ -1,0 +1,227 @@
+{
+  "campaign": "compiler-value-ssa-20260926",
+  "descriptor": {
+    "current_interface_identity": "224e7421ca7023f515e46b282b1ea42920b6002736ea0c80a6170eb0d026a0d3",
+    "path": "native-applications/ravel-planner.json",
+    "previous_interface_identity": "7a01e6cc036b6f2f10abdc5488478edaf9b579c8a33dcbd7f06998cd57c76ce2",
+    "sha256": "1480d9c4a07bd84ebf72b88351bd42a1c1c531d579c05bc997175d534b091741",
+    "status": "repaired"
+  },
+  "native_planner_test": {
+    "command": "MNCS_BINARY=<locked 843c5bc release CLI> MNCS_LANGUAGE_ROOT=<current mncs-language> MNCS_COMMONS_ROOT=<current MNCS-Commons> PYTHONPATH=src python3 -m pytest tests/test_phase6_native_planner.py -q",
+    "elapsed_seconds": 7.47,
+    "passed": 6,
+    "status": "PASS"
+  },
+  "planning_summary": {
+    "all_selected_obligations_current": true,
+    "elapsed_seconds_total": 95.428,
+    "inventory_identity": "4e30538087e7d4e76c4cc59cba3afd6544cac6ca529faedc5417f985613f87d3",
+    "inventory_revision": 10,
+    "note": "The pressure suite executes only the pinned Rust CLI, so its compiler inventory lifecycle is reference_only and it is kept out of native source impact selection.",
+    "python_fallback_used": false,
+    "reference_only_exclusions": [
+      "mncs-compiler.pressure-reproductions"
+    ],
+    "status": "PASS"
+  },
+  "plans": [
+    {
+      "area": "source",
+      "elapsed_seconds": 1.534,
+      "obligation_plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-source-obligation-plan.json",
+      "obligation_plan_sha256": "4a200ee7c0afdcaae9c0a3ebacf7ac1dbfe3f3094e55f2cf6c664c59fe3ed981",
+      "obligation_states": [
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current"
+      ],
+      "plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-source-plan.json",
+      "plan_sha256": "1fe66b6dcd343db204b8eabcd4130f24f5fc816caac7ce1d58f2cf3c9cf51466",
+      "selected_obligations": [
+        "mncs-compiler.frontend-differential",
+        "mncs-compiler.segment-differential",
+        "mncs-compiler.declaration-differential",
+        "mncs-compiler.semantic-proof-differential",
+        "mncs-compiler.flow-cfg-differential",
+        "mncs-compiler.project-source-differential",
+        "mncs-compiler.profile-018-syntax",
+        "mncs-compiler.production-calls"
+      ],
+      "selection_level": "direct_dependents",
+      "status": "PASS"
+    },
+    {
+      "area": "project",
+      "elapsed_seconds": 25.976,
+      "obligation_plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-project-obligation-plan.json",
+      "obligation_plan_sha256": "51e0b1888893c30ea6d42f42934c8875e82ed2827b8fa541fd354cce678bd8d5",
+      "obligation_states": [
+        "current",
+        "current"
+      ],
+      "plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-project-plan.json",
+      "plan_sha256": "bd7897531580e5183d179eab3928529b8921b0b8a7c5abfb69b47999246d5be2",
+      "selected_obligations": [
+        "mncs-compiler.project-source-differential",
+        "mncs-compiler.value-ssa-differential"
+      ],
+      "selection_level": "direct_dependents",
+      "status": "PASS"
+    },
+    {
+      "area": "ssa",
+      "elapsed_seconds": 24.121,
+      "obligation_plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-ssa-obligation-plan.json",
+      "obligation_plan_sha256": "3fc2e565b66a53dc04c384fe132633b6d44df395934855367ecd005bb3c95dea",
+      "obligation_states": [
+        "current"
+      ],
+      "plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-ssa-plan.json",
+      "plan_sha256": "fb4424ce64ed176348207e99031e47a64af2fd8f30a0621fef66425af532a0e5",
+      "selected_obligations": [
+        "mncs-compiler.value-ssa-differential"
+      ],
+      "selection_level": "direct_dependents",
+      "status": "PASS"
+    },
+    {
+      "area": "decl",
+      "elapsed_seconds": 17.077,
+      "obligation_plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-decl-obligation-plan.json",
+      "obligation_plan_sha256": "dceb9ead35bad66c379a2bcb595c705e1164941fcbdacda3b9d38a3ecdc6a82d",
+      "obligation_states": [
+        "current",
+        "current",
+        "current",
+        "current",
+        "current"
+      ],
+      "plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-decl-plan.json",
+      "plan_sha256": "507807acf87d9ebb836aa5774f5bb39c389308aba628ed7e68392bb55b394779",
+      "selected_obligations": [
+        "mncs-compiler.declaration-differential",
+        "mncs-compiler.semantic-proof-differential",
+        "mncs-compiler.flow-cfg-differential",
+        "mncs-compiler.project-source-differential",
+        "mncs-compiler.profile-018-syntax"
+      ],
+      "selection_level": "direct_dependents",
+      "status": "PASS"
+    },
+    {
+      "area": "parser",
+      "elapsed_seconds": 2.181,
+      "obligation_plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-parser-obligation-plan.json",
+      "obligation_plan_sha256": "fad6d6a9cc38bd22ce5faa0ae4b59eafcf24f77c20c0ec899f8118e50c78402d",
+      "obligation_states": [
+        "current",
+        "current",
+        "current",
+        "current",
+        "current",
+        "current"
+      ],
+      "plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-parser-plan.json",
+      "plan_sha256": "d36b28eebc2a300657317dbc8efaebf52562a9653530856a981248ead67b6a7d",
+      "selected_obligations": [
+        "mncs-compiler.frontend-differential",
+        "mncs-compiler.declaration-differential",
+        "mncs-compiler.semantic-proof-differential",
+        "mncs-compiler.flow-cfg-differential",
+        "mncs-compiler.project-source-differential",
+        "mncs-compiler.profile-018-syntax"
+      ],
+      "selection_level": "direct_dependents",
+      "status": "PASS"
+    },
+    {
+      "area": "kernel",
+      "elapsed_seconds": 2.111,
+      "obligation_plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-kernel-obligation-plan.json",
+      "obligation_plan_sha256": "2c012e911070fdcdfdc804ef75b29dad68aa3604832e34f6fb8b7e63a70a62ac",
+      "obligation_states": [
+        "current",
+        "current"
+      ],
+      "plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-kernel-plan.json",
+      "plan_sha256": "ef010a9b0c6b95bce90d5a009c9b435c6367f55027698b35c96180c11c94e2f2",
+      "selected_obligations": [
+        "mncs-compiler.frontend-differential",
+        "mncs-compiler.production-calls"
+      ],
+      "selection_level": "direct_dependents",
+      "status": "PASS"
+    },
+    {
+      "area": "lexer",
+      "elapsed_seconds": 1.935,
+      "obligation_plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-lexer-obligation-plan.json",
+      "obligation_plan_sha256": "63510d4e6e72e4fff0fc06664144980514352c1b6e4f57cb6b7032f77b00223f",
+      "obligation_states": [],
+      "plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-lexer-plan.json",
+      "plan_sha256": "ac40d6cfe91db6de147e2e79240f445845f7c337048dee54e91de2a4ec3ceee8",
+      "selected_obligations": [],
+      "selection_level": "direct_dependents",
+      "status": "PASS"
+    },
+    {
+      "area": "segment",
+      "elapsed_seconds": 1.986,
+      "obligation_plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-segment-obligation-plan.json",
+      "obligation_plan_sha256": "717d2b0e1dc389ca6614668a3b46466580e9ab9035e1eb2690179b3f56f30446",
+      "obligation_states": [
+        "current"
+      ],
+      "plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-segment-plan.json",
+      "plan_sha256": "c80f41dd937d73917468aa9840e68256e07d3f79bac602c200e995a4c64e273a",
+      "selected_obligations": [
+        "mncs-compiler.segment-differential"
+      ],
+      "selection_level": "direct_dependents",
+      "status": "PASS"
+    },
+    {
+      "area": "flow",
+      "elapsed_seconds": 18.507,
+      "obligation_plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-flow-obligation-plan.json",
+      "obligation_plan_sha256": "7c8a32b73d02b94039362c633de2c0c5707cb64f43abddb2435054fadc3d41b3",
+      "obligation_states": [
+        "current"
+      ],
+      "plan_reference": "../mncs-compiler/evidence/campaign-20260926-final-flow-plan.json",
+      "plan_sha256": "01f551ba6cb6c7e7f8cffbdd0d949e35d3b01b1a320f8190b75fa2e5de2b04d9",
+      "selected_obligations": [
+        "mncs-compiler.flow-cfg-differential"
+      ],
+      "selection_level": "direct_dependents",
+      "status": "PASS"
+    }
+  ],
+  "python_fallback_used": false,
+  "repository_head_at_validation": "4ab04a893b3e27e4de6b8a85ab1e9a6225ed54e4",
+  "schema_version": "ravel-native-planner-binding-repair/1",
+  "source": {
+    "command": "mncs abi mncs/workspace/ravel/planning.mncs",
+    "interface_identity": "224e7421ca7023f515e46b282b1ea42920b6002736ea0c80a6170eb0d026a0d3",
+    "path": "mncs/workspace/ravel/planning.mncs",
+    "sha256": "ad20f673252c68c0e08ebd6068d12a77f5a10655cd7f48d2aa6686182a9ce6ee"
+  },
+  "status": "PASS",
+  "commons_campaign_plan": {
+    "plan_id": "060967a1bf83c5197c68f65bfc9d25bc44898282a2833952906fa76d58f03f0b",
+    "obligation_plan_id": "8333d7b4c3edb7c797a64bbbf3d3153ed5df28db6695737238ffc4333bac436b",
+    "repository": "mncs-commons",
+    "repository_revision": "85edb4636b7ada42ec750c6412924f1cc1fec0c8",
+    "selected_obligation": "mncs-commons.project-test.commons-tests",
+    "obligation_status": "new_execution_required",
+    "planning_seconds": 10.2,
+    "sufficient_to_stop": false,
+    "note": "The current plan binds the committed Commons test runner and inventory. The repository suite has retained UNKNOWN backend results, so no canonical PASS is asserted."
+  }
+}
