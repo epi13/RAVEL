@@ -339,12 +339,10 @@ class ImpactPlanTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "source.mncs"
             source.write_text("source", encoding="utf-8")
-            from subprocess import CompletedProcess
-
             with patch(
-                "subprocess.run",
-                return_value=CompletedProcess(["mncs", "impact"], 2, "", "compiler unavailable"),
-            ):
+                "ravel.impact._run_json",
+                side_effect=ImpactError("impact provider command unavailable: timed out"),
+            ) as provider:
                 with self.assertRaisesRegex(ImpactError, "Python semantic plan construction is disabled"):
                     request_verification_plan(
                         source_path=source,
@@ -352,6 +350,53 @@ class ImpactPlanTests(unittest.TestCase):
                         roots=["mncs:fn:one"],
                         cwd=Path(directory),
                     )
+            self.assertEqual(provider.call_count, 1)
+
+    def test_native_planner_uses_scratch_outside_source_checkout(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.mncs"
+            source.write_text("mncs 0.18; module test;", encoding="utf-8")
+            combined = _impact(
+                source_subject={
+                    "source_artifact_identity": "source:module:test",
+                    "module": "test",
+                    "source_profile": "0.18",
+                    "subject_identity": "mncs:0.2:program:test",
+                    "subject_fingerprint": "c" * 64,
+                },
+                source_test_inventory={
+                    "schema_version": "mncs.test-inventory/1",
+                    "valid": True,
+                    "inventory": {
+                        "subject_identity": "mncs:0.2:program:test",
+                        "subject_fingerprint": "c" * 64,
+                        "tests": [],
+                    },
+                },
+            )
+
+            class ReachedPlanner(Exception):
+                pass
+
+            def inspect_command(command: list[str], *, cwd: Path, **_: object) -> None:
+                request, decision, plan = (Path(item) for item in command[-3:])
+                self.assertTrue(request.is_absolute())
+                self.assertTrue(decision.is_absolute())
+                self.assertTrue(plan.is_absolute())
+                self.assertNotEqual(request.parent, cwd)
+                self.assertEqual(list(cwd.glob(".ravel-native-*")), [])
+                raise ReachedPlanner()
+
+            with patch("ravel.impact._run_json", return_value=combined):
+                with patch("ravel.impact.subprocess.run", side_effect=inspect_command):
+                    with self.assertRaises(ReachedPlanner):
+                        request_verification_plan(
+                            source_path=source,
+                            mncs="mncs",
+                            roots=["mncs:fn:changed"],
+                            cwd=root,
+                        )
 
 
 if __name__ == "__main__":

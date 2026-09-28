@@ -763,7 +763,10 @@ def _run_native_planner(
     if not descriptor.is_file():
         raise ImpactError(f"native RAVEL planner descriptor is unavailable: {descriptor}")
     try:
-        with tempfile.TemporaryDirectory(prefix=".ravel-native-", dir=cwd) as directory:
+        # Keep planner scratch outside the source checkout.  Environment may
+        # bind a valid project read-only while granting RAVEL temporary
+        # artifact storage elsewhere.
+        with tempfile.TemporaryDirectory(prefix="ravel-native-") as directory:
             work = Path(directory)
             request_path = work / "planner-request.json"
             decision_path = work / "planner-decision.json"
@@ -783,9 +786,9 @@ def _run_native_planner(
                     "--grant-structured",
                     "ravel_digest",
                     "--",
-                    os.path.relpath(request_path, cwd),
-                    os.path.relpath(decision_path, cwd),
-                    os.path.relpath(plan_path, cwd),
+                    str(request_path),
+                    str(decision_path),
+                    str(plan_path),
                 )
             )
             completed = subprocess.run(
@@ -909,6 +912,15 @@ def request_verification_plan(
         # selection.  Preserve the provider failure in the plan limitations.
         impact_error = error
         impact_document = _unavailable_impact(roots, error)
+    if impact_error is not None and not allow_python_oracle:
+        # A failed impact query cannot provide the source identity needed for
+        # test inventory.  The normal path will fail closed below, so making
+        # another compiler request here only repeats the failed compilation.
+        raise ImpactError(
+            "native RAVEL planning could not acquire compiler facts; "
+            "Python semantic plan construction is disabled on the normal path: "
+            + str(impact_error)
+        )
     inventory_error: ImpactError | None = None
     combined_inventory = impact_document.get("source_test_inventory")
     if isinstance(combined_inventory, dict):
