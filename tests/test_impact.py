@@ -381,11 +381,16 @@ class ImpactPlanTests(unittest.TestCase):
 
             def inspect_command(command: list[str], *, cwd: Path, **_: object) -> None:
                 request, decision, plan = (Path(item) for item in command[-3:])
-                self.assertTrue(request.is_absolute())
-                self.assertTrue(decision.is_absolute())
-                self.assertTrue(plan.is_absolute())
-                self.assertNotEqual(request.parent, cwd)
-                self.assertEqual(list(cwd.glob(".ravel-native-*")), [])
+                # The native application only accepts relative
+                # structured-artifact paths, so the planner executes inside
+                # its scratch directory with bare file names.  Isolation
+                # still holds: scratch lives outside the source checkout.
+                for artifact in (request, decision, plan):
+                    self.assertFalse(artifact.is_absolute())
+                    self.assertEqual(artifact.parent, Path("."))
+                self.assertNotEqual(Path(cwd), root)
+                self.assertEqual(list(root.glob(".ravel-native-*")), [])
+                self.assertEqual(list(root.glob("ravel-native-*")), [])
                 raise ReachedPlanner()
 
             with patch("ravel.impact._run_json", return_value=combined):

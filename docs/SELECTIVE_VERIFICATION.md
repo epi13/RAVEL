@@ -60,7 +60,7 @@ Example:
 ```bash
 ravel-impact tests/self_suite.mncs \
   --mncs /path/to/mncs \
-  --library /path/to/mncs-language/library \
+  --library /path/to/mncs-stdlib/library \
   --root 'mncs:0.2:function:tests.self_suite::arithmetic' \
   --output .mncs/verification-plan.json
 mncs-test run --verification-plan .mncs/verification-plan.json ...
