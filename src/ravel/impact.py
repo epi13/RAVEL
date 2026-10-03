@@ -18,6 +18,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -74,6 +75,25 @@ except ImportError:  # direct script execution
         load_current_evidence,
         obligation_plan_identity,
         validate_obligation_plan,
+    )
+
+try:
+    from .plan_cache import (
+        KEY_SCHEMA as PLAN_CACHE_KEY_SCHEMA,
+        PlanCache,
+        cache_key as plan_cache_key,
+        digest_file as _digest_file,
+        digest_tree as _digest_tree,
+        tool_digest as _tool_digest,
+    )
+except ImportError:  # direct script execution
+    from plan_cache import (  # type: ignore
+        KEY_SCHEMA as PLAN_CACHE_KEY_SCHEMA,
+        PlanCache,
+        cache_key as plan_cache_key,
+        digest_file as _digest_file,
+        digest_tree as _digest_tree,
+        tool_digest as _tool_digest,
     )
 
 
@@ -878,6 +898,141 @@ def _unavailable_impact(roots: Sequence[str], error: ImpactError) -> dict[str, A
     }
 
 
+def _resolve_tool_executable(mncs: str, base: Path) -> Path:
+    """Resolve the provider binary the way the subprocess layer will."""
+    candidate = Path(mncs)
+    if os.sep in mncs or candidate.is_absolute():
+        full = candidate if candidate.is_absolute() else (base / candidate)
+        try:
+            return full.resolve()
+        except OSError:
+            return full
+    located = shutil.which(mncs)
+    if located:
+        try:
+            return Path(located).resolve()
+        except OSError:
+            return Path(located)
+    return candidate
+
+
+def _commons_identity(commons_root: Path | None) -> str:
+    """Bind the Commons contract snapshot behind plan validation."""
+    candidates: list[Path] = []
+    if commons_root is not None:
+        candidates.append(Path(commons_root))
+    else:
+        configured = os.environ.get("MNCS_COMMONS_ROOT")
+        if configured:
+            candidates.append(Path(configured))
+        candidates.append(Path(__file__).resolve().parents[3] / "MNCS-Commons")
+    for root in candidates:
+        contract = root / "src" / "mncs_commons" / "verification_plan.py"
+        digest = _digest_file(contract)
+        if digest is not None:
+            return f"{root.resolve()}@{digest}"
+    return "unavailable"
+
+
+def _planner_source_identities() -> dict[str, str | None]:
+    workspace = Path(__file__).resolve().parents[2]
+    identities: dict[str, str | None] = {}
+    for name in (
+        "native-applications/ravel-planner.json",
+        "mncs/workspace/ravel/planning.mncs",
+        "mncs/workspace/ravel/verification_policy.mncs",
+    ):
+        identities[name] = _digest_file(workspace / name)
+    return identities
+
+
+def _plan_cache_material(
+    *,
+    source_path: Path,
+    source_bytes: bytes,
+    mncs: str,
+    roots: Sequence[str],
+    libraries: Sequence[Path],
+    planner_libraries: Sequence[Path],
+    base: Path,
+    max_depth: int,
+    max_nodes: int,
+    change_class: str,
+    cross_repository: bool,
+    graph_path: Path | None,
+    commons_root: Path | None,
+    producer_repository: str,
+    contract_identity: str | None,
+    cache_dir: Path | None,
+) -> dict[str, Any] | None:
+    """Assemble exact key material, or None when the call must not cache.
+
+    Every input that can alter plan bytes must appear here.  Anything
+    merely operational (timeout, output paths, working directory after
+    path resolution) is excluded.  A None result is fail-closed: the
+    caller plans without touching the cache.
+    """
+
+    def _digests(values: Sequence[Path]) -> list[str] | None:
+        digests: list[str] = []
+        for value in values:
+            path = Path(value)
+            if not path.is_absolute():
+                path = base / path
+            digest = _digest_tree(path)
+            if digest is None:
+                return None
+            digests.append(f"{path.resolve()}@{digest}")
+        return sorted(digests)
+
+    library_digests = _digests(libraries)
+    planner_digests = _digests(planner_libraries)
+    if library_digests is None or planner_digests is None:
+        return None
+    if graph_path is not None:
+        graph_digest = _digest_file(graph_path)
+        if graph_digest is None:
+            return None
+        family_graph_identity: str | None = f"{graph_path.resolve()}@{graph_digest}"
+    else:
+        family_graph_identity = None
+    planner_sources = _planner_source_identities()
+    if any(value is None for value in planner_sources.values()):
+        return None
+    tool = _resolve_tool_executable(mncs, base)
+    return {
+        "schema": PLAN_CACHE_KEY_SCHEMA,
+        "source_path": str(source_path),
+        "source_sha256": sha256_bytes(source_bytes),
+        "roots": sorted(set(roots)),
+        "max_depth": max_depth,
+        "max_nodes": max_nodes,
+        "change_class": change_class,
+        "cross_repository": cross_repository,
+        "producer_repository": producer_repository,
+        "contract_identity": contract_identity,
+        "family_graph": family_graph_identity,
+        "tool": f"{tool}@{_tool_digest(tool, cache_dir=cache_dir)}",
+        "libraries": library_digests,
+        "planner_libraries": planner_digests,
+        "stdlib_bundle": os.environ.get("MNCS_STDLIB_BUNDLE", ""),
+        "commons": _commons_identity(commons_root),
+        "planner_sources": planner_sources,
+    }
+
+
+def _coerce_plan_cache(plan_cache: PlanCache | bool | None) -> PlanCache | None:
+    if plan_cache is None:
+        candidate: PlanCache | None = PlanCache()
+    elif isinstance(plan_cache, bool):
+        candidate = PlanCache() if plan_cache else None
+    else:
+        candidate = plan_cache
+    if candidate is not None and not candidate.is_enabled():
+        return None
+    return candidate
+
+
 def request_verification_plan(
     *,
     source_path: Path,
@@ -885,6 +1040,7 @@ def request_verification_plan(
     roots: Sequence[str],
     libraries: Sequence[Path] = (),
     planner_libraries: Sequence[Path] = (),
+    plan_cache: PlanCache | bool | None = None,
     cwd: Path | None = None,
     max_depth: int = 4,
     max_nodes: int = 256,
@@ -911,8 +1067,58 @@ def request_verification_plan(
     graph_path = family_graph_path
     if graph_path is None and (cross_repository or change_class == "cross_repository_contract"):
         graph_path = default_family_graph_path(commons_root=commons_root)
-    family_graph = load_family_graph(graph_path, commons_root=commons_root) if graph_path else None
     base = (cwd or source_path.parent).resolve()
+    # A no-change plan is pure reconstruction: serve it from the
+    # persistent content-keyed cache without touching any provider.
+    # Obligation planning (repository-context git/cargo inputs are not
+    # content-addressed here) and the differential oracle path bypass
+    # the cache fail-closed.
+    cache = _coerce_plan_cache(plan_cache)
+    cache_dir: Path | None = None
+    cache_material: dict[str, Any] | None = None
+    cache_key_value: str | None = None
+    source_bytes: bytes | None = None
+    obligation_requested = obligation_inventory_path is not None or obligation_output_path is not None
+    if cache is not None and not obligation_requested and not allow_python_oracle:
+        cache_dir = cache.resolve(base)
+    if cache is not None and cache_dir is not None:
+        try:
+            source_bytes = source_path.read_bytes()
+        except OSError:
+            source_bytes = None
+    if cache is not None and cache_dir is not None and source_bytes is not None:
+        cache_material = _plan_cache_material(
+            source_path=source_path,
+            source_bytes=source_bytes,
+            mncs=mncs,
+            roots=roots,
+            libraries=libraries,
+            planner_libraries=planner_libraries,
+            base=base,
+            max_depth=max_depth,
+            max_nodes=max_nodes,
+            change_class=change_class,
+            cross_repository=cross_repository,
+            graph_path=graph_path,
+            commons_root=commons_root,
+            producer_repository=producer_repository,
+            contract_identity=contract_identity,
+            cache_dir=cache_dir,
+        )
+    if cache is not None and cache_dir is not None and cache_material is not None:
+        cache_key_value = plan_cache_key(cache_material)
+        cached = cache.lookup(cache_dir, cache_key_value, cache_material)
+        if cached is not None:
+            try:
+                return validate_plan(cached, source_path=source_path, commons_root=commons_root)
+            except ValueError:
+                # A cached plan that no longer validates is a miss,
+                # never an error: replan from providers below.
+                cache.hits -= 1
+                cache.misses += 1
+    elif cache is not None:
+        cache.skips += 1
+    family_graph = load_family_graph(graph_path, commons_root=commons_root) if graph_path else None
     environment = dict(os.environ)
     if libraries:
         environment["MNCS_LIBRARY_PATH"] = os.pathsep.join(str(path.resolve()) for path in libraries)
@@ -1023,6 +1229,18 @@ def request_verification_plan(
             timeout=timeout,
             use_native=True,
         )
+        if cache is not None and cache_dir is not None and cache_material is not None and cache_key_value is not None:
+            # Never poison the cache when the source moved mid-flight:
+            # the key was derived from pre-impact bytes while the plan
+            # binds post-impact bytes.
+            try:
+                settled = sha256_bytes(source_path.read_bytes())
+            except OSError:
+                settled = None
+            if settled == cache_material.get("source_sha256") == plan.get("source", {}).get("sha256"):
+                cache.store(cache_dir, cache_key_value, cache_material, plan)
+            else:
+                cache.skips += 1
         return plan
     if not allow_python_oracle:
         detail = "; ".join(
@@ -1243,12 +1461,23 @@ def _parser() -> argparse.ArgumentParser:
         action="store_true",
         help="explicitly use the Python differential oracle if compiler facts are unavailable",
     )
+    parser.add_argument(
+        "--no-plan-cache",
+        action="store_true",
+        help="bypass the persistent content-keyed plan cache (also RAVEL_PLAN_CACHE=off)",
+    )
+    parser.add_argument(
+        "--plan-cache-dir",
+        type=Path,
+        help="override the plan cache directory (also RAVEL_PLAN_CACHE_DIR)",
+    )
     parser.add_argument("--output", type=Path)
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    cache = PlanCache(directory=args.plan_cache_dir, enabled=not args.no_plan_cache)
     try:
         plan = request_verification_plan(
             source_path=args.source,
@@ -1256,6 +1485,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             roots=args.roots,
             libraries=[Path(value) for value in args.libraries],
             planner_libraries=[Path(value) for value in args.planner_libraries],
+            plan_cache=cache,
             cwd=args.cwd,
             max_depth=args.max_depth,
             max_nodes=args.max_nodes,
@@ -1274,6 +1504,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     except (ImpactError, OSError, ValueError) as error:
         print(json.dumps({"schema_version": PLAN_SCHEMA, "status": "UNKNOWN", "error": str(error)}, indent=2, sort_keys=True), file=sys.stderr)
         return 2
+    if cache.hits:
+        print(f"ravel plan_cache=hit hits={cache.hits}", file=sys.stderr)
     output = json.dumps(plan, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
     if args.output:
         args.output.resolve().parent.mkdir(parents=True, exist_ok=True)
