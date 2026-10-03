@@ -742,10 +742,19 @@ def _run_native_planner(
     producer_repository: str,
     contract_identity: str | None,
     cwd: Path,
-    libraries: Sequence[Path],
-    timeout: float,
+    planner_libraries: Sequence[Path] = (),
+    timeout: float = 180.0,
 ) -> dict[str, Any]:
-    """Run the canonical native planner application through one host boundary."""
+    """Run the canonical native planner application through one host boundary.
+
+    The planner closure is descriptor-declared (stdlib, Commons mesh, RAVEL
+    workspace).  Caller impact/inventory resolution roots are deliberately
+    *not* forwarded: the planner request already embeds every compiler fact
+    it needs, and extra roots only perturb the native-application artifact
+    cache key (one ~30MB duplicate artifact plus a full recompile per
+    distinct caller library set).  Use ``planner_libraries`` only for roots
+    the planner application itself must resolve beyond its descriptor.
+    """
 
     request = _native_planner_request(
         impact_document=impact_document,
@@ -784,7 +793,7 @@ def _run_native_planner(
             mncs_arg = mncs if Path(mncs).is_absolute() else str((cwd / mncs).resolve())
             command = [mncs_arg, "run-app", str(descriptor)]
             command.extend(("--library", str(Path(__file__).resolve().parents[2] / "mncs" / "workspace" / "ravel")))
-            for library in libraries:
+            for library in planner_libraries:
                 library_path = Path(library)
                 if not library_path.is_absolute():
                     library_path = (cwd / library_path).resolve()
@@ -875,6 +884,7 @@ def request_verification_plan(
     mncs: str,
     roots: Sequence[str],
     libraries: Sequence[Path] = (),
+    planner_libraries: Sequence[Path] = (),
     cwd: Path | None = None,
     max_depth: int = 4,
     max_nodes: int = 256,
@@ -994,7 +1004,7 @@ def request_verification_plan(
             producer_repository=producer_repository,
             contract_identity=contract_identity,
             cwd=base,
-            libraries=libraries,
+            planner_libraries=planner_libraries,
             timeout=timeout,
         )
         plan = _write_obligation_plan_if_requested(
@@ -1009,6 +1019,7 @@ def request_verification_plan(
             commons_root=commons_root,
             mncs=mncs,
             libraries=libraries,
+            planner_libraries=planner_libraries,
             timeout=timeout,
             use_native=True,
         )
@@ -1090,8 +1101,9 @@ def _write_obligation_plan_if_requested(
     commons_root: Path | None,
     mncs: str | Path,
     libraries: Sequence[Path],
-    timeout: float,
-    use_native: bool,
+    planner_libraries: Sequence[Path] = (),
+    timeout: float = 180.0,
+    use_native: bool = True,
 ) -> dict[str, Any]:
     if obligation_inventory_path is None and obligation_output_path is None:
         return dict(verification_plan)
@@ -1138,7 +1150,7 @@ def _write_obligation_plan_if_requested(
             source_path=source_path,
             mncs=mncs,
             cwd=cwd,
-            libraries=libraries,
+            planner_libraries=planner_libraries,
             timeout=timeout,
             compiler_inventory=compiler_inventory_document,
             current_evidence=current_evidence,
@@ -1194,6 +1206,13 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--mncs", required=True)
     parser.add_argument("--root", dest="roots", action="append", required=True)
     parser.add_argument("--library", dest="libraries", action="append", default=[])
+    parser.add_argument(
+        "--planner-library",
+        dest="planner_libraries",
+        action="append",
+        default=[],
+        help="extra library root resolved by the planner run-app beyond its descriptor (rarely needed)",
+    )
     parser.add_argument("--cwd", type=Path)
     parser.add_argument("--max-depth", type=int, default=4)
     parser.add_argument("--max-nodes", type=int, default=256)
@@ -1236,6 +1255,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             mncs=args.mncs,
             roots=args.roots,
             libraries=[Path(value) for value in args.libraries],
+            planner_libraries=[Path(value) for value in args.planner_libraries],
             cwd=args.cwd,
             max_depth=args.max_depth,
             max_nodes=args.max_nodes,

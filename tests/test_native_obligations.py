@@ -118,7 +118,7 @@ def test_native_obligation_kernel_matches_python_oracle_projection(tmp_path: Pat
         source_path=source,
         mncs=binary,
         cwd=ROOT,
-        libraries=[STDLIB_ROOT / "library", COMMONS_ROOT / "src" / "mncs_commons" / "mesh"],
+        planner_libraries=[STDLIB_ROOT / "library", COMMONS_ROOT / "src" / "mncs_commons" / "mesh"],
         compiler_inventory=compiler_inventory,
         commons_root=COMMONS_ROOT,
     )
@@ -171,7 +171,7 @@ def test_direct_plan_reuses_source_bound_evidence_for_repository_scoped_rows(tmp
     }
     native = build_native_obligation_plan(
         verification_plan, inventory, source_path=source, mncs=binary, cwd=ROOT,
-        libraries=[STDLIB_ROOT / "library", COMMONS_ROOT / "src" / "mncs_commons" / "mesh"],
+        planner_libraries=[STDLIB_ROOT / "library", COMMONS_ROOT / "src" / "mncs_commons" / "mesh"],
         compiler_inventory=compiler_inventory, current_evidence=evidence,
         commons_root=COMMONS_ROOT,
     )
@@ -292,7 +292,7 @@ def test_native_repository_boundary_fails_closed_and_accepts_only_complete_curre
         source_path=source,
         mncs=binary,
         cwd=ROOT,
-        libraries=[STDLIB_ROOT / "library", COMMONS_ROOT / "src" / "mncs_commons" / "mesh"],
+        planner_libraries=[STDLIB_ROOT / "library", COMMONS_ROOT / "src" / "mncs_commons" / "mesh"],
         compiler_inventory={
             "inventory": {
                 "scope": "source_module",
@@ -340,7 +340,7 @@ def test_native_repository_boundary_fails_closed_and_accepts_only_complete_curre
         source_path=source,
         mncs=binary,
         cwd=ROOT,
-        libraries=[STDLIB_ROOT / "library", COMMONS_ROOT / "src" / "mncs_commons" / "mesh"],
+        planner_libraries=[STDLIB_ROOT / "library", COMMONS_ROOT / "src" / "mncs_commons" / "mesh"],
         compiler_inventory=None,
         current_evidence=[_current_repository_evidence(item) for item in pass_set],
         commons_root=COMMONS_ROOT,
@@ -358,7 +358,7 @@ def test_native_repository_boundary_fails_closed_and_accepts_only_complete_curre
         source_path=source,
         mncs=binary,
         cwd=ROOT,
-        libraries=[STDLIB_ROOT / "library", COMMONS_ROOT / "src" / "mncs_commons" / "mesh"],
+        planner_libraries=[STDLIB_ROOT / "library", COMMONS_ROOT / "src" / "mncs_commons" / "mesh"],
         compiler_inventory={"inventory": {"scope": "source_module", "tests": []}},
         current_evidence=[],
         commons_root=COMMONS_ROOT,

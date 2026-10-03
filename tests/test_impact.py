@@ -403,6 +403,70 @@ class ImpactPlanTests(unittest.TestCase):
                             cwd=root,
                         )
 
+    def test_planner_run_app_does_not_forward_impact_libraries(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.mncs"
+            source.write_text("mncs 0.18; module test;", encoding="utf-8")
+            impact_lib = root / "impact-libs"
+            impact_lib.mkdir()
+            planner_lib = root / "planner-libs"
+            planner_lib.mkdir()
+            combined = _impact(
+                source_test_inventory={
+                    "schema_version": "mncs.test-inventory/1",
+                    "valid": True,
+                    "inventory": {
+                        "subject_identity": "mncs:0.2:program:test",
+                        "subject_fingerprint": "c" * 64,
+                        "tests": [],
+                    },
+                },
+            )
+
+            class ReachedPlanner(Exception):
+                pass
+
+            seen: dict[str, object] = {}
+
+            def fake_run_json(command: object, *, cwd: Path, environment: dict[str, str], timeout: float) -> object:
+                seen["impact_library_path"] = environment.get("MNCS_LIBRARY_PATH")
+                return combined
+
+            def inspect_command(command: list[str], **_: object) -> None:
+                forwarded = [
+                    command[index + 1]
+                    for index, item in enumerate(command)
+                    if item == "--library"
+                ]
+                seen["planner_libraries"] = forwarded
+                raise ReachedPlanner()
+
+            with patch("ravel.impact._run_json", side_effect=fake_run_json):
+                with patch("ravel.impact.subprocess.run", side_effect=inspect_command):
+                    with self.assertRaises(ReachedPlanner):
+                        request_verification_plan(
+                            source_path=source,
+                            mncs="mncs",
+                            roots=["mncs:fn:changed"],
+                            libraries=[impact_lib],
+                            planner_libraries=[planner_lib],
+                            cwd=root,
+                        )
+            # Impact/inventory resolution still uses the caller roots.
+            self.assertEqual(seen["impact_library_path"], str(impact_lib.resolve()))
+            # The planner run-app receives only its own closure plus
+            # explicit planner extras; caller impact roots must not
+            # perturb the native-application artifact cache key.
+            forwarded = seen["planner_libraries"]
+            self.assertIsInstance(forwarded, list)
+            self.assertIn(str(planner_lib.resolve()), forwarded)
+            self.assertNotIn(str(impact_lib.resolve()), forwarded)
+            self.assertTrue(
+                any(str(item).endswith("mncs/workspace/ravel") for item in forwarded),
+                f"planner workspace missing from {forwarded!r}",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

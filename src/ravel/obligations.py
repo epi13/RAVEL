@@ -1171,13 +1171,23 @@ def build_native_obligation_plan(
     mncs: str | Path,
     cwd: Path,
     libraries: Sequence[Path] = (),
+    planner_libraries: Sequence[Path] = (),
     timeout: float = 180.0,
     compiler_inventory: Mapping[str, Any] | None = None,
     current_evidence: Sequence[Mapping[str, Any]] = (),
     commons_root: Path | None = None,
     repository_context: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Run the canonical native RAVEL obligation kernel through transport."""
+    """Run the canonical native RAVEL obligation kernel through transport.
+
+    The kernel closure is descriptor-declared (stdlib, Commons mesh, RAVEL
+    workspace).  ``planner_libraries`` carries roots the kernel itself must
+    resolve beyond its descriptor; ``libraries`` is retained as a legacy
+    alias for the same extras.  Compiler impact/inventory resolution roots
+    must not be passed here: the kernel request already embeds every fact
+    it needs, and extra roots only perturb the native-application
+    artifact cache key.
+    """
 
     normalized_inventory = validate_obligation_inventory(
         dict(obligation_inventory), commons_root=commons_root
@@ -1236,8 +1246,8 @@ def build_native_obligation_plan(
             command = [str(mncs), "run-app", str(descriptor)]
             step_budget, planner_timeout = _native_obligation_execution_limits(request, timeout)
             command.extend(("--step-budget", str(step_budget)))
-            for library in libraries:
-                resolved_library = library.resolve()
+            for library in (*libraries, *planner_libraries):
+                resolved_library = Path(library).resolve()
                 overlaps_declared_library = any(
                     resolved_library == declared
                     or resolved_library in declared.parents
