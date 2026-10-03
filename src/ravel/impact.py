@@ -765,7 +765,10 @@ def _run_native_planner(
     try:
         # Keep planner scratch outside the source checkout.  Environment may
         # bind a valid project read-only while granting RAVEL temporary
-        # artifact storage elsewhere.
+        # artifact storage elsewhere.  The native application only accepts
+        # relative structured-artifact paths, so execute with the scratch
+        # directory as the working directory and pass bare file names; the
+        # descriptor, libraries, and runtime stay absolute and unaffected.
         with tempfile.TemporaryDirectory(prefix="ravel-native-") as directory:
             work = Path(directory)
             request_path = work / "planner-request.json"
@@ -775,10 +778,17 @@ def _run_native_planner(
                 json.dumps(request, separators=(",", ":"), ensure_ascii=False),
                 encoding="utf-8",
             )
-            command = [str(mncs), "run-app", str(descriptor)]
+            # Callers may pass a relative runtime or relative library roots
+            # bound to the original working directory.  Anchor them before
+            # executing inside the scratch directory.
+            mncs_arg = mncs if Path(mncs).is_absolute() else str((cwd / mncs).resolve())
+            command = [mncs_arg, "run-app", str(descriptor)]
             command.extend(("--library", str(Path(__file__).resolve().parents[2] / "mncs" / "workspace" / "ravel")))
             for library in libraries:
-                command.extend(("--library", str(library)))
+                library_path = Path(library)
+                if not library_path.is_absolute():
+                    library_path = (cwd / library_path).resolve()
+                command.extend(("--library", str(library_path)))
             command.extend(
                 (
                     "--grant-structured",
@@ -786,14 +796,14 @@ def _run_native_planner(
                     "--grant-structured",
                     "ravel_digest",
                     "--",
-                    str(request_path),
-                    str(decision_path),
-                    str(plan_path),
+                    request_path.name,
+                    decision_path.name,
+                    plan_path.name,
                 )
             )
             completed = subprocess.run(
                 command,
-                cwd=cwd,
+                cwd=work,
                 capture_output=True,
                 text=True,
                 check=False,

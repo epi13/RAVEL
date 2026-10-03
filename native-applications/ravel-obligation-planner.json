@@ -7,7 +7,7 @@
   "profile": "0.18",
   "interface_identity": "ad5881d3a3e7cf0ab3ec644728cadfb568f3898c3037d9c3f95b35236f3c428b",
   "libraries": [
-    "../../mncs-language/library",
+    "../../mncs-stdlib/library",
     "../../MNCS-Commons/src/mncs_commons/mesh/mncs",
     "../mncs/workspace/ravel"
   ],

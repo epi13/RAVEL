@@ -25,6 +25,12 @@ COMMONS_ROOT = Path(
         "/home/epi13/Documents/Projects/MNCS-Commons",
     )
 )
+STDLIB_ROOT = Path(
+    os.environ.get(
+        "MNCS_STDLIB_ROOT",
+        "/home/epi13/Documents/Projects/mncs-stdlib",
+    )
+)
 
 
 def runtime() -> Path:
@@ -49,7 +55,7 @@ def run_native(request: dict[str, object]) -> dict[str, object]:
             "run-app",
             str(ROOT / "native-applications" / "ravel-planner.json"),
             "--library",
-            str(LANGUAGE_ROOT / "library"),
+            str(STDLIB_ROOT / "library"),
             "--library",
             str(COMMONS_ROOT / "src" / "mncs_commons" / "mesh"),
             "--library",

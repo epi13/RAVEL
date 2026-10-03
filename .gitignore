@@ -17,3 +17,8 @@ ravel_versions/**/evidence-actual.json
 ravel_versions/**/unified-actual.json
 ravel_versions/**/ravel-*-checkpoint.bin
 ravel-*-checkpoint.bin
+
+# Toolchain native-application artifact cache (content-addressed, regenerable)
+native-applications/.mncs/
+# RAVEL plan/impact caches (content-addressed, regenerable)
+.mncs/cache/
