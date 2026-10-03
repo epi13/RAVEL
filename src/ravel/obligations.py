@@ -65,15 +65,31 @@ def _repository_root(source_path: Path, inventory_path: Path) -> Path | None:
     return None
 
 
-def _declared_path_fingerprint(root: Path, paths: Sequence[str]) -> tuple[str, bool, list[str]]:
+def _declared_path_fingerprint(
+    root: Path,
+    paths: Sequence[str],
+    *,
+    file_digests: dict[Path, str | None] | None = None,
+) -> tuple[str, bool, list[str]]:
+    """Fingerprint declared paths.  ``file_digests`` memoizes per-file content.
+
+    One repository-context build fingerprints overlapping dependency sets
+    once per obligation and once per test target; without the memo every
+    shared file is re-read and re-hashed every time.  The memo is valid
+    for a single build only: it maps a resolved absolute path to its
+    SHA-256 hex digest (None when unreadable), so entries stay correct
+    across calls with different roots while per-call assembly is unchanged.
+    """
     files: dict[str, str] = {}
     complete = True
     visited = 0
+    memo = file_digests if file_digests is not None else {}
+    resolved_root = root.resolve()
     excluded = {".git", "target", "node_modules", "__pycache__", ".pytest_cache"}
     for raw in sorted(set(paths)):
         candidate = (root / raw).resolve()
         try:
-            candidate.relative_to(root.resolve())
+            candidate.relative_to(resolved_root)
         except ValueError:
             complete = False
             continue
@@ -97,9 +113,24 @@ def _declared_path_fingerprint(root: Path, paths: Sequence[str]) -> tuple[str, b
         for file_path in candidates:
             try:
                 relative = file_path.relative_to(root).as_posix()
-                files[relative] = hashlib.sha256(file_path.read_bytes()).hexdigest()
-            except (OSError, ValueError):
+            except ValueError:
                 complete = False
+                continue
+            try:
+                resolved_file = file_path.resolve()
+            except OSError:
+                complete = False
+                continue
+            if resolved_file not in memo:
+                try:
+                    memo[resolved_file] = hashlib.sha256(file_path.read_bytes()).hexdigest()
+                except OSError:
+                    memo[resolved_file] = None
+            digest = memo[resolved_file]
+            if digest is None:
+                complete = False
+            else:
+                files[relative] = digest
     return _digest(files), complete, sorted(files)
 
 
@@ -428,6 +459,10 @@ def build_repository_context(
     declared_tests: list[dict[str, Any]] = []
     repository_evidence: list[dict[str, Any]] = []
     tool_versions: dict[str, str] = {}
+    # One build fingerprints overlapping dependency sets repeatedly (per
+    # obligation, per test target).  Share per-file content digests so each
+    # byte is hashed once per build instead of once per fingerprint call.
+    file_digests: dict[Path, str | None] = {}
     environment = dict(os.environ)
     if libraries:
         environment["MNCS_LIBRARY_PATH"] = os.pathsep.join(str(item.resolve()) for item in libraries)
@@ -538,12 +573,14 @@ def build_repository_context(
                     *[item for item in obligation.get("invalidation_dependencies", []) if isinstance(item, str)],
                     "mncs-test.toml",
                 ],
+                file_digests=file_digests,
             )
             if "mncs-test.toml" not in invalidated_paths:
                 invalidated_paths = sorted(set(invalidated_paths + ["mncs-test.toml"]))
             external_libraries_identity, libraries_complete, _ = _declared_path_fingerprint(
                 root.parent,
                 external_library_names,
+                file_digests=file_digests,
             ) if external_library_names else (_digest([]), True, [])
             complete = complete and libraries_complete
             invalidation = _digest({"declared_dependencies": invalidation, "external_executor_libraries": external_libraries_identity})
@@ -644,7 +681,9 @@ def build_repository_context(
             else:
                 target_paths = []
             child_dependencies = sorted(set(dependency_paths + target_paths))
-            invalidation, paths_complete, invalidated_paths = _declared_path_fingerprint(root, child_dependencies)
+            invalidation, paths_complete, invalidated_paths = _declared_path_fingerprint(
+                root, child_dependencies, file_digests=file_digests
+            )
             complete = complete and paths_complete
             executor = {
                 "provider": "mncs-test",

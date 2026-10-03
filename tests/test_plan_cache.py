@@ -184,13 +184,14 @@ def test_request_plan_serves_repeat_from_cache_without_providers(tmp_path: Path)
         impact["source_test_inventory"],
         source_path=source,
     )
-    calls = {"planner": 0}
+    calls = {"planner": 0, "providers": 0}
 
     def fake_planner(**kwargs: object) -> dict[str, object]:
         calls["planner"] += 1
         return dict(expected)
 
     def fake_run_json(command: object, **kwargs: object) -> object:
+        calls["providers"] += 1
         return dict(impact)
 
     cache = PlanCache(directory=tmp_path / "plan-cache", enabled=True)
@@ -206,9 +207,11 @@ def test_request_plan_serves_repeat_from_cache_without_providers(tmp_path: Path)
         patch("ravel.impact._run_native_planner", side_effect=fake_planner),
     ):
         first = request_verification_plan(**request_kwargs)  # type: ignore[arg-type]
-        assert calls["planner"] == 1
+        assert calls == {"planner": 1, "providers": 1}
         second = request_verification_plan(**request_kwargs)  # type: ignore[arg-type]
-        assert calls["planner"] == 1
+        # A no-change repeat performs zero provider work: no compiler
+        # impact/test-inventory subprocess and no planner admission.
+        assert calls == {"planner": 1, "providers": 1}
     assert first == expected
     assert second == expected
     assert cache.hits == 1

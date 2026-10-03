@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from ravel import obligations
 from ravel.obligations import (
     _cargo_test_target_declarations,
+    _declared_path_fingerprint,
     _manifest_host_grants,
     _native_obligation_execution_limits,
     _native_obligation_request,
@@ -344,3 +345,44 @@ def test_native_obligation_planner_limits_scale_with_declared_work_and_stay_boun
     assert language_timeout == 476.0
     assert max_steps == 8_000_000
     assert max_timeout == 600.0
+
+
+def _fingerprint_fixture(root: Path) -> None:
+    (root / "shared").mkdir()
+    (root / "shared" / "one.txt").write_text("one", encoding="utf-8")
+    (root / "shared" / "two.txt").write_text("two", encoding="utf-8")
+    (root / "only-a.txt").write_text("a", encoding="utf-8")
+    (root / "only-b.txt").write_text("b", encoding="utf-8")
+
+
+def test_fingerprint_shared_memo_matches_fresh_fingerprint(tmp_path: Path) -> None:
+    _fingerprint_fixture(tmp_path)
+    overlapping = (["shared", "only-a.txt"], ["shared", "only-b.txt"])
+    memo: dict[Path, str | None] = {}
+    shared = [
+        _declared_path_fingerprint(tmp_path, paths, file_digests=memo) for paths in overlapping
+    ]
+    fresh = [_declared_path_fingerprint(tmp_path, paths) for paths in overlapping]
+    assert shared == fresh
+    assert len(memo) == 4
+
+
+def test_fingerprint_shared_memo_hashes_each_file_once(
+    monkeypatch, tmp_path: Path
+) -> None:
+    _fingerprint_fixture(tmp_path)
+    reads = 0
+    original_read_bytes = Path.read_bytes
+
+    def counting_read_bytes(self: Path, *args, **kwargs):  # type: ignore[no-untyped-def]
+        nonlocal reads
+        reads += 1
+        return original_read_bytes(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_bytes", counting_read_bytes)
+    memo: dict[Path, str | None] = {}
+    # Three overlapping fingerprint calls (two obligations plus one target,
+    # the shape build_repository_context produces) touch four files.
+    for paths in (["shared", "only-a.txt"], ["shared", "only-b.txt"], ["shared"]):
+        _declared_path_fingerprint(tmp_path, paths, file_digests=memo)
+    assert reads == 4
